@@ -17,5 +17,5 @@ data class Set(
 
 
 enum class Category {
-    CAT1, CAT2, CAT3
+    CAT1, CAT2, CAT3, STRENGTH, CHEST, LEGS
 }
