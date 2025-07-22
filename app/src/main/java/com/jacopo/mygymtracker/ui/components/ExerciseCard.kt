@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -76,7 +74,7 @@ fun ExerciseCard(exercise: ExerciseUIState) {
             }
 
             IconButton(
-                onClick = { sets.add(SetUIState(mutableIntStateOf(0), mutableIntStateOf(0))) }
+                onClick = { exercise.sets.add(SetUIState(reps = mutableIntStateOf(0), weight = mutableIntStateOf(0))) }
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
@@ -96,7 +94,7 @@ fun SetRow(set: SetUIState, removeSet: () -> Unit) {
     ) {
         ValueSetRow(
             incrementValue = 1,
-            dataValue = set.numberOfReps,
+            dataValue = set.reps,
             modifier = Modifier.weight(1f)
         )
         ValueSetRow(incrementValue = 5, dataValue = set.weight, modifier = Modifier.weight(1f))
@@ -165,16 +163,16 @@ fun ValueSetRow(
 @Preview
 @Composable
 fun ExerciseCardPreview() {
-    val exercise = ExerciseUIState(
-        sets = remember {
-            mutableStateListOf(
-                SetUIState(mutableIntStateOf(0), mutableIntStateOf(0)),
-                SetUIState(mutableIntStateOf(0), mutableIntStateOf(0)),
-                SetUIState(mutableIntStateOf(0), mutableIntStateOf(0))
-            )
-        },
-        name = remember { mutableStateOf("Bench Press") },
-        category = remember { mutableStateOf(Category.CAT1) }
-    )
-    ExerciseCard(exercise = exercise)
+//    val exercise = ExerciseUIState(
+//        sets = remember {
+//            mutableStateListOf(
+//                SetUIState(mutableIntStateOf(0), mutableIntStateOf(0)),
+//                SetUIState(mutableIntStateOf(0), mutableIntStateOf(0)),
+//                SetUIState(mutableIntStateOf(0), mutableIntStateOf(0))
+//            )
+//        },
+//        name = remember { mutableStateOf("Bench Press") },
+//        category = remember { mutableStateOf(Category.CAT1) }
+//    )
+//    ExerciseCard(exercise = exercise)
 }

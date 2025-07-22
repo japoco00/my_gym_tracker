@@ -15,7 +15,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jacopo.mygymtracker.model.Category
 import com.jacopo.mygymtracker.ui.components.ExerciseCard
 import com.jacopo.mygymtracker.viewModel.ExerciseUIState
-import com.jacopo.mygymtracker.viewModel.RoutineViewUIState
+import com.jacopo.mygymtracker.viewModel.RoutineUIState
 import com.jacopo.mygymtracker.viewModel.RoutineViewVM
 import com.jacopo.mygymtracker.viewModel.SetUIState
 
@@ -56,8 +56,8 @@ fun RoutineScreenPreview() {
         )
     }
 
-    val sampleUIState = RoutineViewUIState(
-        routineName = "Preview Routine", exercises = sampleExercises
+    val sampleUIState = RoutineUIState(
+        routine = "Preview Routine", exercises = sampleExercises
     )
 
     Surface(modifier = Modifier.fillMaxSize()) {

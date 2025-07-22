@@ -1,17 +1,38 @@
 package com.jacopo.mygymtracker.data.db
 
+import android.content.Context
 import androidx.room.Database
+import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.jacopo.mygymtracker.data.daos.ExerciseDao
+import com.jacopo.mygymtracker.data.daos.RoutineDao
+import com.jacopo.mygymtracker.data.daos.SetDao
 import com.jacopo.mygymtracker.data.model.Exercise
-import com.jacopo.mygymtracker.data.model.ExerciseDao
 import com.jacopo.mygymtracker.data.model.ExerciseSet
 import com.jacopo.mygymtracker.data.model.Routine
-import com.jacopo.mygymtracker.data.model.RoutineDao
-import com.jacopo.mygymtracker.data.model.SetDao
 
 @Database(entities = [Routine::class, Exercise::class, ExerciseSet::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun routineDao(): RoutineDao
     abstract fun exerciseDao(): ExerciseDao
     abstract fun setDao(): SetDao
+
+    companion object {
+        @Volatile
+        private var INSTANCE: AppDatabase? = null
+
+        fun getInstance(context: Context): AppDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDatabase::class.java,
+                    "app_database" // nome del file del db
+                )
+                    //.fallbackToDestructiveMigration() // opzionale in sviluppo
+                    .build()
+                INSTANCE = instance
+                instance
+            }
+        }
+    }
 }
