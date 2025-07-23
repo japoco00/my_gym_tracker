@@ -10,6 +10,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import com.jacopo.mygymtracker.ui.theme.MyGymTrackerTheme
 import com.jacopo.mygymtracker.ui.view.RoutineScreen
@@ -21,7 +22,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             MyGymTrackerTheme {
 
+                val appContainer = (LocalContext.current.applicationContext as MyApplication).appContainer
                 Greeting(
+                    appContainer
                 )
 
             }
@@ -30,8 +33,8 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting() {
-    RoutineScreen()
+fun Greeting(appContainer: AppContainer) {
+    RoutineScreen(appContainer = appContainer)
 }
 
 @Preview(showBackground = true)

@@ -19,66 +19,55 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.jacopo.mygymtracker.model.Category
 import com.jacopo.mygymtracker.viewModel.ExerciseUIState
 import com.jacopo.mygymtracker.viewModel.SetUIState
 
 
 @Composable
-fun ExerciseCard(exercise: ExerciseUIState) {
+fun ExerciseCard(
+    exercise: ExerciseUIState, addNewSet: () -> Unit
+) {
 
     val sets = exercise.sets
-    var exerciseName = exercise.name.value
-    val category = exercise.category.value
 
     Card {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TextField(
-                value = exerciseName,
-                onValueChange = { exerciseName = it }
-            )
+                value = exercise.name.value, onValueChange = { exercise.name.value = it })
             SuggestionChip(
                 onClick = { /*nothing to do*/ },
-                label = { Text(text = category.toString()) }
-            )
+                label = { Text(text = exercise.category.value.toString()) })
             Row {
                 Text(
-                    text = "Reps",
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center
+                    text = "Reps", modifier = Modifier.weight(1f), textAlign = TextAlign.Center
                 )
                 Text(
-                    text = "Kg",
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center
+                    text = "Kg", modifier = Modifier.weight(1f), textAlign = TextAlign.Center
                 )
             }
             Column {
                 sets.forEach { set ->
-                    SetRow(set) {
-                        sets.remove(set)
-                    }
+                    SetRow(
+                        set, removeSet = {
+                            sets.remove(set)
+                        }
+                    )
+
                 }
             }
-
             IconButton(
-                onClick = { exercise.sets.add(SetUIState(reps = mutableIntStateOf(0), weight = mutableIntStateOf(0))) }
+                onClick = addNewSet
             ) {
                 Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add"
+                    imageVector = Icons.Default.Add, contentDescription = "Add"
                 )
             }
         }
@@ -93,19 +82,14 @@ fun SetRow(set: SetUIState, removeSet: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         ValueSetRow(
-            incrementValue = 1,
-            dataValue = set.reps,
-            modifier = Modifier.weight(1f)
+            incrementValue = 1, dataValue = set.reps, modifier = Modifier.weight(1f)
         )
         ValueSetRow(incrementValue = 5, dataValue = set.weight, modifier = Modifier.weight(1f))
-
-
         IconButton(
             onClick = removeSet
         ) {
             Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = "Delete"
+                imageVector = Icons.Default.Delete, contentDescription = "Delete"
             )
         }
     }
@@ -118,8 +102,7 @@ fun ValueSetRow(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
+        modifier = modifier, verticalAlignment = Alignment.CenterVertically
     ) {
         Button(
             shape = Shapes().small,

@@ -10,12 +10,12 @@ import com.jacopo.mygymtracker.data.model.ExerciseSet
 @Dao
 interface SetDao {
     @Insert
-    fun insert(set: List<ExerciseSet>) : List<Long>
+    suspend fun insert(set: List<ExerciseSet>) : List<Long>
 
     @Delete
-    fun delete(set: List<ExerciseSet>)
+    suspend fun delete(set: List<ExerciseSet>)
 
     @Transaction
     @Query("SELECT * FROM ExerciseSet")
-    fun getAll(): List<ExerciseSet>
+    suspend fun getAll(): List<ExerciseSet>
 }

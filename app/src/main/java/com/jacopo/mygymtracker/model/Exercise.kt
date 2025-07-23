@@ -1,7 +1,7 @@
 package com.jacopo.mygymtracker.model
 
 data class Exercise(
-    val id: Int = 0,
+    val id: Int? = null,
     val note: String? = null,
     val name: String,
     val category: Category,

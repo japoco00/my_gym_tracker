@@ -11,15 +11,15 @@ import com.jacopo.mygymtracker.data.model.RoutineWithExercisesWithSets
 @Dao
 interface RoutineDao {
     @Insert
-    fun insert(routine: Routine) : Long
+    suspend fun insert(routine: Routine) : Long
     @Delete
-    fun delete(routine: Routine)
+    suspend fun delete(routine: Routine)
     @Transaction
     @Query(
         "SELECT * FROM Routine WHERE id = :id"
     )
-    fun getRoutineById(id: Int): RoutineWithExercisesWithSets?
+    suspend fun getRoutineById(id: Int): RoutineWithExercisesWithSets?
     @Transaction
     @Query("SELECT * FROM Routine")
-    fun getAllRoutines(): List<RoutineWithExercisesWithSets>
+    suspend fun getAllRoutines(): List<RoutineWithExercisesWithSets>
 }
