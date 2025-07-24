@@ -2,13 +2,14 @@ package com.jacopo.mygymtracker.data.repositories
 
 import com.jacopo.mygymtracker.data.daos.ExerciseDao
 import com.jacopo.mygymtracker.data.model.Exercise
-import com.jacopo.mygymtracker.model.Exercise as ExerciseDomain
 import com.jacopo.mygymtracker.data.model.ExerciseWithSets
+import kotlinx.coroutines.flow.Flow
+import com.jacopo.mygymtracker.model.Exercise as ExerciseDomain
 
 class ExerciseRepository(
     private val exerciseDao: ExerciseDao
 ) {
-    suspend fun getAllExercises(): List<ExerciseWithSets> {
+    suspend fun getAllExercises(): Flow<List<ExerciseWithSets>> {
         return exerciseDao.getAll()
     }
 

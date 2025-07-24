@@ -7,19 +7,24 @@ import androidx.room.Query
 import androidx.room.Transaction
 import com.jacopo.mygymtracker.data.model.Routine
 import com.jacopo.mygymtracker.data.model.RoutineWithExercisesWithSets
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface RoutineDao {
     @Insert
-    suspend fun insert(routine: Routine) : Long
+    suspend fun insert(routine: Routine): Long
+
     @Delete
     suspend fun delete(routine: Routine)
+
     @Transaction
     @Query(
         "SELECT * FROM Routine WHERE id = :id"
     )
-    suspend fun getRoutineById(id: Int): RoutineWithExercisesWithSets?
+    fun getRoutineById(id: Int): Flow<RoutineWithExercisesWithSets?>
+
+    //TODO: refactor to return a flow of list
     @Transaction
     @Query("SELECT * FROM Routine")
-    suspend fun getAllRoutines(): List<RoutineWithExercisesWithSets>
+    fun getAllRoutines(): Flow<List<RoutineWithExercisesWithSets>>
 }

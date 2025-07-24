@@ -9,7 +9,7 @@ import androidx.room.Relation
 @Entity
 data class Routine(
     @PrimaryKey(autoGenerate = true)
-    val id : Int,
+    val id: Int,
     val name: String,
     val note: String? = null,
 )

@@ -62,9 +62,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    androidTestImplementation (libs.androidx.room.testing)
-    androidTestImplementation (libs.androidx.junit.v121)
-    androidTestImplementation (libs.androidx.core)
-    androidTestImplementation (libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.androidx.room.testing)
+    androidTestImplementation(libs.androidx.junit.v121)
+    androidTestImplementation(libs.androidx.core)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
     testImplementation(kotlin("test"))
 }

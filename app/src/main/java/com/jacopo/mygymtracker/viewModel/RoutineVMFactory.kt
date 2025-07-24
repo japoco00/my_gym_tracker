@@ -9,16 +9,12 @@ import com.jacopo.mygymtracker.data.repositories.SetRepository
 class RoutineViewModelFactory(
     private val routineId: Int? = null,
     private val routineRepository: RoutineRepository,
-    private val exerciseRepository: ExerciseRepository,
-    private val setRepository: SetRepository
 ) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(RoutineViewVM::class.java)) {
             val viewModel = RoutineViewVM(
                 routineRepository,
-                exerciseRepository,
-                setRepository
             )
             viewModel.loadRoutine(routineId ?: -1)
             @Suppress("UNCHECKED_CAST")

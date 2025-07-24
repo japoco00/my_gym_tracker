@@ -5,14 +5,14 @@ data class Exercise(
     val note: String? = null,
     val name: String,
     val category: Category,
-    var sets: MutableList<Set> = mutableListOf(
-        Set(reps = 0, weight = 0),
-        Set(reps = 0, weight = 0),
-        Set(reps = 0, weight = 0)
+    var sets: MutableList<ExerciseSet> = mutableListOf(
+        ExerciseSet(reps = 0, weight = 0),
+        ExerciseSet(reps = 0, weight = 0),
+        ExerciseSet(reps = 0, weight = 0)
     )
 )
 
-data class Set(
+data class ExerciseSet(
     val id: Int? = null,
     var reps: Int,
     var weight: Int

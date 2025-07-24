@@ -49,7 +49,7 @@ class AppDatabaseTest {
     @Test
     fun insertRoutineWithExercisesAndSets() {
         // Inserisci Routine
-        val routine = Routine(id=0, name = "Routine A", note = "Note")
+        val routine = Routine(id = 0, name = "Routine A", note = "Note")
         val routineId = routineDao.insert(routine).toInt()
 
         // Inserisci Exercise
@@ -83,11 +83,18 @@ class AppDatabaseTest {
     @Test
     fun deleteRoutine_cascadeDeletesExercisesAndSets() {
         // Inserimento
-        val routine = Routine(id=0, name = "Delete Test", note = null)
+        val routine = Routine(id = 0, name = "Delete Test", note = null)
         val routineId = routineDao.insert(routine).toInt()
 
         val exerciseId = exerciseDao.insert(
-            listOf(Exercise(name = "Squat", category = Category.LEGS, routineId = routineId, id = 0))
+            listOf(
+                Exercise(
+                    name = "Squat",
+                    category = Category.LEGS,
+                    routineId = routineId,
+                    id = 0
+                )
+            )
         ).first().toInt()
 
         setDao.insert(

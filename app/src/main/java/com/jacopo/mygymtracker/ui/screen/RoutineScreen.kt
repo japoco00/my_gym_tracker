@@ -1,4 +1,4 @@
-package com.jacopo.mygymtracker.ui.view
+package com.jacopo.mygymtracker.ui.screen
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -7,30 +7,23 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jacopo.mygymtracker.AppContainer
-import com.jacopo.mygymtracker.MyApplication
-import com.jacopo.mygymtracker.data.repositories.ExerciseRepository
-import com.jacopo.mygymtracker.data.repositories.RoutineRepository
-import com.jacopo.mygymtracker.data.repositories.SetRepository
 import com.jacopo.mygymtracker.ui.components.ExerciseCard
 import com.jacopo.mygymtracker.viewModel.RoutineViewModelFactory
 import com.jacopo.mygymtracker.viewModel.RoutineViewVM
 
 @Composable
 fun RoutineScreen(
-    routineId : Int? = null,
+    routineId: Int? = null,
     appContainer: AppContainer,
 ) {
 
     val factory = remember {
-        RoutineViewModelFactory (
+        RoutineViewModelFactory(
             routineId = routineId,
             routineRepository = appContainer.routineRepository,
-            exerciseRepository = appContainer.exerciseRepository,
-            setRepository = appContainer.setRepository
         )
     }
     val vm: RoutineViewVM = viewModel(factory = factory)
@@ -38,7 +31,7 @@ fun RoutineScreen(
     Surface(modifier = Modifier.fillMaxSize()) {
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(vm.routineState.exercises) { exercise ->
-                ExerciseCard(exercise, addNewSet = {vm.addNewSet(exercise)})
+                ExerciseCard(exercise, addNewSet = { vm.addNewSet(exercise) })
             }
         }
     }

@@ -11,20 +11,16 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jacopo.mygymtracker.data.repositories.ExerciseRepository
 import com.jacopo.mygymtracker.data.repositories.RoutineRepository
-import com.jacopo.mygymtracker.data.repositories.SetRepository
 import com.jacopo.mygymtracker.model.Category
 import com.jacopo.mygymtracker.model.Routine
 import kotlinx.coroutines.launch
 
 class RoutineViewVM(
     private val routineRepository: RoutineRepository,
-    private val exerciseRepository: ExerciseRepository,
-    private val setRepository: SetRepository
 ) : ViewModel() {
 
-    val staticData = RoutineUIState(
+    private val staticData = RoutineUIState(
         name = mutableStateOf("Sample Routine"),
         note = mutableStateOf("This is a sample routine for demonstration purposes."),
         exercises = mutableStateListOf(
@@ -59,22 +55,26 @@ class RoutineViewVM(
         )
     )
 
-    var routineState by mutableStateOf<RoutineUIState>(staticData)
+    var routineState by mutableStateOf(staticData)
         private set
 
     fun loadRoutine(routineId: Int) {
         if (routineId <= 0) {
-            routineState = staticData
             return
         }
         // Load the routine and its exercises from the repository
         viewModelScope.launch {
-            val routine = routineRepository.getRoutineById(routineId)
-            routineState = routineToUIState(routine)
+            routineRepository.getRoutineById(routineId)
+                .collect { routine ->
+                    routineState = routineToUIState(routine)
+                }
         }
     }
 
-    private fun routineToUIState(routine: Routine): RoutineUIState {
+    private fun routineToUIState(routine: Routine?): RoutineUIState {
+        if (routine == null) {
+            return staticData
+        }
         return RoutineUIState(
             id = routine.id,
             name = mutableStateOf(routine.name),

@@ -7,16 +7,17 @@ import androidx.room.Query
 import androidx.room.Transaction
 import com.jacopo.mygymtracker.data.model.Exercise
 import com.jacopo.mygymtracker.data.model.ExerciseWithSets
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ExerciseDao {
     @Insert
-    suspend fun insert(exercise: List<Exercise>) : List<Long>
+    suspend fun insert(exercise: List<Exercise>): List<Long>
 
     @Delete
     suspend fun delete(exercise: List<Exercise>)
 
     @Transaction
     @Query("SELECT * FROM Exercise")
-    suspend fun getAll(): List<ExerciseWithSets>
+    fun getAll(): Flow<List<ExerciseWithSets>>
 }
