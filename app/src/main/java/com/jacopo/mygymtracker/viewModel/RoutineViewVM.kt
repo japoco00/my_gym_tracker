@@ -2,11 +2,10 @@ package com.jacopo.mygymtracker.viewModel
 
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
@@ -55,18 +54,17 @@ class RoutineViewVM(
         )
     )
 
-    var routineState by mutableStateOf(staticData)
-        private set
+    private val _routineState = mutableStateOf(staticData)
+    var routineState: State<RoutineUIState> = _routineState
 
     fun loadRoutine(routineId: Int) {
-        if (routineId <= 0) {
-            return
-        }
+        if (routineId <= 0) return
+
         // Load the routine and its exercises from the repository
         viewModelScope.launch {
             routineRepository.getRoutineById(routineId)
                 .collect { routine ->
-                    routineState = routineToUIState(routine)
+                    _routineState.value = routineToUIState(routine)
                 }
         }
     }

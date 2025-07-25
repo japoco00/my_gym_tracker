@@ -20,7 +20,8 @@ import com.jacopo.mygymtracker.viewModel.RoutinesListVMFactory
 
 @Composable
 fun RoutinesListScreen(
-    appContainer : AppContainer
+    appContainer: AppContainer,
+    onNavigateToDetails: (Int) -> Unit = { /* No-op */ },
 ) {
 
     val factory = remember {
@@ -32,15 +33,15 @@ fun RoutinesListScreen(
     val routines by vm.routines.collectAsState()
 
 
-    Column (
+    Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         LazyColumn {
             items(routines) { routine ->
-                RoutineOverviewCard(routine, onClick = {}, onDelete = {vm.deleteRoutine(routine)})
+                RoutineOverviewCard(routine, onClick = {onNavigateToDetails(routine.id!!)}, onDelete = { vm.deleteRoutine(routine) })
             }
         }
-        Button(onClick = {vm.addEmptyRoutine()}) {
+        Button(onClick = { vm.addEmptyRoutine() }) {
             Text(text = "Add Routine")
         }
     }

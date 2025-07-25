@@ -25,10 +25,12 @@ import com.jacopo.mygymtracker.model.ExerciseSet
 import com.jacopo.mygymtracker.model.Routine
 
 @Composable
-fun RoutineOverviewCard(routine: Routine, onClick: () -> Unit, onDelete: ()-> Unit) {
-    Card(onClick = onClick,
-        modifier = Modifier.padding(8.dp)) {
-        Row (
+fun RoutineOverviewCard(routine: Routine, onClick: () -> Unit, onDelete: () -> Unit) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.padding(8.dp)
+    ) {
+        Row(
             verticalAlignment = Alignment.CenterVertically
         )
         {

@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.jacopo.mygymtracker.data.repositories.RoutineRepository
 
-class RoutinesListVMFactory (
+class RoutinesListVMFactory(
     private val routineRepository: RoutineRepository,
 ) : ViewModelProvider.Factory {
 

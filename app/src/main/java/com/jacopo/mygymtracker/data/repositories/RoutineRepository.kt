@@ -11,7 +11,7 @@ import com.jacopo.mygymtracker.data.model.Routine as DataRoutine
 class RoutineRepository(
     private val routineDao: RoutineDao,
 ) {
-    suspend fun insert (routine: Routine): Long {
+    suspend fun insert(routine: Routine): Long {
         return routineDao.insert(routine.toDataModel())
     }
 

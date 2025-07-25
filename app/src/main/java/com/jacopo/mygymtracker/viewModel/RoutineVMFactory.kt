@@ -2,9 +2,7 @@ package com.jacopo.mygymtracker.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.jacopo.mygymtracker.data.repositories.ExerciseRepository
 import com.jacopo.mygymtracker.data.repositories.RoutineRepository
-import com.jacopo.mygymtracker.data.repositories.SetRepository
 
 class RoutineViewModelFactory(
     private val routineId: Int? = null,

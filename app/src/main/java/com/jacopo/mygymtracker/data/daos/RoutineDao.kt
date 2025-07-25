@@ -23,7 +23,6 @@ interface RoutineDao {
     )
     fun getRoutineById(id: Int): Flow<RoutineWithExercisesWithSets?>
 
-    //TODO: refactor to return a flow of list
     @Transaction
     @Query("SELECT * FROM Routine")
     fun getAllRoutines(): Flow<List<RoutineWithExercisesWithSets>>

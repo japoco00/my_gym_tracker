@@ -30,7 +30,7 @@ fun RoutineScreen(
 
     Surface(modifier = Modifier.fillMaxSize()) {
         LazyColumn(modifier = Modifier.fillMaxSize()) {
-            items(vm.routineState.exercises) { exercise ->
+            items(vm.routineState.value.exercises) { exercise ->
                 ExerciseCard(exercise, addNewSet = { vm.addNewSet(exercise) })
             }
         }

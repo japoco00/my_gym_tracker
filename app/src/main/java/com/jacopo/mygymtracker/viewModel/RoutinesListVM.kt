@@ -22,14 +22,6 @@ class RoutinesListVM(
             initialValue = emptyList()
         )
 
-    fun loadRoutines() {
-        viewModelScope.launch {
-            routineRepository.getAllRoutines().collect { routineList ->
-                routines.value
-            }
-        }
-    }
-
     fun deleteRoutine(routine: Routine) {
         viewModelScope.launch {
             routineRepository.delete(routine)
