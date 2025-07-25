@@ -18,6 +18,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -25,6 +26,10 @@ import androidx.navigation.compose.rememberNavController
 import com.jacopo.mygymtracker.ui.screen.RoutineScreen
 import com.jacopo.mygymtracker.ui.screen.RoutinesListScreen
 import com.jacopo.mygymtracker.ui.theme.AppTheme
+import com.jacopo.mygymtracker.viewModel.RoutineViewModelFactory
+import com.jacopo.mygymtracker.viewModel.RoutineViewVM
+import com.jacopo.mygymtracker.viewModel.RoutinesListVM
+import com.jacopo.mygymtracker.viewModel.RoutinesListVMFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,16 +67,30 @@ class MainActivity : ComponentActivity() {
 fun MyNavHost(navController: NavHostController, appContainer: AppContainer) {
     NavHost(navController = navController, startDestination = "routines") {
         composable("routines") {
+            val vm = viewModel<RoutinesListVM>(
+                factory = RoutinesListVMFactory(
+                    routineRepository = appContainer.routineRepository
+                )
+            )
             RoutinesListScreen(
-                appContainer = appContainer,
                 onNavigateToDetails = { routineId ->
                     navController.navigate("routine/$routineId")
-                }
+                },
+                vm = vm
             )
         }
         composable("routine/{routineId}") { backStackEntry ->
             val routineId = backStackEntry.arguments?.getString("routineId")?.toInt()
-            RoutineScreen(routineId, appContainer = appContainer)
+            val vm = viewModel<RoutineViewVM>(
+                factory = RoutineViewModelFactory(
+                    routineId = if (routineId == -1) null else routineId,
+                    routineRepository = appContainer.routineRepository
+                )
+            )
+            RoutineScreen(
+                navController = navController,
+                vm = vm
+            )
         }
     }
 }

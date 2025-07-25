@@ -14,7 +14,7 @@ class RoutineViewModelFactory(
             val viewModel = RoutineViewVM(
                 routineRepository,
             )
-            viewModel.loadRoutine(routineId ?: -1)
+            viewModel.loadRoutine(routineId)
             @Suppress("UNCHECKED_CAST")
             return viewModel as T
         }

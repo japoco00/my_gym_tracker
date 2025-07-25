@@ -41,7 +41,8 @@ fun ExerciseCard(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TextField(
-                value = exercise.name.value, onValueChange = { exercise.name.value = it })
+                value = exercise.name.value, onValueChange = { exercise.name.value = it },
+                placeholder = { Text(text = "New Exercise")})
             SuggestionChip(
                 onClick = { /*nothing to do*/ },
                 label = { Text(text = exercise.category.value.toString()) })

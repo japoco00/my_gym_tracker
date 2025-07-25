@@ -7,14 +7,14 @@ import androidx.room.PrimaryKey
 @Entity(
     foreignKeys = [
         ForeignKey(
-            entity = Exercise::class,
+            entity = ExerciseEntry::class,
             parentColumns = ["id"],
             childColumns = ["exerciseId"],
             onDelete = ForeignKey.CASCADE
         )
     ],
 )
-data class ExerciseSet(
+data class SetEntry(
     @PrimaryKey(autoGenerate = true)
     val id: Int,
     val reps: Int,

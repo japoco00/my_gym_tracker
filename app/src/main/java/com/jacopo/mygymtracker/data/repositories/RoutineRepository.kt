@@ -1,25 +1,44 @@
 package com.jacopo.mygymtracker.data.repositories
 
+import androidx.room.Transaction
+import androidx.room.withTransaction
 import com.jacopo.mygymtracker.data.daos.RoutineDao
-import com.jacopo.mygymtracker.data.model.RoutineWithExercisesWithSets
+import com.jacopo.mygymtracker.data.db.AppDatabase
+import com.jacopo.mygymtracker.data.model.RoutineFullEntry
 import com.jacopo.mygymtracker.model.Routine
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import com.jacopo.mygymtracker.data.model.Routine as DataRoutine
+import com.jacopo.mygymtracker.data.model.RoutineEntry as DataRoutine
 
 
 class RoutineRepository(
     private val routineDao: RoutineDao,
+    private val exerciseRepository: ExerciseRepository,
+    private val database: AppDatabase
 ) {
     suspend fun insert(routine: Routine): Long {
         return routineDao.insert(routine.toDataModel())
+    }
+
+    suspend fun update(routine: Routine) {
+        routineDao.update(routine.toDataModel())
+    }
+
+    suspend fun updateFull(routine: Routine) {
+        database.withTransaction {
+            val routineData = routine.toDataModel()
+            val id = routineDao.insert(routineData).toInt()
+            for (exercise in routine.exercises) {
+                exerciseRepository.updateFull(exercise, id)
+            }
+        }
     }
 
     suspend fun delete(routine: Routine) {
         routineDao.delete(routine.toDataModel())
     }
 
-    fun getAllRoutines(): Flow<List<RoutineWithExercisesWithSets>> {
+    fun getAllRoutines(): Flow<List<RoutineFullEntry>> {
         return routineDao.getAllRoutines()
     }
 
@@ -29,11 +48,11 @@ class RoutineRepository(
 }
 
 
-fun RoutineWithExercisesWithSets.toDomainModel(): Routine {
+fun RoutineFullEntry.toDomainModel(): Routine {
     return Routine(
-        id = routine.id,
-        name = routine.name,
-        note = routine.note,
+        id = routineEntry.id,
+        name = routineEntry.name,
+        note = routineEntry.note,
         exercises = exercises.map { it.toDomainModel() }
     )
 }

@@ -1,14 +1,18 @@
 package com.jacopo.mygymtracker.ui.screen
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.jacopo.mygymtracker.AppContainer
 import com.jacopo.mygymtracker.ui.components.ExerciseCard
 import com.jacopo.mygymtracker.viewModel.RoutineViewModelFactory
@@ -16,61 +20,36 @@ import com.jacopo.mygymtracker.viewModel.RoutineViewVM
 
 @Composable
 fun RoutineScreen(
-    routineId: Int? = null,
-    appContainer: AppContainer,
+    navController: NavHostController,
+    vm : RoutineViewVM
 ) {
 
-    val factory = remember {
-        RoutineViewModelFactory(
-            routineId = routineId,
-            routineRepository = appContainer.routineRepository,
-        )
+//    val factory = remember {
+//        RoutineViewModelFactory(
+//            routineId = if (routineId == -1) null else routineId,
+//            routineRepository = appContainer.routineRepository,
+//        )
+//    }
+//    val vm: RoutineViewVM = viewModel(factory = factory)
+    BackHandler {
+        vm.saveRoutine()
+        navController.popBackStack()
     }
-    val vm: RoutineViewVM = viewModel(factory = factory)
 
-    Surface(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
-            items(vm.routineState.value.exercises) { exercise ->
-                ExerciseCard(exercise, addNewSet = { vm.addNewSet(exercise) })
+    if (vm.routineState.value == null) {
+        CircularProgressIndicator()
+    } else {
+        Column(modifier = Modifier.fillMaxSize()) {
+            LazyColumn() {
+                items(vm.routineState.value!!.exercises) { exercise ->
+                    ExerciseCard(exercise, addNewSet = { vm.addNewSet(exercise) })
+                }
+                item {
+                    Button(onClick = { vm.addEmptyExercise() }) {
+                        Text("Add Exercise")
+                    }
+                }
             }
         }
     }
-
-}
-
-@Preview(showBackground = true, apiLevel = 33)
-@Composable
-fun RoutineScreenPreview() {
-//    val sampleExercises = remember {
-//        mutableStateListOf(
-//            ExerciseUIState(
-//                name = mutableStateOf("Bench Press"),
-//                category = mutableStateOf(Category.CAT1),
-//                sets = mutableStateListOf(
-//                    SetUIState(mutableIntStateOf(10), mutableIntStateOf(60)),
-//                    SetUIState(mutableIntStateOf(8), mutableIntStateOf(70))
-//                )
-//            ), ExerciseUIState(
-//                name = mutableStateOf("Squat"),
-//                category = mutableStateOf(Category.CAT2),
-//                sets = mutableStateListOf(
-//                    SetUIState(mutableIntStateOf(12), mutableIntStateOf(80)),
-//                    SetUIState(mutableIntStateOf(10), mutableIntStateOf(90))
-//                )
-//            )
-//        )
-//    }
-//
-//    val sampleUIState = RoutineUIState(
-//        routine = "Preview Routine", exercises = sampleExercises
-//    )
-//
-//    Surface(modifier = Modifier.fillMaxSize()) {
-//        LazyColumn(modifier = Modifier.fillMaxSize()) {
-//            items(sampleUIState.exercises) { exercise ->
-//                ExerciseCard(exercise)
-//            }
-//        }
-//    }
-
 }

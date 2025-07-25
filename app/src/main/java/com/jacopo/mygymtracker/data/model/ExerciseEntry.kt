@@ -10,14 +10,14 @@ import com.jacopo.mygymtracker.model.Category
 @Entity(
     foreignKeys = [
         ForeignKey(
-            entity = Routine::class,
+            entity = RoutineEntry::class,
             parentColumns = ["id"],
             childColumns = ["routineId"],
             onDelete = ForeignKey.CASCADE
         )
     ]
 )
-data class Exercise(
+data class ExerciseEntry(
     @PrimaryKey(autoGenerate = true)
     val id: Int,
     val name: String,
@@ -28,12 +28,12 @@ data class Exercise(
 )
 
 
-data class ExerciseWithSets(
+data class ExerciseWithSetsEntry(
     @Embedded
-    val exercise: Exercise,
+    val exerciseEntry: ExerciseEntry,
     @Relation(
         parentColumn = "id",
         entityColumn = "exerciseId"
     )
-    val sets: List<ExerciseSet>
+    val sets: List<SetEntry>
 )

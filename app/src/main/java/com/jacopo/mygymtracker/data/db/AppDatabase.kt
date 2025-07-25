@@ -7,11 +7,11 @@ import androidx.room.RoomDatabase
 import com.jacopo.mygymtracker.data.daos.ExerciseDao
 import com.jacopo.mygymtracker.data.daos.RoutineDao
 import com.jacopo.mygymtracker.data.daos.SetDao
-import com.jacopo.mygymtracker.data.model.Exercise
-import com.jacopo.mygymtracker.data.model.ExerciseSet
-import com.jacopo.mygymtracker.data.model.Routine
+import com.jacopo.mygymtracker.data.model.ExerciseEntry
+import com.jacopo.mygymtracker.data.model.SetEntry
+import com.jacopo.mygymtracker.data.model.RoutineEntry
 
-@Database(entities = [Routine::class, Exercise::class, ExerciseSet::class], version = 1)
+@Database(entities = [RoutineEntry::class, ExerciseEntry::class, SetEntry::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun routineDao(): RoutineDao
     abstract fun exerciseDao(): ExerciseDao

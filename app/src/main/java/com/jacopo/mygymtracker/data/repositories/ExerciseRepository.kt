@@ -1,33 +1,39 @@
 package com.jacopo.mygymtracker.data.repositories
 
 import com.jacopo.mygymtracker.data.daos.ExerciseDao
-import com.jacopo.mygymtracker.data.model.Exercise
-import com.jacopo.mygymtracker.data.model.ExerciseWithSets
-import kotlinx.coroutines.flow.Flow
-import com.jacopo.mygymtracker.model.Exercise as ExerciseDomain
+import com.jacopo.mygymtracker.data.model.ExerciseEntry
+import com.jacopo.mygymtracker.data.model.ExerciseWithSetsEntry
+import com.jacopo.mygymtracker.model.Exercise
 
 class ExerciseRepository(
-    private val exerciseDao: ExerciseDao
+    private val exerciseDao: ExerciseDao,
+    private val setRepository: SetRepository
 ) {
-    suspend fun getAllExercises(): Flow<List<ExerciseWithSets>> {
-        return exerciseDao.getAll()
-    }
-
-    suspend fun insertExercises(exercises: List<Exercise>): List<Long> {
-        return exerciseDao.insert(exercises)
-    }
-
-    suspend fun deleteExercises(exercises: List<Exercise>) {
-        exerciseDao.delete(exercises)
+    suspend fun updateFull(exercise: Exercise, routineId: Int) {
+        val exerciseEntry = exercise.toDataModel(routineId)
+        val id = exerciseDao.insert(exerciseEntry).toInt()
+        for (set in exercise.sets) {
+            setRepository.update(set, id)
+        }
     }
 }
 
-fun ExerciseWithSets.toDomainModel(): ExerciseDomain {
-    return ExerciseDomain(
-        id = exercise.id,
-        name = exercise.name,
-        note = exercise.note,
+fun ExerciseWithSetsEntry.toDomainModel(): Exercise {
+    return Exercise(
+        id = exerciseEntry.id,
+        name = exerciseEntry.name,
+        note = exerciseEntry.note,
         sets = sets.map { it.toDomainModel() }.toMutableList(),
-        category = exercise.category
+        category = exerciseEntry.category
+    )
+}
+
+fun Exercise.toDataModel(routineId: Int): ExerciseEntry {
+    return ExerciseEntry(
+        id = id ?: 0, // Assuming id is nullable, use 0 for new exercises
+        name = name,
+        note = note,
+        category = category,
+        routineId = routineId
     )
 }

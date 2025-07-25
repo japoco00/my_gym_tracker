@@ -3,20 +3,24 @@ package com.jacopo.mygymtracker.data.daos
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy.Companion.REPLACE
 import androidx.room.Query
 import androidx.room.Transaction
-import com.jacopo.mygymtracker.data.model.ExerciseSet
+import androidx.room.Update
+import com.jacopo.mygymtracker.data.model.SetEntry
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SetDao {
-    @Insert
-    suspend fun insert(set: List<ExerciseSet>): List<Long>
+    @Insert(onConflict = REPLACE)
+    suspend fun insert(set: SetEntry): Long
 
+    @Update
+    suspend fun update(set: SetEntry)
     @Delete
-    suspend fun delete(set: List<ExerciseSet>)
+    suspend fun delete(set: List<SetEntry>)
 
     @Transaction
-    @Query("SELECT * FROM ExerciseSet")
-    fun getAll(): Flow<List<ExerciseSet>>
+    @Query("SELECT * FROM SetEntry")
+    fun getAll(): Flow<List<SetEntry>>
 }

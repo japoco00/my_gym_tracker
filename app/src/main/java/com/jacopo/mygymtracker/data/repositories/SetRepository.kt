@@ -1,30 +1,30 @@
 package com.jacopo.mygymtracker.data.repositories
 
 import com.jacopo.mygymtracker.data.daos.SetDao
-import com.jacopo.mygymtracker.data.model.ExerciseSet
-import kotlinx.coroutines.flow.Flow
-import com.jacopo.mygymtracker.model.ExerciseSet as ExerciseSetDomain
+import com.jacopo.mygymtracker.data.model.SetEntry
+import com.jacopo.mygymtracker.model.ExerciseSet
 
 class SetRepository(
     private val setDao: SetDao
 ) {
-    suspend fun getAllSets(): Flow<List<ExerciseSet>> {
-        return setDao.getAll()
-    }
-
-    suspend fun insertSets(sets: List<ExerciseSet>): List<Long> {
-        return setDao.insert(sets)
-    }
-
-    suspend fun deleteSets(sets: List<ExerciseSet>) {
-        setDao.delete(sets)
+    suspend fun update(set: ExerciseSet, exerciseId: Int) {
+        setDao.insert(set.toDataModel(exerciseId))
     }
 }
 
-fun ExerciseSet.toDomainModel(): ExerciseSetDomain {
-    return ExerciseSetDomain(
+fun SetEntry.toDomainModel(): ExerciseSet {
+    return ExerciseSet(
         id = this.id,
         reps = this.reps,
         weight = this.weight
+    )
+}
+
+fun ExerciseSet.toDataModel(exerciseId: Int): SetEntry {
+    return SetEntry(
+        id = this.id ?: 0, // Assuming id is nullable, use 0 for new sets
+        reps = this.reps,
+        weight = this.weight,
+        exerciseId = exerciseId
     )
 }

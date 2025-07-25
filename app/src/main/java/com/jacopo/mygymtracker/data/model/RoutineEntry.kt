@@ -7,7 +7,7 @@ import androidx.room.Relation
 
 
 @Entity
-data class Routine(
+data class RoutineEntry(
     @PrimaryKey(autoGenerate = true)
     val id: Int,
     val name: String,
@@ -15,15 +15,15 @@ data class Routine(
 )
 
 
-data class RoutineWithExercisesWithSets(
+data class RoutineFullEntry(
     @Embedded
-    val routine: Routine,
+    val routineEntry: RoutineEntry,
     @Relation(
-        entity = Exercise::class,
+        entity = ExerciseEntry::class,
         parentColumn = "id",
         entityColumn = "routineId"
     )
-    val exercises: List<ExerciseWithSets>
+    val exercises: List<ExerciseWithSetsEntry>
 )
 
 
