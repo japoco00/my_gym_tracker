@@ -115,12 +115,13 @@ class RoutineViewVM(
     }
 
 
-    fun addEmptyExercise() {
+    fun addEmptyExercise(lastUsedDraftId : Int?) {
         val newExercise = ExerciseUIState(
             name = mutableStateOf(""),
             note = mutableStateOf(null),
             category = mutableStateOf(Category.CAT1),
-            sets = mutableStateListOf()
+            sets = mutableStateListOf(),
+            draftId = (lastUsedDraftId ?: 0) - 1
         )
         if (_routineState.value != null) {
             _routineState.value!!.exercises.add(newExercise)
@@ -138,6 +139,7 @@ data class RoutineUIState(
 
 data class ExerciseUIState(
     val id: Int? = null,
+    val draftId: Int = 0, // Used to identify unsaved exercises
     val name: MutableState<String>,
     val note: MutableState<String?> = mutableStateOf(null),
     val category: MutableState<Category>,

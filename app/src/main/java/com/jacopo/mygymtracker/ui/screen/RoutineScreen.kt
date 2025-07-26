@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.jacopo.mygymtracker.ui.components.ExerciseCard
@@ -43,17 +44,23 @@ fun RoutineScreen(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LazyColumn(horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.weight(1f)) {
-                items(vm.routineState.value!!.exercises, ) { exercise ->
-                    SwipableCard( // TODO fix swipe to delete
+            LazyColumn(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(1f)
+            ) {
+                items(
+                    vm.routineState.value!!.exercises,
+                    key = { it.id ?: it.draftId }
+                    ) { exercise ->
+                    SwipableCard(
                         exercise = exercise,
                         addNewSet = { vm.addNewSet(exercise)},
-                        onRemove = { vm.removeExercise(exercise) }
+                        onRemove = { vm.removeExercise(exercise) },
+                        modifier = Modifier.animateItem()
                         )
                 }
             }
-            Button(onClick = { vm.addEmptyExercise() },
+            Button(onClick = { vm.addEmptyExercise(vm.routineState.value!!.exercises.minOfOrNull { it.draftId }) },
                 modifier = Modifier.padding(0.dp, 16.dp)) {
                 Text("Add Exercise")
             }
