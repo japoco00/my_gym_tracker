@@ -6,9 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.jacopo.mygymtracker.data.repositories.RoutineRepository
 import com.jacopo.mygymtracker.data.repositories.toDomainModel
 import com.jacopo.mygymtracker.model.Routine
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -21,6 +19,7 @@ class RoutinesListVM(
     init {
         Log.d("RoutinesListVM", "RoutinesListVM created")
     }
+
     var routines = routineRepository.getAllRoutines()
         .map { list -> list.map { it.toDomainModel() } }
         .onEach { newList ->

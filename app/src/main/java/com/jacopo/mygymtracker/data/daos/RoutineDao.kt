@@ -18,6 +18,7 @@ interface RoutineDao {
 
     @Update
     suspend fun update(routineEntry: RoutineEntry)
+
     @Delete
     suspend fun delete(routineEntry: RoutineEntry)
 

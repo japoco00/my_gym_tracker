@@ -8,19 +8,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.jacopo.mygymtracker.AppContainer
 import com.jacopo.mygymtracker.ui.components.RoutineOverviewCard
 import com.jacopo.mygymtracker.viewModel.RoutinesListVM
-import com.jacopo.mygymtracker.viewModel.RoutinesListVMFactory
 
 @Composable
 fun RoutinesListScreen(
     onNavigateToDetails: (Int) -> Unit = { /* No-op */ },
-    vm : RoutinesListVM
+    vm: RoutinesListVM
 ) {
 
 //    val factory = remember {

@@ -8,8 +8,8 @@ import com.jacopo.mygymtracker.data.daos.ExerciseDao
 import com.jacopo.mygymtracker.data.daos.RoutineDao
 import com.jacopo.mygymtracker.data.daos.SetDao
 import com.jacopo.mygymtracker.data.model.ExerciseEntry
-import com.jacopo.mygymtracker.data.model.SetEntry
 import com.jacopo.mygymtracker.data.model.RoutineEntry
+import com.jacopo.mygymtracker.data.model.SetEntry
 
 @Database(entities = [RoutineEntry::class, ExerciseEntry::class, SetEntry::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {

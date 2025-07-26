@@ -1,6 +1,5 @@
 package com.jacopo.mygymtracker.data.repositories
 
-import androidx.room.Transaction
 import androidx.room.withTransaction
 import com.jacopo.mygymtracker.data.daos.RoutineDao
 import com.jacopo.mygymtracker.data.db.AppDatabase

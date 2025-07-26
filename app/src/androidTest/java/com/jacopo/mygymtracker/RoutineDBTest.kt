@@ -4,12 +4,12 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.jacopo.mygymtracker.data.db.AppDatabase
-import com.jacopo.mygymtracker.data.model.ExerciseEntry
 import com.jacopo.mygymtracker.data.model.ExerciseDao
-import com.jacopo.mygymtracker.data.model.SetEntry
-import com.jacopo.mygymtracker.data.model.RoutineEntry
+import com.jacopo.mygymtracker.data.model.ExerciseEntry
 import com.jacopo.mygymtracker.data.model.RoutineDao
+import com.jacopo.mygymtracker.data.model.RoutineEntry
 import com.jacopo.mygymtracker.data.model.SetDao
+import com.jacopo.mygymtracker.data.model.SetEntry
 import com.jacopo.mygymtracker.model.Category
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After

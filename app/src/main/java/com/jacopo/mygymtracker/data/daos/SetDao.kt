@@ -17,6 +17,7 @@ interface SetDao {
 
     @Update
     suspend fun update(set: SetEntry)
+
     @Delete
     suspend fun delete(set: List<SetEntry>)
 

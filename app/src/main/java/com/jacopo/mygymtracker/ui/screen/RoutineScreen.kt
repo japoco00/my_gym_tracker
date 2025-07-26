@@ -3,25 +3,25 @@ package com.jacopo.mygymtracker.ui.screen
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.jacopo.mygymtracker.AppContainer
 import com.jacopo.mygymtracker.ui.components.ExerciseCard
-import com.jacopo.mygymtracker.viewModel.RoutineViewModelFactory
+import com.jacopo.mygymtracker.ui.components.SwipableCard
 import com.jacopo.mygymtracker.viewModel.RoutineViewVM
 
 @Composable
 fun RoutineScreen(
     navController: NavHostController,
-    vm : RoutineViewVM
+    vm: RoutineViewVM
 ) {
 
 //    val factory = remember {
@@ -39,16 +39,23 @@ fun RoutineScreen(
     if (vm.routineState.value == null) {
         CircularProgressIndicator()
     } else {
-        Column(modifier = Modifier.fillMaxSize()) {
-            LazyColumn() {
-                items(vm.routineState.value!!.exercises) { exercise ->
-                    ExerciseCard(exercise, addNewSet = { vm.addNewSet(exercise) })
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            LazyColumn(horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(1f)) {
+                items(vm.routineState.value!!.exercises, ) { exercise ->
+                    SwipableCard( // TODO fix swipe to delete
+                        exercise = exercise,
+                        addNewSet = { vm.addNewSet(exercise)},
+                        onRemove = { vm.removeExercise(exercise) }
+                        )
                 }
-                item {
-                    Button(onClick = { vm.addEmptyExercise() }) {
-                        Text("Add Exercise")
-                    }
-                }
+            }
+            Button(onClick = { vm.addEmptyExercise() },
+                modifier = Modifier.padding(0.dp, 16.dp)) {
+                Text("Add Exercise")
             }
         }
     }

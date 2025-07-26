@@ -78,6 +78,19 @@ class RoutineViewVM(
         )
     }
 
+    fun removeExercise(exercise: ExerciseUIState) {
+        if (_routineState.value != null) {
+            _routineState.value!!.exercises.remove(exercise)
+        }
+    }
+    fun addNewSet(exercise: ExerciseUIState) {
+        val newSet = SetUIState(
+            reps = mutableIntStateOf(0),
+            weight = mutableIntStateOf(0)
+        )
+        exercise.sets.add(newSet)
+    }
+
     private fun routineUIStateToRoutine(routineUIState: RoutineUIState): Routine {
         return Routine(
             id = routineUIState.id,
@@ -101,13 +114,6 @@ class RoutineViewVM(
         )
     }
 
-    fun addNewSet(exercise: ExerciseUIState) {
-        val newSet = SetUIState(
-            reps = mutableIntStateOf(0),
-            weight = mutableIntStateOf(0)
-        )
-        exercise.sets.add(newSet)
-    }
 
     fun addEmptyExercise() {
         val newExercise = ExerciseUIState(
