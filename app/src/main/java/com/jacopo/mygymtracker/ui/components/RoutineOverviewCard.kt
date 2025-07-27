@@ -5,11 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -54,8 +50,7 @@ fun RoutineOverviewCard(routine: Routine, onClick: () -> Unit, onDelete: () -> U
                 }
                 routine.exercises.forEach { exercise ->
                     val repsString =
-                        exercise.sets.size.toString() + " x " + exercise.sets.map { set -> set.reps.toString() }
-                            .joinToString(", ")
+                        exercise.sets.size.toString() + " x " + exercise.sets.joinToString(", ") { set -> set.reps.toString() }
                     Text( // Display the exercise name and sets
                         "${exercise.name}: $repsString",
                         style = MaterialTheme.typography.bodySmall,
@@ -63,15 +58,15 @@ fun RoutineOverviewCard(routine: Routine, onClick: () -> Unit, onDelete: () -> U
                     )
                 }
             }
-            IconButton(
-                onClick = onDelete,
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    tint = MaterialTheme.colorScheme.error,
-                    contentDescription = "Delete Routine",
-                )
-            }
+//            IconButton(
+//                onClick = onDelete,
+//            ) {
+//                Icon(
+//                    imageVector = Icons.Default.Delete,
+//                    tint = MaterialTheme.colorScheme.error,
+//                    contentDescription = "Delete Routine",
+//                )
+//            }
         }
     }
 }

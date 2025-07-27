@@ -1,13 +1,10 @@
 package com.jacopo.mygymtracker.viewModel
 
 import android.util.Log
-import androidx.compose.runtime.MutableIntState
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,6 +13,9 @@ import com.jacopo.mygymtracker.model.Category
 import com.jacopo.mygymtracker.model.Exercise
 import com.jacopo.mygymtracker.model.ExerciseSet
 import com.jacopo.mygymtracker.model.Routine
+import com.jacopo.mygymtracker.ui.ExerciseUIState
+import com.jacopo.mygymtracker.ui.RoutineUIState
+import com.jacopo.mygymtracker.ui.SetUIState
 import kotlinx.coroutines.launch
 
 class RoutineViewVM(
@@ -66,13 +66,13 @@ class RoutineViewVM(
                     name = mutableStateOf(exercise.name),
                     note = mutableStateOf(exercise.note),
                     category = mutableStateOf(exercise.category),
-                    sets = exercise.sets.map { set ->
+                    sets = mutableStateOf(exercise.sets.map { set ->
                         SetUIState(
                             id = set.id,
                             reps = mutableIntStateOf(set.reps),
                             weight = mutableIntStateOf(set.weight)
                         )
-                    }.toMutableStateList()
+                    })
                 )
             }.toMutableStateList()
         )
@@ -83,12 +83,13 @@ class RoutineViewVM(
             _routineState.value!!.exercises.remove(exercise)
         }
     }
+
     fun addNewSet(exercise: ExerciseUIState) {
         val newSet = SetUIState(
             reps = mutableIntStateOf(0),
             weight = mutableIntStateOf(0)
         )
-        exercise.sets.add(newSet)
+        exercise.sets.value += newSet
     }
 
     private fun routineUIStateToRoutine(routineUIState: RoutineUIState): Routine {
@@ -102,7 +103,7 @@ class RoutineViewVM(
                     name = exercise.name.value,
                     note = exercise.note.value,
                     category = exercise.category.value,
-                    sets = exercise.sets.map { set ->
+                    sets = exercise.sets.value.map { set ->
                         ExerciseSet(
                             id = set.id,
                             reps = set.reps.intValue,
@@ -114,40 +115,16 @@ class RoutineViewVM(
         )
     }
 
-
-    fun addEmptyExercise(lastUsedDraftId : Int?) {
+    fun addEmptyExercise() {
         val newExercise = ExerciseUIState(
             name = mutableStateOf(""),
             note = mutableStateOf(null),
             category = mutableStateOf(Category.CAT1),
-            sets = mutableStateListOf(),
-            draftId = (lastUsedDraftId ?: 0) - 1
         )
         if (_routineState.value != null) {
             _routineState.value!!.exercises.add(newExercise)
         }
     }
-
 }
 
-data class RoutineUIState(
-    val id: Int? = null,
-    val name: MutableState<String>,
-    val note: MutableState<String?> = mutableStateOf(null),
-    val exercises: SnapshotStateList<ExerciseUIState>,
-)
 
-data class ExerciseUIState(
-    val id: Int? = null,
-    val draftId: Int = 0, // Used to identify unsaved exercises
-    val name: MutableState<String>,
-    val note: MutableState<String?> = mutableStateOf(null),
-    val category: MutableState<Category>,
-    val sets: SnapshotStateList<SetUIState>
-)
-
-data class SetUIState(
-    val id: Int? = null,
-    val reps: MutableIntState = mutableIntStateOf(0),
-    val weight: MutableIntState = mutableIntStateOf(0)
-)
