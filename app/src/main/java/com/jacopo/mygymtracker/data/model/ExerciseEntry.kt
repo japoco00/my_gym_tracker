@@ -27,7 +27,6 @@ data class ExerciseEntry(
     val routineId: Int,
 )
 
-
 data class ExerciseWithSetsEntry(
     @Embedded
     val exerciseEntry: ExerciseEntry,

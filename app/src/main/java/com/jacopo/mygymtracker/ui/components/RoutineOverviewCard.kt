@@ -1,6 +1,5 @@
 package com.jacopo.mygymtracker.ui.components
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,19 +8,14 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.jacopo.mygymtracker.model.Category
-import com.jacopo.mygymtracker.model.Exercise
-import com.jacopo.mygymtracker.model.ExerciseSet
 import com.jacopo.mygymtracker.model.Routine
 
 @Composable
-fun RoutineOverviewCard(routine: Routine, onClick: () -> Unit, onDelete: () -> Unit) {
+fun RoutineOverviewCard(routine: Routine, onClick: () -> Unit) {
     Card(
         onClick = onClick,
         modifier = Modifier.padding(8.dp)
@@ -42,7 +36,7 @@ fun RoutineOverviewCard(routine: Routine, onClick: () -> Unit, onDelete: () -> U
                 if (routine.note != null) {
                     Text(
                         // Display the routine note if it exists
-                        routine.note!!,
+                        routine.note !!,
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center,
@@ -58,42 +52,6 @@ fun RoutineOverviewCard(routine: Routine, onClick: () -> Unit, onDelete: () -> U
                     )
                 }
             }
-//            IconButton(
-//                onClick = onDelete,
-//            ) {
-//                Icon(
-//                    imageVector = Icons.Default.Delete,
-//                    tint = MaterialTheme.colorScheme.error,
-//                    contentDescription = "Delete Routine",
-//                )
-//            }
         }
     }
-}
-
-@SuppressLint("UnrememberedMutableState")
-@Preview
-@Composable
-fun RoutineOverviewCardPreview() {
-    RoutineOverviewCard(
-        routine = Routine(
-            id = 1,
-            name = "Sample Routine",
-            note = "This is a sample routine note.",
-            exercises = listOf(
-                Exercise(
-                    name = "Bench Press", sets = mutableStateListOf(
-                        ExerciseSet(reps = 10, weight = 10), ExerciseSet(reps = 8, weight = 12)
-                    ), id = 0, note = null, category = Category.CAT1
-                ), Exercise(
-                    name = "Squat",
-                    sets = mutableStateListOf(
-                        ExerciseSet(reps = 3, weight = 5), ExerciseSet(reps = 2, weight = 4)
-                    ),
-                    id = null,
-                    note = null,
-                    category = Category.CAT3,
-                )
-            )
-        ), onClick = {}, onDelete = {})
 }

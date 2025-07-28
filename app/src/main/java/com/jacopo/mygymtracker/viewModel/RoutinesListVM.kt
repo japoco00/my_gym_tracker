@@ -23,7 +23,7 @@ class RoutinesListVM(
     var routines = routineRepository.getAllRoutines()
         .map { list -> list.map { it.toDomainModel() } }
         .onEach { newList ->
-            Log.d("RoutineVM", "Nuovo stato routines: ${newList.map { it.name }}")
+            Log.d("RoutineVM", "Nuovo stato routines: ${newList.map { it.id }}")
         }
         .stateIn(
             viewModelScope,

@@ -2,6 +2,8 @@ package com.jacopo.mygymtracker.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -16,6 +18,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -53,17 +56,23 @@ fun <T> SwipableElement(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(color)
-                        .padding(16.dp),
+                        .background(
+                            lerp(
+                                Color.Transparent,
+                                color,
+                                swipeToDismissCardState.progress
+                            )
+                        ),
                     contentAlignment = Alignment.CenterEnd
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Delete",
                         modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        tint = MaterialTheme.colorScheme.primary
+                            .fillMaxHeight(0.7f)
+                            .aspectRatio(1f)
+                            .padding(end = 16.dp),
+                        tint = MaterialTheme.colorScheme.onErrorContainer
                     )
                 }
             }

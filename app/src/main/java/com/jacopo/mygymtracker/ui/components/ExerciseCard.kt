@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.ui.ExerciseUIState
 import com.jacopo.mygymtracker.ui.SetUIState
 
-
 @Composable
 fun ExerciseCard(
     exercise: ExerciseUIState, addNewSet: () -> Unit, modifier: Modifier = Modifier
@@ -79,7 +78,6 @@ fun ExerciseCard(
         }
     }
 }
-
 
 @Composable
 fun SetRow(set: SetUIState) {

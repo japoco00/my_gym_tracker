@@ -18,26 +18,21 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.jacopo.mygymtracker.ui.screen.RoutineScreen
-import com.jacopo.mygymtracker.ui.screen.RoutinesListScreen
+import com.jacopo.mygymtracker.ui.navigation.Routines
+import com.jacopo.mygymtracker.ui.navigation.navigateToRoutineDetails
+import com.jacopo.mygymtracker.ui.navigation.routineDetailsDestination
+import com.jacopo.mygymtracker.ui.navigation.routinesDestination
 import com.jacopo.mygymtracker.ui.theme.AppTheme
-import com.jacopo.mygymtracker.viewModel.RoutineViewModelFactory
-import com.jacopo.mygymtracker.viewModel.RoutineViewVM
-import com.jacopo.mygymtracker.viewModel.RoutinesListVM
-import com.jacopo.mygymtracker.viewModel.RoutinesListVMFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        @OptIn(ExperimentalMaterial3Api::class)
-        setContent {
+        @OptIn(ExperimentalMaterial3Api::class) setContent {
             AppTheme {
                 val navController = rememberNavController()
                 val appContainer =
@@ -47,8 +42,7 @@ class MainActivity : ComponentActivity() {
                     topBar = { TopAppBar(title = { Text("My Gym Tracker") }) },
                     bottomBar = {},
                     containerColor = MaterialTheme.colorScheme.background
-                )
-                { innerPadding ->
+                ) { innerPadding ->
                     Surface(
                         modifier = Modifier
                             .fillMaxSize()
@@ -65,34 +59,22 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MyNavHost(navController: NavHostController, appContainer: AppContainer) {
-    NavHost(navController = navController, startDestination = "routines") {
-        composable("routines") {
-            val vm = viewModel<RoutinesListVM>(
-                factory = RoutinesListVMFactory(
-                    routineRepository = appContainer.routineRepository
-                )
-            )
-            RoutinesListScreen(
-                onNavigateToDetails = { routineId ->
-                    navController.navigate("routine/$routineId")
-                },
-                vm = vm
-            )
-        }
-        composable("routine/{routineId}") { backStackEntry ->
-            val routineId = backStackEntry.arguments?.getString("routineId")?.toInt()
-            val vm = viewModel<RoutineViewVM>(
-                factory = RoutineViewModelFactory(
-                    routineId = if (routineId == -1) null else routineId,
-                    routineRepository = appContainer.routineRepository
-                )
-            )
-            RoutineScreen(
-                navController = navController,
-                vm = vm
-            )
-        }
+    NavHost(navController = navController, startDestination = Routines) {
+        val routineRepository = appContainer.routineRepository
+
+        routinesDestination(
+            routineRepository,
+            onNavigateToRoutineDetails = { routineId ->
+                navController.navigateToRoutineDetails(routineId)
+            })
+
+        routineDetailsDestination(
+            routineRepository,
+            onNavigateBack = {
+                navController.navigateUp()
+            })
     }
 }
+
 
 

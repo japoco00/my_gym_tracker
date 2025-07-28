@@ -39,7 +39,7 @@ class RoutineViewVM(
         viewModelScope.launch {
             routineRepository.getRoutineById(routineId)
                 .collect { routine ->
-                    _routineState.value = routineToUIState(routine!!)
+                    _routineState.value = routineToUIState(routine !!)
                 }
         }
     }
@@ -48,7 +48,7 @@ class RoutineViewVM(
         if (_routineState.value == null) {
             return
         }
-        val routine = routineUIStateToRoutine(_routineState.value!!)
+        val routine = routineUIStateToRoutine(_routineState.value !!)
         viewModelScope.launch {
             Log.d("RoutineViewVM", "Saving routine: ${routine.name}")
             routineRepository.updateFull(routine)
@@ -80,7 +80,7 @@ class RoutineViewVM(
 
     fun removeExercise(exercise: ExerciseUIState) {
         if (_routineState.value != null) {
-            _routineState.value!!.exercises.remove(exercise)
+            _routineState.value !!.exercises.remove(exercise)
         }
     }
 
@@ -122,7 +122,7 @@ class RoutineViewVM(
             category = mutableStateOf(Category.CAT1),
         )
         if (_routineState.value != null) {
-            _routineState.value!!.exercises.add(newExercise)
+            _routineState.value !!.exercises.add(newExercise)
         }
     }
 }

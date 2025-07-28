@@ -15,39 +15,39 @@ import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.model.Routine
 import com.jacopo.mygymtracker.ui.components.RoutineOverviewCard
 import com.jacopo.mygymtracker.ui.components.SwipableElement
-import com.jacopo.mygymtracker.viewModel.RoutinesListVM
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun RoutinesListScreen(
-    onNavigateToDetails: (Int) -> Unit = { /* No-op */ },
-    vm: RoutinesListVM
+    routinesFlow: StateFlow<List<Routine>>,
+    onNavigateToRoutineDetails: (Int) -> Unit = { /* No-op */ },
+    onDeleteRoutine: (Routine) -> Unit = { /* No-op */ },
 ) {
-    val routines by vm.routines.collectAsState()
+    val routines by routinesFlow.collectAsState()
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         LazyColumn(modifier = Modifier.weight(1f)) {
-            items(routines, key = { it.id!! }) { routine ->
+            items(routines, key = { it.id !! }) { routine ->
                 val content: @Composable () -> Unit =
                     {
                         RoutineOverviewCard(
                             routine,
-                            onClick = { onNavigateToDetails(routine.id!!) },
-                            onDelete = { vm.deleteRoutine(routine) }
+                            onClick = { onNavigateToRoutineDetails(routine.id !!) },
                         )
                     }
 
                 SwipableElement<Routine>(
                     item = routine,
-                    onDismiss = { vm.deleteRoutine(it) },
+                    onDismiss = { onDeleteRoutine(it) },
                     content = content,
                     modifier = Modifier.animateItem()
                 )
             }
         }
         Button(
-            onClick = { onNavigateToDetails(-1) },
+            onClick = { onNavigateToRoutineDetails(- 1) },
             modifier = Modifier.padding(0.dp, 16.dp)
         )
         {

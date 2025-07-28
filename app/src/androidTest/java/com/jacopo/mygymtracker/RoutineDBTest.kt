@@ -74,7 +74,7 @@ class AppDatabaseTest {
         val routineWithAll = routineDao.getRoutineById(routineId)
 
         assertNotNull(routineWithAll)
-        assertEquals(1, routineWithAll!!.exercises.size)
+        assertEquals(1, routineWithAll !!.exercises.size)
         assertEquals("Push Up", routineWithAll.exercises.first().exercise.name)
         assertEquals(1, routineWithAll.exercises.first().sets.size)
         assertEquals(10, routineWithAll.exercises.first().sets.first().numberOfReps)

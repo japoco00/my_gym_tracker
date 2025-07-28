@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import com.jacopo.mygymtracker.data.model.RoutineEntry as DataRoutine
 
-
 class RoutineRepository(
     private val routineDao: RoutineDao,
     private val exerciseRepository: ExerciseRepository,
@@ -45,7 +44,6 @@ class RoutineRepository(
         return routineDao.getRoutineById(id).map { it?.toDomainModel() }
     }
 }
-
 
 fun RoutineFullEntry.toDomainModel(): Routine {
     return Routine(

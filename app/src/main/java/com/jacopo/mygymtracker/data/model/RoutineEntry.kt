@@ -5,7 +5,6 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.Relation
 
-
 @Entity
 data class RoutineEntry(
     @PrimaryKey(autoGenerate = true)
@@ -13,7 +12,6 @@ data class RoutineEntry(
     val name: String,
     val note: String? = null,
 )
-
 
 data class RoutineFullEntry(
     @Embedded
