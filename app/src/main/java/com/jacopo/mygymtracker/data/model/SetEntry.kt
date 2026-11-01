@@ -24,7 +24,7 @@ import androidx.room.PrimaryKey
 )
 data class SetEntry(
     @PrimaryKey(autoGenerate = true)
-    val setId: Int,
+    val setId: Int = 0,
     // Foreign key to Exercise
     val exerciseId: Int,
     // Foreign key to Routine
@@ -32,7 +32,3 @@ data class SetEntry(
     val weight: Int,
     val reps: Int,
 )
-
-
-
-

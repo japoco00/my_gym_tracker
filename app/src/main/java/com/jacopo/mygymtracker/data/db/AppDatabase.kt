@@ -12,7 +12,15 @@ import com.jacopo.mygymtracker.data.model.RoutineEntry
 import com.jacopo.mygymtracker.data.model.RoutineExerciseCrossRef
 import com.jacopo.mygymtracker.data.model.SetEntry
 
-@Database(entities = [RoutineEntry::class, ExerciseEntry::class, SetEntry::class, RoutineExerciseCrossRef::class], version = 1)
+@Database(
+    entities = [
+        RoutineEntry::class,
+        ExerciseEntry::class,
+        SetEntry::class,
+        RoutineExerciseCrossRef::class
+    ],
+    version = 2
+)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun routineDao(): RoutineDao
     abstract fun exerciseDao(): ExerciseDao
@@ -29,7 +37,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "app_database" // nome del file del db
                 )
-                    //.fallbackToDestructiveMigration() // opzionale in sviluppo
+                    .fallbackToDestructiveMigration(dropAllTables = true)
                     .build()
                 INSTANCE = instance
                 instance

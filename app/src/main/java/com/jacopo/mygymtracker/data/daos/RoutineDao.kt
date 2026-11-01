@@ -8,6 +8,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.jacopo.mygymtracker.data.model.RoutineEntry
+import com.jacopo.mygymtracker.data.model.RoutineExerciseCrossRef
 import com.jacopo.mygymtracker.data.model.RoutineWithExercisesEntry
 import kotlinx.coroutines.flow.Flow
 
@@ -22,6 +23,17 @@ interface RoutineDao {
     @Delete
     suspend fun delete(routineEntry: RoutineEntry)
 
+    @Insert(onConflict = REPLACE)
+    suspend fun insertRoutineExerciseCrossRef(crossRef: RoutineExerciseCrossRef)
+
+    @Insert(onConflict = REPLACE)
+    suspend fun insertRoutineExerciseCrossRefs(crossRefs: List<RoutineExerciseCrossRef>)
+
+    @Delete
+    suspend fun deleteRoutineExerciseCrossRef(crossRef: RoutineExerciseCrossRef)
+
+    @Query("DELETE FROM RoutineExerciseCrossRef WHERE routineId = :routineId")
+    suspend fun deleteCrossRefsForRoutine(routineId: Int)
 
     @Transaction
     @Query("SELECT * FROM RoutineEntry")
@@ -29,4 +41,8 @@ interface RoutineDao {
 
     @Query("SELECT * FROM RoutineEntry WHERE routineId = :routineId")
     fun getRoutineById(routineId: Int): Flow<RoutineEntry>
+
+    @Transaction
+    @Query("SELECT * FROM RoutineEntry WHERE routineId = :routineId")
+    fun getRoutineWithExercisesById(routineId: Int): Flow<RoutineWithExercisesEntry>
 }

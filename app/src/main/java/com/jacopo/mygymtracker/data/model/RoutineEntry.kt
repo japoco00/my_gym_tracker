@@ -3,19 +3,20 @@ package com.jacopo.mygymtracker.data.model
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.Junction
 import androidx.room.PrimaryKey
 import androidx.room.Relation
 
 @Entity
 data class RoutineEntry(
-    @PrimaryKey(autoGenerate = true) val routineId: Int,
+    @PrimaryKey(autoGenerate = true) val routineId: Int = 0,
     val name: String,
     val note: String? = null,
 )
 
-
-@Entity(primaryKeys = ["routineId", "exerciseId"],
+@Entity(
+    primaryKeys = ["routineId", "exerciseId"],
     foreignKeys = [
         ForeignKey(
             entity = RoutineEntry::class,
@@ -29,12 +30,13 @@ data class RoutineEntry(
             childColumns = ["exerciseId"],
             onDelete = ForeignKey.CASCADE
         )
-    ])
+    ],
+    indices = [Index("routineId"), Index("exerciseId")]
+)
 data class RoutineExerciseCrossRef(
     val routineId: Int,
     val exerciseId: Int
 )
-
 
 data class RoutineWithExercisesEntry(
     @Embedded val routineEntry: RoutineEntry,
@@ -44,12 +46,3 @@ data class RoutineWithExercisesEntry(
         associateBy = Junction(RoutineExerciseCrossRef::class)
     ) val exercises: List<ExerciseEntry>
 )
-
-
-
-
-
-
-
-
-

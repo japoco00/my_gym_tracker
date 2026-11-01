@@ -26,13 +26,12 @@ enum class Category {
 }
 
 
-fun Exercise.toEntry(sets: List<ExerciseSet>, routineId: Int) : ExerciseEntry {
+fun Exercise.toEntry(): ExerciseEntry {
     return ExerciseEntry(
         exerciseId = id ?: 0,
         name = name,
         category = category,
         note = note,
-        routineId = routineId
     )
 }
 

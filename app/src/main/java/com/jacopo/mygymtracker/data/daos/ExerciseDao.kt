@@ -5,10 +5,8 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy.Companion.REPLACE
 import androidx.room.Query
-import androidx.room.Transaction
 import androidx.room.Update
 import com.jacopo.mygymtracker.data.model.ExerciseEntry
-import com.jacopo.mygymtracker.data.model.ExerciseWithSetsEntry
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -22,7 +20,6 @@ interface ExerciseDao {
     @Delete
     suspend fun delete(exerciseEntry: List<ExerciseEntry>)
 
-    @Transaction
     @Query("SELECT * FROM ExerciseEntry")
-    fun getAll(): Flow<List<ExerciseWithSetsEntry>>
+    fun getAll(): Flow<List<ExerciseEntry>>
 }

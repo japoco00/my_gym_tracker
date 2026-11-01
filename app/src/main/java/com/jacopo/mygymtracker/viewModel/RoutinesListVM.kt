@@ -25,14 +25,15 @@ class RoutinesListVM(
     var routines: StateFlow<List<Routine>> =
         routineRepository.getAllRoutinesWithExercises().map { routineList ->
             routineList.map { routineWithExercisesEntry ->
+                val routineId = routineWithExercisesEntry.routineEntry.routineId
                 val exercises = routineWithExercisesEntry.exercises.map { exerciseEntry ->
                     val sets = setRepository.getAllSetsByExerciseIdAndRoutineId(
-                        exerciseEntry.exerciseId, exerciseEntry.routineId
+                        exerciseEntry.exerciseId, routineId
                     ).map { it.toModel() }
                     exerciseEntry.toModel(sets)
                 }
                 Routine(
-                    id = routineWithExercisesEntry.routineEntry.routineId,
+                    id = routineId,
                     name = routineWithExercisesEntry.routineEntry.name,
                     exercises = exercises,
                     note = routineWithExercisesEntry.routineEntry.note
