@@ -24,4 +24,10 @@ interface SetDao {
     @Transaction
     @Query("SELECT * FROM SetEntry")
     fun getAll(): Flow<List<SetEntry>>
+
+    @Query("SELECT * FROM SetEntry WHERE exerciseId = :exerciseId AND routineId = :routineId")
+    suspend fun getAllSetsByExerciseIdAndRoutineId(
+        exerciseId: Int, routineId: Int
+    ): List<SetEntry>
+
 }

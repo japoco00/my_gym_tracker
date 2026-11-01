@@ -4,37 +4,49 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jacopo.mygymtracker.data.repositories.RoutineRepository
-import com.jacopo.mygymtracker.data.repositories.toDomainModel
+import com.jacopo.mygymtracker.data.repositories.SetRepository
 import com.jacopo.mygymtracker.model.Routine
+import com.jacopo.mygymtracker.model.toEntry
+import com.jacopo.mygymtracker.model.toModel
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class RoutinesListVM(
-    private val routineRepository: RoutineRepository,
+    private val routineRepository: RoutineRepository, private val setRepository: SetRepository
 ) : ViewModel() {
 
     init {
         Log.d("RoutinesListVM", "RoutinesListVM created")
     }
 
-    var routines = routineRepository.getAllRoutines()
-        .map { list -> list.map { it.toDomainModel() } }
-        .onEach { newList ->
-            Log.d("RoutineVM", "Nuovo stato routines: ${newList.map { it.id }}")
-        }
-        .stateIn(
-            viewModelScope,
-            started = SharingStarted.WhileSubscribed(),
-            initialValue = emptyList()
-        )
+    var routines: StateFlow<List<Routine>> =
+        routineRepository.getAllRoutinesWithExercises().map { routineList ->
+            routineList.map { routineWithExercisesEntry ->
+                val exercises = routineWithExercisesEntry.exercises.map { exerciseEntry ->
+                    val sets = setRepository.getAllSetsByExerciseIdAndRoutineId(
+                        exerciseEntry.exerciseId, exerciseEntry.routineId
+                    ).map { it.toModel() }
+                    exerciseEntry.toModel(sets)
+                }
+                Routine(
+                    id = routineWithExercisesEntry.routineEntry.routineId,
+                    name = routineWithExercisesEntry.routineEntry.name,
+                    exercises = exercises,
+                    note = routineWithExercisesEntry.routineEntry.note
+                )
+            }
+        }.stateIn(
+                viewModelScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = emptyList()
+            )
 
     fun deleteRoutine(routine: Routine) {
         viewModelScope.launch {
-            Log.d("RoutinesListVM", "Deleting routine: ${routine.name}")
-            routineRepository.delete(routine)
+            routineRepository.delete(routine.toEntry())
         }
     }
 }

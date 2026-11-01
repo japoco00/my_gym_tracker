@@ -7,6 +7,6 @@ import com.jacopo.mygymtracker.data.repositories.SetRepository
 
 class AppContainer(database: AppDatabase) {
     val setRepository = SetRepository(database.setDao())
-    val exerciseRepository = ExerciseRepository(database.exerciseDao(), setRepository)
+    val exerciseRepository = ExerciseRepository(database.exerciseDao())
     val routineRepository = RoutineRepository(database.routineDao(), exerciseRepository, database)
 }

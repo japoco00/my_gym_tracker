@@ -25,10 +25,7 @@ class RoutineViewVM(
     var routineState: State<RoutineUIState?> = _routineState
 
     fun loadRoutine(routineId: Int?) {
-        Log.d("RoutineViewVM", "loadRoutine called with id: $routineId")
-
         if (routineId == null) {
-            Log.d("RoutineViewVM", "Creating new routine state")
             _routineState.value = RoutineUIState(
                 name = mutableStateOf("New routine"),
                 note = mutableStateOf(null),
@@ -39,6 +36,7 @@ class RoutineViewVM(
         viewModelScope.launch {
             routineRepository.getRoutineById(routineId)
                 .collect { routine ->
+
                     _routineState.value = routineToUIState(routine !!)
                 }
         }

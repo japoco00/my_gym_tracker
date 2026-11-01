@@ -9,9 +9,10 @@ import com.jacopo.mygymtracker.data.daos.RoutineDao
 import com.jacopo.mygymtracker.data.daos.SetDao
 import com.jacopo.mygymtracker.data.model.ExerciseEntry
 import com.jacopo.mygymtracker.data.model.RoutineEntry
+import com.jacopo.mygymtracker.data.model.RoutineExerciseCrossRef
 import com.jacopo.mygymtracker.data.model.SetEntry
 
-@Database(entities = [RoutineEntry::class, ExerciseEntry::class, SetEntry::class], version = 1)
+@Database(entities = [RoutineEntry::class, ExerciseEntry::class, SetEntry::class, RoutineExerciseCrossRef::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun routineDao(): RoutineDao
     abstract fun exerciseDao(): ExerciseDao

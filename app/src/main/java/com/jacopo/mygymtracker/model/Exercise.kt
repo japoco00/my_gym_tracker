@@ -1,5 +1,8 @@
 package com.jacopo.mygymtracker.model
 
+import com.jacopo.mygymtracker.data.model.ExerciseEntry
+import com.jacopo.mygymtracker.data.model.SetEntry
+
 data class Exercise(
     val id: Int? = null,
     val note: String? = null,
@@ -21,3 +24,43 @@ data class ExerciseSet(
 enum class Category {
     CAT1, CAT2, CAT3, STRENGTH, CHEST, LEGS
 }
+
+
+fun Exercise.toEntry(sets: List<ExerciseSet>, routineId: Int) : ExerciseEntry {
+    return ExerciseEntry(
+        exerciseId = id ?: 0,
+        name = name,
+        category = category,
+        note = note,
+        routineId = routineId
+    )
+}
+
+fun ExerciseEntry.toModel(sets: List<ExerciseSet> = emptyList()): Exercise {
+    return Exercise(
+        id = exerciseId,
+        name = name,
+        category = category,
+        note = note,
+        sets = sets.toMutableList(),
+    )
+}
+
+fun ExerciseSet.toEntry(exerciseId: Int, routineId: Int): SetEntry {
+    return SetEntry(
+        setId = id ?: 0,
+        reps = reps,
+        weight = weight,
+        exerciseId = exerciseId,
+        routineId = routineId,
+    )
+}
+
+fun SetEntry.toModel(): ExerciseSet {
+    return ExerciseSet(
+        id = setId,
+        reps = reps,
+        weight = weight
+    )
+}
+

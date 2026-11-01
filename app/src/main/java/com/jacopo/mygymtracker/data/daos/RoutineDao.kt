@@ -8,7 +8,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.jacopo.mygymtracker.data.model.RoutineEntry
-import com.jacopo.mygymtracker.data.model.RoutineFullEntry
+import com.jacopo.mygymtracker.data.model.RoutineWithExercisesEntry
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -22,13 +22,11 @@ interface RoutineDao {
     @Delete
     suspend fun delete(routineEntry: RoutineEntry)
 
-    @Transaction
-    @Query(
-        "SELECT * FROM RoutineEntry WHERE id = :id"
-    )
-    fun getRoutineById(id: Int): Flow<RoutineFullEntry?>
 
     @Transaction
     @Query("SELECT * FROM RoutineEntry")
-    fun getAllRoutines(): Flow<List<RoutineFullEntry>>
+    fun getAllRoutinesWithExercises(): Flow<List<RoutineWithExercisesEntry>>
+
+    @Query("SELECT * FROM RoutineEntry WHERE routineId = :routineId")
+    fun getRoutineById(routineId: Int): Flow<RoutineEntry>
 }

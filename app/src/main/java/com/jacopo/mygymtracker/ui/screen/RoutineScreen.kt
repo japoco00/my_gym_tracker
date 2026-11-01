@@ -17,17 +17,23 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.model.Category
+import com.jacopo.mygymtracker.ui.AddExercisesUIState
 import com.jacopo.mygymtracker.ui.ExerciseUIState
 import com.jacopo.mygymtracker.ui.RoutineUIState
+import com.jacopo.mygymtracker.ui.components.AddExercisesModal
 import com.jacopo.mygymtracker.ui.components.ExerciseCard
 import com.jacopo.mygymtracker.ui.components.SwipableElement
+import com.jacopo.mygymtracker.ui.toUiState
 
 @Composable
 fun RoutineScreen(
@@ -36,7 +42,9 @@ fun RoutineScreen(
     onAddEmptyExercise: () -> Unit = {},
     onDeleteExercise: (ExerciseUIState) -> Unit = {},
     onAddNewSet: (ExerciseUIState) -> Unit = {},
+    onAddExercises: (List<ExerciseUIState>) -> Unit = {}
 ) {
+    var showModal by remember { mutableStateOf(false) }
 
     BackHandler {
         onBack()
@@ -69,8 +77,7 @@ fun RoutineScreen(
                 if (uiState.value?.name?.value.isNullOrEmpty())
                     Text("Routine name cannot be empty")
             },
-
-            )
+        )
         LazyColumn(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.weight(1f)
@@ -100,6 +107,16 @@ fun RoutineScreen(
             Text("Add Exercise")
         }
     }
+
+    AddExercisesModal (
+        uiState = AddExercisesUIState()
+    ) { exerciseList ->
+        val exerciseUiStateList = exerciseList.map { exercise ->
+            exercise.toUiState()
+        }
+        onAddExercises(exerciseUiStateList)
+    }
+
 }
 
 @SuppressLint("UnrememberedMutableState")
