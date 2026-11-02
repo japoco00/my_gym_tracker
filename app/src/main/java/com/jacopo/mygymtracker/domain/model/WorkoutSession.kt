@@ -13,10 +13,7 @@ data class WorkoutSession(
     val startedAt: Instant,
     val finishedAt: Instant? = null,
     val exercises: List<WorkoutExercise> = emptyList(),
-) {
-    val hasCompletedSets: Boolean
-        get() = exercises.any { exercise -> exercise.sets.any { it.isCompleted } }
-}
+)
 
 data class WorkoutExercise(
     val exercise: Exercise,
