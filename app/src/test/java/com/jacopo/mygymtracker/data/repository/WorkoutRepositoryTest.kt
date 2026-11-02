@@ -14,7 +14,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -41,7 +40,7 @@ class WorkoutRepositoryTest {
     fun startWorkout_prefillsPlanAndBecomesActive() = runTest {
         val routine = savedRoutine()
 
-        val id = workouts.startWorkout(routine, now = time(1))
+        val id = workouts.startWorkout(routine, now = time(1))!!
 
         val active = workouts.observeActiveWorkout().first()!!
         assertEquals(id, active.id)
@@ -53,26 +52,35 @@ class WorkoutRepositoryTest {
     }
 
     @Test
-    fun startWorkout_failsWhileAnotherIsActive() = runTest {
+    fun startWorkout_returnsNullWhileAnotherIsActive() = runTest {
         val routine = savedRoutine()
-        workouts.startWorkout(routine)
+        val firstId = workouts.startWorkout(routine)
 
-        val error = runCatching { workouts.startWorkout(routine) }.exceptionOrNull()
-
-        assertTrue(error is IllegalStateException)
+        assertNull(workouts.startWorkout(routine))
+        assertEquals(firstId, workouts.observeActiveWorkout().first()?.id)
     }
 
     @Test
     fun finishWorkout_keepsOnlyCompletedSets() = runTest {
-        val id = workouts.startWorkout(savedRoutine(), now = time(1))
+        val id = workouts.startWorkout(savedRoutine(), now = time(1))!!
         val draft = workouts.getWorkout(id)!!.completeFirstSetOfFirstExercise()
 
-        val finished = workouts.finishWorkout(draft, now = time(2))
+        val finished = workouts.finishWorkout(draft, now = time(2))!!
 
         assertNull(workouts.observeActiveWorkout().first())
         assertEquals(time(2), finished.finishedAt)
         assertEquals(listOf("Squat"), finished.exercises.map { it.exercise.name })
         assertEquals(listOf(LoggedSet(5, 100.0, isCompleted = true)), finished.exercises.single().sets)
+    }
+
+    @Test
+    fun finishWorkout_returnsNullOnceWorkoutIsDiscarded() = runTest {
+        val id = workouts.startWorkout(savedRoutine())!!
+        val draft = workouts.getWorkout(id)!!.completeFirstSetOfFirstExercise()
+        workouts.deleteWorkout(id)
+
+        assertNull(workouts.finishWorkout(draft))
+        assertNull(workouts.getWorkout(id))
     }
 
     @Test
@@ -116,7 +124,7 @@ class WorkoutRepositoryTest {
 
     @Test
     fun saveDraft_isIgnoredOnceWorkoutIsDiscarded() = runTest {
-        val id = workouts.startWorkout(savedRoutine())
+        val id = workouts.startWorkout(savedRoutine())!!
         val draft = workouts.getWorkout(id)!!
         workouts.deleteWorkout(id)
 
@@ -150,7 +158,7 @@ class WorkoutRepositoryTest {
 
     /** Starts and finishes a workout where only the first squat set is completed. */
     private suspend fun finishWorkout(routine: Routine, at: Long, weightKg: Double = 100.0): Int {
-        val id = workouts.startWorkout(routine, now = time(at))
+        val id = workouts.startWorkout(routine, now = time(at))!!
         val draft = workouts.getWorkout(id)!!.completeFirstSetOfFirstExercise(weightKg)
         workouts.finishWorkout(draft, now = time(at + 1))
         return id

@@ -215,8 +215,12 @@ class WorkoutViewModel(
         closeJob = viewModelScope.launch {
             draftJob?.cancelAndJoin()
             val workout = _uiState.value.toDomain(sessionId)
-            withContext(NonCancellable) { workoutRepository.finishWorkout(workout) }
+            val finished = withContext(NonCancellable) { workoutRepository.finishWorkout(workout) }
             hasUnsavedEdits = false
+            if (finished == null) {
+                _uiState.update { it.copy(exit = WorkoutExit.CLOSED) }
+                return@launch
+            }
 
             // Compared with every set, checked or not: unchecked sets still describe the plan.
             val performedPlan = workout.toRoutineExercises()

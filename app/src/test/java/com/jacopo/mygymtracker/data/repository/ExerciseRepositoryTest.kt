@@ -90,7 +90,7 @@ class ExerciseRepositoryTest {
     @Test
     fun deleteExercise_blockedByWorkoutHistoryAfterRoutineIsGone() = runTest {
         val routineId = routines.saveRoutine(routineOf("Push", newExercise("Squat") to emptyList()))
-        val workoutId = workouts.startWorkout(routines.getRoutine(routineId)!!)
+        val workoutId = workouts.startWorkout(routines.getRoutine(routineId)!!)!!
         routines.deleteRoutine(routineId)
         val squat = catalogEntry("Squat")
 

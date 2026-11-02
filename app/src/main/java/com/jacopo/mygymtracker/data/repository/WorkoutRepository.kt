@@ -34,15 +34,14 @@ class WorkoutRepository(
         workoutDao.getWithExercises(sessionId)?.toDomain()
 
     /**
-     * Starts a workout pre-filled with [routine]'s plan.
-     * Only one workout can be in progress, and it needs at least one exercise.
+     * Starts a workout pre-filled with [routine]'s plan, which needs at least one exercise.
      *
-     * @return the id of the new session.
+     * @return the id of the new session, or `null` if another workout is already in progress.
      */
-    suspend fun startWorkout(routine: Routine, now: Instant = Instant.now()): Int =
+    suspend fun startWorkout(routine: Routine, now: Instant = Instant.now()): Int? =
         database.withTransaction {
             require(routine.exercises.isNotEmpty()) { "Cannot start a workout without exercises" }
-            check(!workoutDao.hasActive()) { "Another workout is already in progress" }
+            if (workoutDao.hasActive()) return@withTransaction null
             val workout = routine.toWorkoutSession(startedAt = now)
             val sessionId = workoutDao.insertSession(workout.toEntity()).toInt()
             writeExercises(sessionId, workout.exercises)
@@ -62,18 +61,20 @@ class WorkoutRepository(
     /**
      * Finishes [workout], dropping unchecked sets and exercises left without completed sets.
      *
-     * @return the finished workout as stored, with catalog ids resolved.
+     * @return the finished workout as stored, with catalog ids resolved,
+     * or `null` if it was finished or discarded meanwhile.
      */
-    suspend fun finishWorkout(workout: WorkoutSession, now: Instant = Instant.now()): WorkoutSession {
+    suspend fun finishWorkout(workout: WorkoutSession, now: Instant = Instant.now()): WorkoutSession? {
         val sessionId = requireNotNull(workout.id) { "Only started workouts can be finished" }
         val finished = workout.withCompletedSetsOnly().copy(finishedAt = now)
         require(finished.exercises.isNotEmpty()) { "A workout needs at least one completed set" }
-        database.withTransaction {
-            check(workoutDao.isActive(sessionId)) { "Workout $sessionId is not in progress" }
+        val wasActive = database.withTransaction {
+            if (!workoutDao.isActive(sessionId)) return@withTransaction false
             workoutDao.updateSession(finished.toEntity())
             writeExercises(sessionId, finished.exercises)
+            true
         }
-        return checkNotNull(getWorkout(sessionId))
+        return if (wasActive) getWorkout(sessionId) else null
     }
 
     /** Deletes a workout, in progress (discard) or finished (history). */

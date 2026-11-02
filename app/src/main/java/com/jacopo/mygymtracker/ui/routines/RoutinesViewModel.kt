@@ -24,12 +24,14 @@ import kotlinx.coroutines.launch
 /**
  * @property pendingDelete routine hidden from the list and waiting for the undo snackbar to close.
  * @property startConflict routine the user tried to start while [activeWorkout] is still running.
+ * @property startedWorkoutId workout just started, waiting for the screen to open it.
  */
 data class RoutinesUiState(
     val routines: List<Routine> = emptyList(),
     val pendingDelete: Routine? = null,
     val activeWorkout: WorkoutSession? = null,
     val startConflict: Routine? = null,
+    val startedWorkoutId: Int? = null,
     val isLoading: Boolean = true,
 )
 
@@ -41,6 +43,7 @@ class RoutinesViewModel(
 
     private val pendingDelete = MutableStateFlow<Routine?>(null)
     private val startConflict = MutableStateFlow<Routine?>(null)
+    private val startedWorkoutId = MutableStateFlow<Int?>(null)
     private var startJob: Job? = null
 
     val uiState: StateFlow<RoutinesUiState> = combine(
@@ -48,12 +51,14 @@ class RoutinesViewModel(
         workoutRepository.observeActiveWorkout(),
         pendingDelete,
         startConflict,
-    ) { routines, activeWorkout, pending, conflict ->
+        startedWorkoutId,
+    ) { routines, activeWorkout, pending, conflict, startedId ->
         RoutinesUiState(
             routines = routines.filterNot { it.id == pending?.id },
             pendingDelete = pending,
             activeWorkout = activeWorkout,
             startConflict = conflict,
+            startedWorkoutId = startedId,
             isLoading = false,
         )
     }.stateIn(
@@ -63,28 +68,43 @@ class RoutinesViewModel(
     )
 
     /** Starts a workout from [routine], or asks what to do if another one is still running. */
-    fun startWorkout(routine: Routine, onStarted: (sessionId: Int) -> Unit) {
+    fun startWorkout(routine: Routine) {
         if (startJob?.isActive == true) return
         if (uiState.value.activeWorkout != null) {
             startConflict.value = routine
             return
         }
-        startJob = viewModelScope.launch { onStarted(workoutRepository.startWorkout(routine)) }
+        startJob = viewModelScope.launch { start(routine) }
     }
 
     /** Throws away the running workout and starts the one that caused the conflict. */
-    fun discardActiveAndStart(onStarted: (sessionId: Int) -> Unit) {
+    fun discardActiveAndStart() {
         val routine = startConflict.value ?: return
         if (startJob?.isActive == true) return
         startConflict.value = null
         startJob = viewModelScope.launch {
             uiState.value.activeWorkout?.id?.let { workoutRepository.deleteWorkout(it) }
-            onStarted(workoutRepository.startWorkout(routine))
+            start(routine)
         }
     }
 
     fun dismissStartConflict() {
         startConflict.value = null
+    }
+
+    /** Called once the screen has navigated to [RoutinesUiState.startedWorkoutId]. */
+    fun onWorkoutOpened() {
+        startedWorkoutId.value = null
+    }
+
+    /** Asks again instead of starting if another workout became active meanwhile. */
+    private suspend fun start(routine: Routine) {
+        val sessionId = workoutRepository.startWorkout(routine)
+        if (sessionId == null) {
+            startConflict.value = routine
+        } else {
+            startedWorkoutId.value = sessionId
+        }
     }
 
     /** Hides [routine] at once; it is deleted for real when the undo window closes. */
