@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
-import com.jacopo.mygymtracker.ui.components.AddExercisesModal
+import com.jacopo.mygymtracker.ui.components.AddExercisesSheet
 import com.jacopo.mygymtracker.ui.components.SwipeToDeleteContainer
 import com.jacopo.mygymtracker.ui.theme.AppTheme
 
@@ -45,9 +45,9 @@ fun RoutineDetailScreen(
     onExerciseNameChange: (exerciseKey: String, String) -> Unit,
     onExerciseCategoryChange: (exerciseKey: String, Category) -> Unit,
     onAddEmptyExercise: () -> Unit,
-    onOpenCatalogSheet: () -> Unit,
-    onDismissCatalogSheet: () -> Unit,
-    onConfirmCatalogExercises: (List<Exercise>) -> Unit,
+    onOpenAddExercises: () -> Unit,
+    onDismissAddExercises: () -> Unit,
+    onConfirmAddExercises: (List<Exercise>) -> Unit,
     onDeleteExercise: (exerciseKey: String) -> Unit,
     onAddSet: (exerciseKey: String) -> Unit,
     onDeleteSet: (exerciseKey: String, setUuid: String) -> Unit,
@@ -145,7 +145,7 @@ fun RoutineDetailScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.padding(16.dp),
             ) {
-                OutlinedButton(onClick = onOpenCatalogSheet) {
+                OutlinedButton(onClick = onOpenAddExercises) {
                     Text(text = stringResource(R.string.routine_add_from_catalog))
                 }
                 Button(onClick = onAddEmptyExercise) {
@@ -156,10 +156,10 @@ fun RoutineDetailScreen(
     }
 
     if (uiState.isAddExercisesSheetOpen) {
-        AddExercisesModal(
+        AddExercisesSheet(
             catalogExercises = uiState.catalogExercises,
-            onDismiss = onDismissCatalogSheet,
-            onConfirm = onConfirmCatalogExercises,
+            onDismiss = onDismissAddExercises,
+            onConfirm = onConfirmAddExercises,
         )
     }
 }
@@ -193,9 +193,9 @@ private fun RoutineDetailScreenPreview() {
             onExerciseNameChange = { _, _ -> },
             onExerciseCategoryChange = { _, _ -> },
             onAddEmptyExercise = {},
-            onOpenCatalogSheet = {},
-            onDismissCatalogSheet = {},
-            onConfirmCatalogExercises = {},
+            onOpenAddExercises = {},
+            onDismissAddExercises = {},
+            onConfirmAddExercises = {},
             onDeleteExercise = {},
             onAddSet = {},
             onDeleteSet = { _, _ -> },

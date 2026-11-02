@@ -49,7 +49,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddExercisesModal(
+fun AddExercisesSheet(
     catalogExercises: List<Exercise>,
     onDismiss: () -> Unit,
     onConfirm: (List<Exercise>) -> Unit,

@@ -44,7 +44,7 @@ import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.LoggedSet
 import com.jacopo.mygymtracker.domain.model.UserSettings
 import com.jacopo.mygymtracker.resttimer.RestTimer
-import com.jacopo.mygymtracker.ui.components.AddExercisesModal
+import com.jacopo.mygymtracker.ui.components.AddExercisesSheet
 import com.jacopo.mygymtracker.ui.format.formatDuration
 import com.jacopo.mygymtracker.ui.theme.AppTheme
 import kotlinx.coroutines.delay
@@ -166,7 +166,7 @@ fun WorkoutScreen(
     }
 
     if (uiState.isAddExercisesSheetOpen) {
-        AddExercisesModal(
+        AddExercisesSheet(
             catalogExercises = uiState.catalogExercises,
             onDismiss = onDismissAddExercises,
             onConfirm = onConfirmAddExercises,
