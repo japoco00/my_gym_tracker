@@ -47,6 +47,8 @@
     <string name="workout_set">Set</string>
     <string name="workout_previous">Previous</string>
     <string name="workout_previous_set">%1$s × %2$d</string>
+    <string name="workout_previous_set_added">+%1$s × %2$d</string>
+    <string name="workout_added_weight">+%1$s</string>
     <string name="workout_no_previous">–</string>
     <string name="workout_set_done">Set %1$d done</string>
     <string name="workout_finish_title">Finish workout?</string>
@@ -78,6 +80,7 @@
     <string name="history_sets">Sets</string>
     <string name="history_volume">Volume</string>
     <string name="history_set">%1$s %2$s × %3$d</string>
+    <string name="history_set_added">+%1$s %2$s × %3$d</string>
     <string name="history_delete_title">Delete this workout?</string>
     <string name="history_delete_message">It will be removed from your history and progress.</string>
 
@@ -128,6 +131,8 @@
     <string name="exercise_name_hint">Exercise name</string>
     <string name="set_reps">Reps</string>
     <string name="set_weight">Weight (%1$s)</string>
+    <string name="set_added_weight">Added (%1$s)</string>
+    <string name="set_time">Time</string>
     <string name="action_add_set">Add set</string>
 
     <!-- Exercise catalog -->
@@ -135,6 +140,7 @@
     <string name="exercises_search_hint">Search exercises</string>
     <string name="exercises_empty">No exercises found.</string>
     <string name="exercises_create">New exercise</string>
+    <string name="exercise_category_and_type">%1$s · %2$s</string>
     <string name="exercise_dialog_title_new">New exercise</string>
     <string name="exercise_dialog_title_edit">Edit exercise</string>
     <string name="exercise_name_taken">An exercise with this name already exists.</string>
@@ -158,6 +164,11 @@
     <string name="category_full_body">Full body</string>
     <string name="category_cardio">Cardio</string>
     <string name="category_other">Other</string>
+
+    <!-- Exercise tracking types -->
+    <string name="tracking_type_weight_reps">Weight &amp; reps</string>
+    <string name="tracking_type_reps">Bodyweight</string>
+    <string name="tracking_type_duration">Time</string>
 
     <!-- Settings -->
     <string name="settings_title">Settings</string>

@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.Category
+import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import java.time.Instant
 import java.time.ZoneId
@@ -52,6 +53,15 @@ fun WeightUnit.label(): String = stringResource(
     when (this) {
         WeightUnit.KG -> R.string.unit_kg
         WeightUnit.LB -> R.string.unit_lb
+    },
+)
+
+@Composable
+fun TrackingType.label(): String = stringResource(
+    when (this) {
+        TrackingType.WEIGHT_REPS -> R.string.tracking_type_weight_reps
+        TrackingType.REPS -> R.string.tracking_type_reps
+        TrackingType.DURATION -> R.string.tracking_type_duration
     },
 )
 

@@ -156,6 +156,7 @@ class WorkoutViewModel(
             val nextSet = WorkoutSetUiState(
                 reps = lastSet?.reps ?: 0,
                 weightKg = lastSet?.weightKg ?: 0.0,
+                durationSeconds = lastSet?.durationSeconds ?: 0,
             )
             exercise.copy(sets = exercise.sets + nextSet)
         }
@@ -173,6 +174,10 @@ class WorkoutViewModel(
 
     fun updateSetWeight(exerciseKey: String, setKey: String, weightKg: Double) {
         updateSet(exerciseKey, setKey) { it.copy(weightKg = weightKg.coerceAtLeast(0.0)) }
+    }
+
+    fun updateSetDuration(exerciseKey: String, setKey: String, seconds: Int) {
+        updateSet(exerciseKey, setKey) { it.copy(durationSeconds = seconds.coerceAtLeast(0)) }
     }
 
     /** Ticking a set off starts the rest before the next one. */

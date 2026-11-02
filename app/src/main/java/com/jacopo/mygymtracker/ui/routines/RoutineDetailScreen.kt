@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
+import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.ui.components.AddExercisesSheet
 import com.jacopo.mygymtracker.ui.components.SwipeToDeleteContainer
 import com.jacopo.mygymtracker.ui.theme.AppTheme
@@ -44,6 +45,7 @@ fun RoutineDetailScreen(
     onNameChange: (String) -> Unit,
     onExerciseNameChange: (exerciseKey: String, String) -> Unit,
     onExerciseCategoryChange: (exerciseKey: String, Category) -> Unit,
+    onExerciseTrackingTypeChange: (exerciseKey: String, TrackingType) -> Unit,
     onAddEmptyExercise: () -> Unit,
     onOpenAddExercises: () -> Unit,
     onDismissAddExercises: () -> Unit,
@@ -53,6 +55,7 @@ fun RoutineDetailScreen(
     onDeleteSet: (exerciseKey: String, setKey: String) -> Unit,
     onRepsChange: (exerciseKey: String, setKey: String, Int) -> Unit,
     onWeightChange: (exerciseKey: String, setKey: String, Double) -> Unit,
+    onDurationChange: (exerciseKey: String, setKey: String, seconds: Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     BackHandler(onBack = onBack)
@@ -129,11 +132,17 @@ fun RoutineDetailScreen(
                             onCategoryChange = { category ->
                                 onExerciseCategoryChange(exerciseKey, category)
                             },
+                            onTrackingTypeChange = { trackingType ->
+                                onExerciseTrackingTypeChange(exerciseKey, trackingType)
+                            },
                             onAddSet = { onAddSet(exerciseKey) },
                             onDeleteSet = { setKey -> onDeleteSet(exerciseKey, setKey) },
                             onRepsChange = { setKey, reps -> onRepsChange(exerciseKey, setKey, reps) },
                             onWeightChange = { setKey, weight ->
                                 onWeightChange(exerciseKey, setKey, weight)
+                            },
+                            onDurationChange = { setKey, seconds ->
+                                onDurationChange(exerciseKey, setKey, seconds)
                             },
                             modifier = Modifier.fillMaxWidth(),
                         )
@@ -192,6 +201,7 @@ private fun RoutineDetailScreenPreview() {
             onNameChange = {},
             onExerciseNameChange = { _, _ -> },
             onExerciseCategoryChange = { _, _ -> },
+            onExerciseTrackingTypeChange = { _, _ -> },
             onAddEmptyExercise = {},
             onOpenAddExercises = {},
             onDismissAddExercises = {},
@@ -201,6 +211,7 @@ private fun RoutineDetailScreenPreview() {
             onDeleteSet = { _, _ -> },
             onRepsChange = { _, _, _ -> },
             onWeightChange = { _, _, _ -> },
+            onDurationChange = { _, _, _ -> },
         )
     }
 }

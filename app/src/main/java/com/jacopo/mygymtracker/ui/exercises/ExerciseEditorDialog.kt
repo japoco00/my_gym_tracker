@@ -19,11 +19,14 @@ import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
-import com.jacopo.mygymtracker.ui.components.CategoryDropdown
+import com.jacopo.mygymtracker.domain.model.TrackingType
+import com.jacopo.mygymtracker.ui.components.ChipDropdown
+import com.jacopo.mygymtracker.ui.format.label
 import com.jacopo.mygymtracker.ui.theme.AppTheme
 
 /**
- * Edits the name and category of [exercise], or of a new exercise when it is `null`.
+ * Edits the name, category and tracking type of [exercise], or of a new exercise when it is `null`.
+ * Changing the type of a used exercise keeps its logged sets; only how they are shown changes.
  *
  * @param rejectedName name the repository refused as a duplicate; flagged until the user changes it.
  * @param defaultCategory category preselected for a new exercise.
@@ -33,11 +36,14 @@ fun ExerciseEditorDialog(
     exercise: Exercise?,
     rejectedName: String?,
     defaultCategory: Category,
-    onSave: (name: String, category: Category) -> Unit,
+    onSave: (name: String, category: Category, trackingType: TrackingType) -> Unit,
     onDismiss: () -> Unit,
 ) {
     var name by rememberSaveable(exercise?.id) { mutableStateOf(exercise?.name.orEmpty()) }
     var category by rememberSaveable(exercise?.id) { mutableStateOf(exercise?.category ?: defaultCategory) }
+    var trackingType by rememberSaveable(exercise?.id) {
+        mutableStateOf(exercise?.trackingType ?: TrackingType.WEIGHT_REPS)
+    }
     val isNameTaken = rejectedName != null && name.trim().equals(rejectedName, ignoreCase = true)
 
     AlertDialog(
@@ -64,12 +70,23 @@ fun ExerciseEditorDialog(
                     },
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
                 )
-                CategoryDropdown(selected = category, onSelect = { category = it })
+                ChipDropdown(
+                    selected = category,
+                    options = Category.entries,
+                    label = { it.label() },
+                    onSelect = { category = it },
+                )
+                ChipDropdown(
+                    selected = trackingType,
+                    options = TrackingType.entries,
+                    label = { it.label() },
+                    onSelect = { trackingType = it },
+                )
             }
         },
         confirmButton = {
             TextButton(
-                onClick = { onSave(name, category) },
+                onClick = { onSave(name, category, trackingType) },
                 enabled = name.isNotBlank() && !isNameTaken,
             ) {
                 Text(stringResource(R.string.action_save))
@@ -89,7 +106,7 @@ private fun ExerciseEditorDialogPreview() {
             exercise = Exercise(id = 1, name = "Bench Press", category = Category.CHEST),
             rejectedName = "Bench Press",
             defaultCategory = Category.OTHER,
-            onSave = { _, _ -> },
+            onSave = { _, _, _ -> },
             onDismiss = {},
         )
     }

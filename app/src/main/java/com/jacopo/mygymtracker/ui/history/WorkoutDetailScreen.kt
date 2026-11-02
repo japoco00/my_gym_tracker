@@ -27,6 +27,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,6 +36,7 @@ import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.LoggedSet
+import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.domain.model.WorkoutExercise
 import com.jacopo.mygymtracker.domain.model.WorkoutSession
@@ -184,11 +186,21 @@ private fun ExerciseSetsCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.width(32.dp),
                     )
-                    Text(stringResource(R.string.history_set, weightUnit.format(set.weightKg), weightUnit.label(), set.reps))
+                    Text(set.summary(exercise.exercise.trackingType, weightUnit))
                 }
             }
         }
     }
+}
+
+/** A logged set with its unit, e.g. `80 kg × 8`, `+10 kg × 8`, `12 reps` or `1:30`. */
+@Composable
+private fun LoggedSet.summary(trackingType: TrackingType, weightUnit: WeightUnit): String = when {
+    trackingType == TrackingType.DURATION -> formatDuration(durationSeconds.toLong())
+    trackingType == TrackingType.REPS && weightKg > 0.0 ->
+        stringResource(R.string.history_set_added, weightUnit.format(weightKg), weightUnit.label(), reps)
+    trackingType == TrackingType.REPS -> pluralStringResource(R.plurals.reps_count, reps, reps)
+    else -> stringResource(R.string.history_set, weightUnit.format(weightKg), weightUnit.label(), reps)
 }
 
 @Preview(showBackground = true)

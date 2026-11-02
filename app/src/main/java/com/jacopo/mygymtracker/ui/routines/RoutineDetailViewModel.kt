@@ -11,6 +11,7 @@ import com.jacopo.mygymtracker.data.repository.SettingsRepository
 import com.jacopo.mygymtracker.di.appContainer
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
+import com.jacopo.mygymtracker.domain.model.TrackingType
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -111,6 +112,10 @@ class RoutineDetailViewModel(
         updateExercise(exerciseKey) { it.copy(category = category) }
     }
 
+    fun updateExerciseTrackingType(exerciseKey: String, trackingType: TrackingType) {
+        updateExercise(exerciseKey) { it.copy(trackingType = trackingType) }
+    }
+
     fun removeExercise(exerciseKey: String) {
         _uiState.update { state ->
             state.copy(exercises = state.exercises.filterNot { it.key == exerciseKey })
@@ -123,6 +128,7 @@ class RoutineDetailViewModel(
             val nextSet = PlannedSetUiState(
                 reps = lastSet?.reps ?: 0,
                 weightKg = lastSet?.weightKg ?: 0.0,
+                durationSeconds = lastSet?.durationSeconds ?: 0,
             )
             exercise.copy(sets = exercise.sets + nextSet)
         }
@@ -140,6 +146,10 @@ class RoutineDetailViewModel(
 
     fun updateSetWeight(exerciseKey: String, setKey: String, weightKg: Double) {
         updateSet(exerciseKey, setKey) { it.copy(weightKg = weightKg.coerceAtLeast(0.0)) }
+    }
+
+    fun updateSetDuration(exerciseKey: String, setKey: String, seconds: Int) {
+        updateSet(exerciseKey, setKey) { it.copy(durationSeconds = seconds.coerceAtLeast(0)) }
     }
 
     /**

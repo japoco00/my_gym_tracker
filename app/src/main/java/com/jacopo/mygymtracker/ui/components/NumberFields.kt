@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.domain.model.formatWeight
 import com.jacopo.mygymtracker.domain.model.parseWeight
+import com.jacopo.mygymtracker.ui.format.formatDuration
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -66,6 +67,34 @@ fun WeightField(
         step = if (showStepper) unit.step else null,
         modifier = modifier,
     )
+}
+
+/** Shows and edits [seconds] as `m:ss`; a plain number is read as seconds. */
+@Composable
+fun DurationField(
+    seconds: Int,
+    onSecondsChange: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    showStepper: Boolean = false,
+) {
+    NumberField(
+        value = seconds.toDouble(),
+        onValueChange = { onSecondsChange(it.roundToInt()) },
+        format = { formatDuration(it.toLong()) },
+        parse = ::parseDuration,
+        keyboardType = KeyboardType.Number,
+        step = if (showStepper) DURATION_STEP_SECONDS else null,
+        modifier = modifier,
+    )
+}
+
+private const val DURATION_STEP_SECONDS = 15.0
+
+/** `90`, `1:30` and `0:01:30` are all 90 seconds; `null` for anything else. */
+private fun parseDuration(text: String): Double? {
+    val parts = text.trim().split(':').map { part -> part.toIntOrNull()?.takeIf { it >= 0 } ?: return null }
+    if (parts.size > 3) return null
+    return parts.fold(0.0) { total, part -> total * 60 + part }
 }
 
 /**

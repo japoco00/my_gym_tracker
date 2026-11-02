@@ -14,29 +14,29 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.jacopo.mygymtracker.domain.model.Category
-import com.jacopo.mygymtracker.ui.format.label
 
-/** Chip showing [selected]; tapping it opens the list of categories. */
+/** Chip showing [selected]; tapping it opens the list of [options]. */
 @Composable
-fun CategoryDropdown(
-    selected: Category,
-    onSelect: (Category) -> Unit,
+fun <T> ChipDropdown(
+    selected: T,
+    options: List<T>,
+    label: @Composable (T) -> String,
+    onSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
     Box(modifier = modifier) {
         AssistChip(
             onClick = { expanded = true },
-            label = { Text(selected.label()) },
+            label = { Text(label(selected)) },
             trailingIcon = { Icon(Icons.Default.ArrowDropDown, contentDescription = null) },
         )
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            Category.entries.forEach { category ->
+            options.forEach { option ->
                 DropdownMenuItem(
-                    text = { Text(category.label()) },
+                    text = { Text(label(option)) },
                     onClick = {
-                        onSelect(category)
+                        onSelect(option)
                         expanded = false
                     },
                 )

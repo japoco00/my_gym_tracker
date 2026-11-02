@@ -20,6 +20,8 @@ import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.PlannedSet
 import com.jacopo.mygymtracker.domain.model.Routine
 import com.jacopo.mygymtracker.domain.model.RoutineExercise
+import com.jacopo.mygymtracker.domain.model.TrackingType
+import com.jacopo.mygymtracker.ui.format.formatDuration
 import com.jacopo.mygymtracker.ui.theme.AppTheme
 
 /**
@@ -68,7 +70,13 @@ fun RoutineOverviewCard(
                         R.string.routine_exercise_sets,
                         exercise.name,
                         sets.size,
-                        sets.joinToString(", ") { it.reps.toString() },
+                        sets.joinToString(", ") { set ->
+                            if (exercise.trackingType == TrackingType.DURATION) {
+                                formatDuration(set.durationSeconds.toLong())
+                            } else {
+                                set.reps.toString()
+                            }
+                        },
                     )
                 }
                 Text(

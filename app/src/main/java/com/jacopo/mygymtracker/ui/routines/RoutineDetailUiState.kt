@@ -5,6 +5,7 @@ import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.PlannedSet
 import com.jacopo.mygymtracker.domain.model.Routine
 import com.jacopo.mygymtracker.domain.model.RoutineExercise
+import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -34,6 +35,7 @@ data class RoutineExerciseUiState @OptIn(ExperimentalUuidApi::class) constructor
     val name: String = "",
     val note: String? = null,
     val category: Category = Category.OTHER,
+    val trackingType: TrackingType = TrackingType.WEIGHT_REPS,
     val sets: List<PlannedSetUiState> = emptyList(),
 )
 
@@ -41,6 +43,7 @@ data class PlannedSetUiState @OptIn(ExperimentalUuidApi::class) constructor(
     val key: String = Uuid.random().toString(),
     val reps: Int = 0,
     val weightKg: Double = 0.0,
+    val durationSeconds: Int = 0,
 )
 
 // region Mappers
@@ -59,7 +62,10 @@ fun RoutineExercise.toUiState(): RoutineExerciseUiState = RoutineExerciseUiState
     name = exercise.name,
     note = exercise.note,
     category = exercise.category,
-    sets = sets.map { PlannedSetUiState(reps = it.reps, weightKg = it.weightKg) },
+    trackingType = exercise.trackingType,
+    sets = sets.map {
+        PlannedSetUiState(reps = it.reps, weightKg = it.weightKg, durationSeconds = it.durationSeconds)
+    },
 )
 
 /** A catalog exercise freshly added to the routine starts with three empty sets. */
@@ -68,6 +74,7 @@ fun Exercise.toUiState(): RoutineExerciseUiState = RoutineExerciseUiState(
     name = name,
     note = note,
     category = category,
+    trackingType = trackingType,
     sets = List(3) { PlannedSetUiState() },
 )
 
@@ -89,8 +96,14 @@ fun RoutineDetailUiState.toDomainOrNull(untitledName: String): Routine? {
 }
 
 private fun RoutineExerciseUiState.toDomain(): RoutineExercise = RoutineExercise(
-    exercise = Exercise(id = exerciseId, name = name.trim(), category = category, note = note),
-    sets = sets.map { PlannedSet(reps = it.reps, weightKg = it.weightKg) },
+    exercise = Exercise(
+        id = exerciseId,
+        name = name.trim(),
+        category = category,
+        trackingType = trackingType,
+        note = note,
+    ),
+    sets = sets.map { PlannedSet(reps = it.reps, weightKg = it.weightKg, durationSeconds = it.durationSeconds) },
 )
 
 // endregion

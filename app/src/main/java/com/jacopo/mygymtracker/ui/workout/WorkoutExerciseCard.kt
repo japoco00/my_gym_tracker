@@ -22,6 +22,7 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -32,10 +33,13 @@ import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.LoggedSet
+import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.domain.model.WeightUnit
+import com.jacopo.mygymtracker.ui.components.DurationField
 import com.jacopo.mygymtracker.ui.components.RepsField
 import com.jacopo.mygymtracker.ui.components.SwipeToDeleteContainer
 import com.jacopo.mygymtracker.ui.components.WeightField
+import com.jacopo.mygymtracker.ui.format.formatDuration
 import com.jacopo.mygymtracker.ui.format.label
 import com.jacopo.mygymtracker.ui.theme.AppTheme
 
@@ -44,7 +48,7 @@ private val CheckboxWidth = 48.dp
 
 /**
  * One exercise of the workout: a row per set with last time's values as a reference.
- * Swipe a set to delete it; tick it when it's done.
+ * Swipe a set to delete it; tick it when it's done. The columns follow the exercise's [TrackingType].
  */
 @Composable
 fun WorkoutExerciseCard(
@@ -56,9 +60,11 @@ fun WorkoutExerciseCard(
     onDeleteSet: (setKey: String) -> Unit,
     onRepsChange: (setKey: String, Int) -> Unit,
     onWeightChange: (setKey: String, Double) -> Unit,
+    onDurationChange: (setKey: String, seconds: Int) -> Unit,
     onCompletedChange: (setKey: String, completed: Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val trackingType = exercise.exercise.trackingType
     Card(modifier = modifier.padding(horizontal = 12.dp, vertical = 6.dp)) {
         Column(
             modifier = Modifier
@@ -85,8 +91,18 @@ fun WorkoutExerciseCard(
             Row(modifier = Modifier.padding(horizontal = 8.dp)) {
                 ColumnHeader(stringResource(R.string.workout_set), Modifier.width(SetNumberWidth))
                 ColumnHeader(stringResource(R.string.workout_previous), Modifier.weight(1.2f))
-                ColumnHeader(weightUnit.label(), Modifier.weight(1f))
-                ColumnHeader(stringResource(R.string.set_reps), Modifier.weight(1f))
+                when (trackingType) {
+                    TrackingType.DURATION -> ColumnHeader(stringResource(R.string.set_time), Modifier.weight(2f))
+                    TrackingType.WEIGHT_REPS, TrackingType.REPS -> {
+                        val weightHeader = if (trackingType == TrackingType.REPS) {
+                            stringResource(R.string.workout_added_weight, weightUnit.label())
+                        } else {
+                            weightUnit.label()
+                        }
+                        ColumnHeader(weightHeader, Modifier.weight(1f))
+                        ColumnHeader(stringResource(R.string.set_reps), Modifier.weight(1f))
+                    }
+                }
                 ColumnHeader("", Modifier.width(CheckboxWidth))
             }
             exercise.sets.forEachIndexed { index, set ->
@@ -96,9 +112,11 @@ fun WorkoutExerciseCard(
                             number = index + 1,
                             set = set,
                             previous = previousSets.getOrNull(index),
+                            trackingType = trackingType,
                             weightUnit = weightUnit,
                             onRepsChange = { reps -> onRepsChange(set.key, reps) },
                             onWeightChange = { weight -> onWeightChange(set.key, weight) },
+                            onDurationChange = { seconds -> onDurationChange(set.key, seconds) },
                             onCompletedChange = { completed -> onCompletedChange(set.key, completed) },
                         )
                     }
@@ -120,9 +138,11 @@ private fun SetRow(
     number: Int,
     set: WorkoutSetUiState,
     previous: LoggedSet?,
+    trackingType: TrackingType,
     weightUnit: WeightUnit,
     onRepsChange: (Int) -> Unit,
     onWeightChange: (Double) -> Unit,
+    onDurationChange: (Int) -> Unit,
     onCompletedChange: (Boolean) -> Unit,
 ) {
     Row(
@@ -140,29 +160,38 @@ private fun SetRow(
             modifier = Modifier.width(SetNumberWidth),
         )
         Text(
-            text = previous?.let {
-                stringResource(R.string.workout_previous_set, weightUnit.format(it.weightKg), it.reps)
-            } ?: stringResource(R.string.workout_no_previous),
+            text = previous?.summary(trackingType, weightUnit) ?: stringResource(R.string.workout_no_previous),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
             modifier = Modifier.weight(1.2f),
         )
-        WeightField(
-            weightKg = set.weightKg,
-            unit = weightUnit,
-            onWeightKgChange = onWeightChange,
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 2.dp),
-        )
-        RepsField(
-            reps = set.reps,
-            onRepsChange = onRepsChange,
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 2.dp),
-        )
+        when (trackingType) {
+            TrackingType.DURATION -> DurationField(
+                seconds = set.durationSeconds,
+                onSecondsChange = onDurationChange,
+                modifier = Modifier
+                    .weight(2f)
+                    .padding(horizontal = 2.dp),
+            )
+            TrackingType.WEIGHT_REPS, TrackingType.REPS -> {
+                WeightField(
+                    weightKg = set.weightKg,
+                    unit = weightUnit,
+                    onWeightKgChange = onWeightChange,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 2.dp),
+                )
+                RepsField(
+                    reps = set.reps,
+                    onRepsChange = onRepsChange,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 2.dp),
+                )
+            }
+        }
         val doneLabel = stringResource(R.string.workout_set_done, number)
         Checkbox(
             checked = set.isCompleted,
@@ -172,6 +201,16 @@ private fun SetRow(
                 .semantics { contentDescription = doneLabel },
         )
     }
+}
+
+/** Last time's set in the "Previous" column; the weight column's header already names the unit. */
+@Composable
+private fun LoggedSet.summary(trackingType: TrackingType, weightUnit: WeightUnit): String = when {
+    trackingType == TrackingType.DURATION -> formatDuration(durationSeconds.toLong())
+    trackingType == TrackingType.REPS && weightKg > 0.0 ->
+        stringResource(R.string.workout_previous_set_added, weightUnit.format(weightKg), reps)
+    trackingType == TrackingType.REPS -> pluralStringResource(R.plurals.reps_count, reps, reps)
+    else -> stringResource(R.string.workout_previous_set, weightUnit.format(weightKg), reps)
 }
 
 @Composable
@@ -203,6 +242,7 @@ private fun WorkoutExerciseCardPreview() {
             onDeleteSet = {},
             onRepsChange = { _, _ -> },
             onWeightChange = { _, _ -> },
+            onDurationChange = { _, _ -> },
             onCompletedChange = { _, _ -> },
         )
     }

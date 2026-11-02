@@ -42,6 +42,7 @@ import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.LoggedSet
+import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.domain.model.UserSettings
 import com.jacopo.mygymtracker.resttimer.RestTimer
 import com.jacopo.mygymtracker.ui.components.AddExercisesSheet
@@ -66,6 +67,7 @@ fun WorkoutScreen(
     onDeleteSet: (exerciseKey: String, setKey: String) -> Unit,
     onRepsChange: (exerciseKey: String, setKey: String, Int) -> Unit,
     onWeightChange: (exerciseKey: String, setKey: String, Double) -> Unit,
+    onDurationChange: (exerciseKey: String, setKey: String, seconds: Int) -> Unit,
     onSetCompletedChange: (exerciseKey: String, setKey: String, completed: Boolean) -> Unit,
     onAdjustRest: (deltaSeconds: Int) -> Unit,
     onSkipRest: () -> Unit,
@@ -137,6 +139,7 @@ fun WorkoutScreen(
                     onDeleteSet = { setKey -> onDeleteSet(exerciseKey, setKey) },
                     onRepsChange = { setKey, reps -> onRepsChange(exerciseKey, setKey, reps) },
                     onWeightChange = { setKey, weight -> onWeightChange(exerciseKey, setKey, weight) },
+                    onDurationChange = { setKey, seconds -> onDurationChange(exerciseKey, setKey, seconds) },
                     onCompletedChange = { setKey, completed -> onSetCompletedChange(exerciseKey, setKey, completed) },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -337,6 +340,15 @@ private fun WorkoutScreenPreview() {
                             WorkoutSetUiState(reps = 8, weightKg = 80.0),
                         ),
                     ),
+                    WorkoutExerciseUiState(
+                        exercise = Exercise(
+                            id = 2,
+                            name = "Plank",
+                            category = Category.CORE,
+                            trackingType = TrackingType.DURATION,
+                        ),
+                        sets = listOf(WorkoutSetUiState(durationSeconds = 60)),
+                    ),
                 ),
                 previousSets = mapOf(1 to listOf(LoggedSet(reps = 8, weightKg = 77.5, isCompleted = true))),
                 restTimer = RestTimer(endsAtMillis = System.currentTimeMillis() + 62_000, totalSeconds = 90),
@@ -353,6 +365,7 @@ private fun WorkoutScreenPreview() {
             onDeleteSet = { _, _ -> },
             onRepsChange = { _, _, _ -> },
             onWeightChange = { _, _, _ -> },
+            onDurationChange = { _, _, _ -> },
             onSetCompletedChange = { _, _, _ -> },
             onAdjustRest = {},
             onSkipRest = {},

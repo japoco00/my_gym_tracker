@@ -38,6 +38,7 @@ fun NavGraphBuilder.routineDetailDestination(
             onNameChange = viewModel::updateRoutineName,
             onExerciseNameChange = viewModel::updateExerciseName,
             onExerciseCategoryChange = viewModel::updateExerciseCategory,
+            onExerciseTrackingTypeChange = viewModel::updateExerciseTrackingType,
             onAddEmptyExercise = viewModel::addEmptyExercise,
             onOpenAddExercises = viewModel::openAddExercisesSheet,
             onDismissAddExercises = viewModel::closeAddExercisesSheet,
@@ -47,6 +48,7 @@ fun NavGraphBuilder.routineDetailDestination(
             onDeleteSet = viewModel::removeSet,
             onRepsChange = viewModel::updateSetReps,
             onWeightChange = viewModel::updateSetWeight,
+            onDurationChange = viewModel::updateSetDuration,
         )
     }
 }

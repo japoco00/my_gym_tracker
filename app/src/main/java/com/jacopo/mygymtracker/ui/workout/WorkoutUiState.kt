@@ -49,6 +49,7 @@ data class WorkoutSetUiState @OptIn(ExperimentalUuidApi::class) constructor(
     val key: String = Uuid.random().toString(),
     val reps: Int = 0,
     val weightKg: Double = 0.0,
+    val durationSeconds: Int = 0,
     val isCompleted: Boolean = false,
 )
 
@@ -86,8 +87,12 @@ private fun WorkoutExercise.toUiState(): WorkoutExerciseUiState = WorkoutExercis
     sets = sets.map { it.toUiState() },
 )
 
-fun LoggedSet.toUiState(): WorkoutSetUiState =
-    WorkoutSetUiState(reps = reps, weightKg = weightKg, isCompleted = isCompleted)
+fun LoggedSet.toUiState(): WorkoutSetUiState = WorkoutSetUiState(
+    reps = reps,
+    weightKg = weightKg,
+    durationSeconds = durationSeconds,
+    isCompleted = isCompleted,
+)
 
 fun WorkoutUiState.toDomain(sessionId: Int): WorkoutSession = WorkoutSession(
     id = sessionId,
@@ -98,7 +103,12 @@ fun WorkoutUiState.toDomain(sessionId: Int): WorkoutSession = WorkoutSession(
         WorkoutExercise(
             exercise = exercise.exercise,
             sets = exercise.sets.map {
-                LoggedSet(reps = it.reps, weightKg = it.weightKg, isCompleted = it.isCompleted)
+                LoggedSet(
+                    reps = it.reps,
+                    weightKg = it.weightKg,
+                    durationSeconds = it.durationSeconds,
+                    isCompleted = it.isCompleted,
+                )
             },
         )
     },

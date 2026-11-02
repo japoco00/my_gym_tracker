@@ -9,6 +9,7 @@ import com.jacopo.mygymtracker.data.repository.ExerciseRepository
 import com.jacopo.mygymtracker.di.appContainer
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
+import com.jacopo.mygymtracker.domain.model.TrackingType
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -68,11 +69,11 @@ class ExercisesViewModel(
 
     fun dismissDialog() = showDialog(null)
 
-    fun saveExercise(name: String, category: Category) {
+    fun saveExercise(name: String, category: Category, trackingType: TrackingType) {
         val edit = _uiState.value.dialog as? ExerciseDialog.Edit ?: return
         if (saveJob?.isActive == true) return
-        val exercise = edit.exercise?.copy(name = name, category = category)
-            ?: Exercise(name = name, category = category)
+        val exercise = edit.exercise?.copy(name = name, category = category, trackingType = trackingType)
+            ?: Exercise(name = name, category = category, trackingType = trackingType)
         saveJob = viewModelScope.launch {
             val saved = exerciseRepository.saveExercise(exercise)
             showDialog(if (saved) null else edit.copy(rejectedName = name.trim()))

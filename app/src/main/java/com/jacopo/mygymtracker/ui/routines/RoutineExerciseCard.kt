@@ -1,6 +1,7 @@
 package com.jacopo.mygymtracker.ui.routines
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,8 +25,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.Category
+import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.domain.model.WeightUnit
-import com.jacopo.mygymtracker.ui.components.CategoryDropdown
+import com.jacopo.mygymtracker.ui.components.ChipDropdown
+import com.jacopo.mygymtracker.ui.components.DurationField
 import com.jacopo.mygymtracker.ui.components.RepsField
 import com.jacopo.mygymtracker.ui.components.SwipeToDeleteContainer
 import com.jacopo.mygymtracker.ui.components.WeightField
@@ -34,7 +37,8 @@ import com.jacopo.mygymtracker.ui.theme.AppTheme
 
 /**
  * Card for one exercise of the routine. Catalog exercises show their name read-only
- * (renaming happens in the catalog); new exercises can be named and categorised here.
+ * (renaming happens in the catalog); new exercises can be named, categorised and typed here.
+ * The set columns follow the exercise's [TrackingType].
  */
 @Composable
 fun RoutineExerciseCard(
@@ -42,10 +46,12 @@ fun RoutineExerciseCard(
     weightUnit: WeightUnit,
     onNameChange: (String) -> Unit,
     onCategoryChange: (Category) -> Unit,
+    onTrackingTypeChange: (TrackingType) -> Unit,
     onAddSet: () -> Unit,
     onDeleteSet: (setKey: String) -> Unit,
     onRepsChange: (setKey: String, Int) -> Unit,
     onWeightChange: (setKey: String, Double) -> Unit,
+    onDurationChange: (setKey: String, seconds: Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -78,18 +84,41 @@ fun RoutineExerciseCard(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                CategoryDropdown(
-                    selected = exercise.category,
-                    onSelect = onCategoryChange,
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-                )
+                ) {
+                    ChipDropdown(
+                        selected = exercise.category,
+                        options = Category.entries,
+                        label = { it.label() },
+                        onSelect = onCategoryChange,
+                    )
+                    ChipDropdown(
+                        selected = exercise.trackingType,
+                        options = TrackingType.entries,
+                        label = { it.label() },
+                        onSelect = onTrackingTypeChange,
+                    )
+                }
             }
             Row(modifier = Modifier.fillMaxWidth()) {
-                ColumnHeader(text = stringResource(R.string.set_reps), modifier = Modifier.weight(1f))
-                ColumnHeader(
-                    text = stringResource(R.string.set_weight, weightUnit.label()),
-                    modifier = Modifier.weight(1f),
-                )
+                when (exercise.trackingType) {
+                    TrackingType.DURATION ->
+                        ColumnHeader(text = stringResource(R.string.set_time), modifier = Modifier.weight(1f))
+                    TrackingType.WEIGHT_REPS, TrackingType.REPS -> {
+                        val weightHeader = if (exercise.trackingType == TrackingType.REPS) {
+                            R.string.set_added_weight
+                        } else {
+                            R.string.set_weight
+                        }
+                        ColumnHeader(text = stringResource(R.string.set_reps), modifier = Modifier.weight(1f))
+                        ColumnHeader(
+                            text = stringResource(weightHeader, weightUnit.label()),
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                }
             }
             exercise.sets.forEach { set ->
                 key(set.key) {
@@ -103,19 +132,29 @@ fun RoutineExerciseCard(
                                 .fillMaxWidth()
                                 .padding(vertical = 4.dp),
                         ) {
-                            RepsField(
-                                reps = set.reps,
-                                onRepsChange = { reps -> onRepsChange(set.key, reps) },
-                                showStepper = true,
-                                modifier = Modifier.weight(1f),
-                            )
-                            WeightField(
-                                weightKg = set.weightKg,
-                                unit = weightUnit,
-                                onWeightKgChange = { weight -> onWeightChange(set.key, weight) },
-                                showStepper = true,
-                                modifier = Modifier.weight(1f),
-                            )
+                            when (exercise.trackingType) {
+                                TrackingType.DURATION -> DurationField(
+                                    seconds = set.durationSeconds,
+                                    onSecondsChange = { seconds -> onDurationChange(set.key, seconds) },
+                                    showStepper = true,
+                                    modifier = Modifier.weight(1f),
+                                )
+                                TrackingType.WEIGHT_REPS, TrackingType.REPS -> {
+                                    RepsField(
+                                        reps = set.reps,
+                                        onRepsChange = { reps -> onRepsChange(set.key, reps) },
+                                        showStepper = true,
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                    WeightField(
+                                        weightKg = set.weightKg,
+                                        unit = weightUnit,
+                                        onWeightKgChange = { weight -> onWeightChange(set.key, weight) },
+                                        showStepper = true,
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -154,10 +193,12 @@ private fun RoutineExerciseCardPreview() {
             weightUnit = WeightUnit.KG,
             onNameChange = {},
             onCategoryChange = {},
+            onTrackingTypeChange = {},
             onAddSet = {},
             onDeleteSet = {},
             onRepsChange = { _, _ -> },
             onWeightChange = { _, _ -> },
+            onDurationChange = { _, _ -> },
         )
     }
 }
@@ -167,14 +208,19 @@ private fun RoutineExerciseCardPreview() {
 private fun NewRoutineExerciseCardPreview() {
     AppTheme {
         RoutineExerciseCard(
-            exercise = RoutineExerciseUiState(sets = listOf(PlannedSetUiState())),
+            exercise = RoutineExerciseUiState(
+                trackingType = TrackingType.DURATION,
+                sets = listOf(PlannedSetUiState(durationSeconds = 90)),
+            ),
             weightUnit = WeightUnit.LB,
             onNameChange = {},
             onCategoryChange = {},
+            onTrackingTypeChange = {},
             onAddSet = {},
             onDeleteSet = {},
             onRepsChange = { _, _ -> },
             onWeightChange = { _, _ -> },
+            onDurationChange = { _, _ -> },
         )
     }
 }

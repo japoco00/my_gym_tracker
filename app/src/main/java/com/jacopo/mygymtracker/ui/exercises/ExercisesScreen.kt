@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
+import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.ui.format.label
 import com.jacopo.mygymtracker.ui.theme.AppTheme
 
@@ -53,7 +54,7 @@ fun ExercisesScreen(
     onEditExercise: (Exercise) -> Unit,
     onCreateExercise: () -> Unit,
     onDeleteExercise: (Exercise) -> Unit,
-    onSaveExercise: (name: String, category: Category) -> Unit,
+    onSaveExercise: (name: String, category: Category, trackingType: TrackingType) -> Unit,
     onConfirmDelete: (Exercise) -> Unit,
     onDismissDialog: () -> Unit,
     modifier: Modifier = Modifier,
@@ -106,7 +107,15 @@ fun ExercisesScreen(
                     ) { exercise ->
                         ListItem(
                             headlineContent = { Text(exercise.name) },
-                            supportingContent = { Text(exercise.category.label()) },
+                            supportingContent = {
+                                Text(
+                                    stringResource(
+                                        R.string.exercise_category_and_type,
+                                        exercise.category.label(),
+                                        exercise.trackingType.label(),
+                                    ),
+                                )
+                            },
                             trailingContent = {
                                 Row {
                                     IconButton(onClick = { onEditExercise(exercise) }) {
@@ -182,7 +191,7 @@ private fun CategoryFilterRow(
 private fun ExerciseDialogHost(
     dialog: ExerciseDialog?,
     defaultCategory: Category,
-    onSaveExercise: (name: String, category: Category) -> Unit,
+    onSaveExercise: (name: String, category: Category, trackingType: TrackingType) -> Unit,
     onConfirmDelete: (Exercise) -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -238,7 +247,7 @@ private fun ExercisesScreenPreview() {
             onEditExercise = {},
             onCreateExercise = {},
             onDeleteExercise = {},
-            onSaveExercise = { _, _ -> },
+            onSaveExercise = { _, _, _ -> },
             onConfirmDelete = {},
             onDismissDialog = {},
         )
