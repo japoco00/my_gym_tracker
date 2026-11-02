@@ -17,21 +17,14 @@ import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.R
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-
-/** Delay that lets the dismiss animation play before the item is removed. */
-private const val DELETE_ANIMATION_DELAY_MS = 250L
 
 /** Wraps [content] so that swiping it from end to start triggers [onDelete]. */
 @Composable
@@ -41,24 +34,10 @@ fun SwipeToDeleteContainer(
     content: @Composable RowScope.() -> Unit,
 ) {
     val currentOnDelete by rememberUpdatedState(onDelete)
-    val scope = rememberCoroutineScope()
-    val density = LocalDensity.current
     // Plain remember, not saveable: an item restored by "Undo" must come back un-swiped.
     val dismissState = remember {
         SwipeToDismissBoxState(
             initialValue = SwipeToDismissBoxValue.Settled,
-            density = density,
-            confirmValueChange = { value ->
-                if (value == SwipeToDismissBoxValue.EndToStart) {
-                    scope.launch {
-                        delay(DELETE_ANIMATION_DELAY_MS)
-                        currentOnDelete()
-                    }
-                    true
-                } else {
-                    false
-                }
-            },
             positionalThreshold = { totalDistance -> totalDistance * 0.3f },
         )
     }
@@ -67,6 +46,8 @@ fun SwipeToDeleteContainer(
         state = dismissState,
         modifier = modifier,
         enableDismissFromStartToEnd = false,
+        // Called once the swipe has settled, so the dismiss animation has already played.
+        onDismiss = { currentOnDelete() },
         backgroundContent = {
             if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
                 Box(
