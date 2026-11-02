@@ -22,7 +22,7 @@ fun AppNavHost(
         )
 
         routineDetailDestination(
-            onNavigateBack = { navController.navigateUp() },
+            onNavigateBack = { navController.closeRoutineDetail() },
         )
 
         workoutDestination(

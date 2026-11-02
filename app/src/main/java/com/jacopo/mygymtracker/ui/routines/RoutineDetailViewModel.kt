@@ -143,22 +143,22 @@ class RoutineDetailViewModel(
     }
 
     /**
-     * Saves and then calls [onSaved]. An empty new routine is not saved at all.
+     * Saves the routine, then closes the editor. An empty new routine is not saved at all.
      * [untitledName] is the localized name for a routine left without one.
      */
-    fun saveRoutine(untitledName: String, onSaved: () -> Unit = {}) {
+    fun saveRoutine(untitledName: String) {
         // A second back press while saving must not insert the new routine twice.
-        if (saveJob != null) return
+        if (saveJob != null || _uiState.value.isClosed) return
         val routine = _uiState.value.takeUnless { it.isLoading }?.toDomainOrNull(untitledName)
         if (routine == null) {
-            onSaved()
+            _uiState.update { it.copy(isClosed = true) }
             return
         }
         saveJob = viewModelScope.launch {
             withContext(NonCancellable) {
                 routineRepository.saveRoutine(routine)
             }
-            onSaved()
+            _uiState.update { it.copy(isClosed = true) }
         }
     }
 

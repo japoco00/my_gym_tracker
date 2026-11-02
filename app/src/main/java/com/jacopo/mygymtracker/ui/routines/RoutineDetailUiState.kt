@@ -9,6 +9,7 @@ import com.jacopo.mygymtracker.domain.model.WeightUnit
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
+/** @property isClosed saving is done (or there was nothing to save), so the editor can close. */
 data class RoutineDetailUiState(
     val id: Int? = null,
     val name: String = "",
@@ -18,6 +19,7 @@ data class RoutineDetailUiState(
     val isAddExercisesSheetOpen: Boolean = false,
     val weightUnit: WeightUnit = WeightUnit.KG,
     val isLoading: Boolean = true,
+    val isClosed: Boolean = false,
 )
 
 /**
