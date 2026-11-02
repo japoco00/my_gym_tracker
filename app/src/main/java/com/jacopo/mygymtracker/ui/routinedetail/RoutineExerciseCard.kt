@@ -37,8 +37,8 @@ import com.jacopo.mygymtracker.ui.theme.AppTheme
  * (renaming happens in the catalog); new exercises can be named and categorised here.
  */
 @Composable
-fun ExerciseCard(
-    exercise: ExerciseUiState,
+fun RoutineExerciseCard(
+    exercise: RoutineExerciseUiState,
     weightUnit: WeightUnit,
     onNameChange: (String) -> Unit,
     onCategoryChange: (Category) -> Unit,
@@ -142,14 +142,14 @@ private fun ColumnHeader(text: String, modifier: Modifier = Modifier) {
 
 @Preview(showBackground = true)
 @Composable
-private fun ExerciseCardPreview() {
+private fun RoutineExerciseCardPreview() {
     AppTheme {
-        ExerciseCard(
-            exercise = ExerciseUiState(
+        RoutineExerciseCard(
+            exercise = RoutineExerciseUiState(
                 exerciseId = 1,
                 name = "Bench Press",
                 category = Category.CHEST,
-                sets = listOf(SetUiState(reps = 8, weightKg = 82.5)),
+                sets = listOf(PlannedSetUiState(reps = 8, weightKg = 82.5)),
             ),
             weightUnit = WeightUnit.KG,
             onNameChange = {},
@@ -164,10 +164,10 @@ private fun ExerciseCardPreview() {
 
 @Preview(showBackground = true)
 @Composable
-private fun NewExerciseCardPreview() {
+private fun NewRoutineExerciseCardPreview() {
     AppTheme {
-        ExerciseCard(
-            exercise = ExerciseUiState(sets = listOf(SetUiState())),
+        RoutineExerciseCard(
+            exercise = RoutineExerciseUiState(sets = listOf(PlannedSetUiState())),
             weightUnit = WeightUnit.LB,
             onNameChange = {},
             onCategoryChange = {},

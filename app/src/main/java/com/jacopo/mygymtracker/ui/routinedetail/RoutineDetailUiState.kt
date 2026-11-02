@@ -13,7 +13,7 @@ data class RoutineDetailUiState(
     val id: Int? = null,
     val name: String = "",
     val note: String? = null,
-    val exercises: List<ExerciseUiState> = emptyList(),
+    val exercises: List<RoutineExerciseUiState> = emptyList(),
     val catalogExercises: List<Exercise> = emptyList(),
     val isAddExercisesSheetOpen: Boolean = false,
     val weightUnit: WeightUnit = WeightUnit.KG,
@@ -26,16 +26,16 @@ data class RoutineDetailUiState(
  * @property exerciseId catalog id, or `null` for a new exercise typed in this screen.
  * @property key stable UI identity, unique even when the same catalog exercise appears twice.
  */
-data class ExerciseUiState @OptIn(ExperimentalUuidApi::class) constructor(
+data class RoutineExerciseUiState @OptIn(ExperimentalUuidApi::class) constructor(
     val exerciseId: Int? = null,
     val key: String = Uuid.random().toString(),
     val name: String = "",
     val note: String? = null,
     val category: Category = Category.OTHER,
-    val sets: List<SetUiState> = emptyList(),
+    val sets: List<PlannedSetUiState> = emptyList(),
 )
 
-data class SetUiState @OptIn(ExperimentalUuidApi::class) constructor(
+data class PlannedSetUiState @OptIn(ExperimentalUuidApi::class) constructor(
     val uuid: String = Uuid.random().toString(),
     val reps: Int = 0,
     val weightKg: Double = 0.0,
@@ -52,21 +52,21 @@ fun RoutineDetailUiState.withRoutine(routine: Routine): RoutineDetailUiState = c
     isLoading = false,
 )
 
-fun RoutineExercise.toUiState(): ExerciseUiState = ExerciseUiState(
+fun RoutineExercise.toUiState(): RoutineExerciseUiState = RoutineExerciseUiState(
     exerciseId = exercise.id,
     name = exercise.name,
     note = exercise.note,
     category = exercise.category,
-    sets = sets.map { SetUiState(reps = it.reps, weightKg = it.weightKg) },
+    sets = sets.map { PlannedSetUiState(reps = it.reps, weightKg = it.weightKg) },
 )
 
 /** A catalog exercise freshly added to the routine starts with three empty sets. */
-fun Exercise.toUiState(): ExerciseUiState = ExerciseUiState(
+fun Exercise.toUiState(): RoutineExerciseUiState = RoutineExerciseUiState(
     exerciseId = id,
     name = name,
     note = note,
     category = category,
-    sets = List(3) { SetUiState() },
+    sets = List(3) { PlannedSetUiState() },
 )
 
 /**
@@ -85,7 +85,7 @@ fun RoutineDetailUiState.toDomainOrNull(): Routine? {
     )
 }
 
-private fun ExerciseUiState.toDomain(): RoutineExercise = RoutineExercise(
+private fun RoutineExerciseUiState.toDomain(): RoutineExercise = RoutineExercise(
     exercise = Exercise(id = exerciseId, name = name.trim(), category = category, note = note),
     sets = sets.map { PlannedSet(reps = it.reps, weightKg = it.weightKg) },
 )

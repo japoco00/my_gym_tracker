@@ -80,10 +80,10 @@ class RoutineDetailViewModel(
     }
 
     fun addEmptyExercise() {
-        val newExercise = ExerciseUiState(
+        val newExercise = RoutineExerciseUiState(
             name = "",
             category = Category.OTHER,
-            sets = listOf(SetUiState()),
+            sets = listOf(PlannedSetUiState()),
         )
         _uiState.update { state ->
             state.copy(exercises = state.exercises + newExercise)
@@ -120,7 +120,7 @@ class RoutineDetailViewModel(
     fun addSet(exerciseKey: String) {
         updateExercise(exerciseKey) { exercise ->
             val lastSet = exercise.sets.lastOrNull()
-            val nextSet = SetUiState(
+            val nextSet = PlannedSetUiState(
                 reps = lastSet?.reps ?: 0,
                 weightKg = lastSet?.weightKg ?: 0.0,
             )
@@ -161,7 +161,7 @@ class RoutineDetailViewModel(
 
     private inline fun updateExercise(
         exerciseKey: String,
-        crossinline transform: (ExerciseUiState) -> ExerciseUiState,
+        crossinline transform: (RoutineExerciseUiState) -> RoutineExerciseUiState,
     ) {
         _uiState.update { state ->
             state.copy(
@@ -175,7 +175,7 @@ class RoutineDetailViewModel(
     private inline fun updateSet(
         exerciseKey: String,
         setUuid: String,
-        crossinline transform: (SetUiState) -> SetUiState,
+        crossinline transform: (PlannedSetUiState) -> PlannedSetUiState,
     ) {
         updateExercise(exerciseKey) { exercise ->
             exercise.copy(

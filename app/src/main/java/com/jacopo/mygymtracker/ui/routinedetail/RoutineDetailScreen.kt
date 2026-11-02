@@ -122,7 +122,7 @@ fun RoutineDetailScreen(
                         onDelete = { onDeleteExercise(exerciseKey) },
                         modifier = Modifier.animateItem(),
                     ) {
-                        ExerciseCard(
+                        RoutineExerciseCard(
                             exercise = exercise,
                             weightUnit = uiState.weightUnit,
                             onNameChange = { name -> onExerciseNameChange(exerciseKey, name) },
@@ -174,17 +174,17 @@ private fun RoutineDetailScreenPreview() {
                 name = "Sample Routine",
                 isLoading = false,
                 exercises = listOf(
-                    ExerciseUiState(
+                    RoutineExerciseUiState(
                         exerciseId = 1,
                         name = "Bench Press",
                         category = Category.CHEST,
-                        sets = listOf(SetUiState(reps = 10, weightKg = 60.0)),
+                        sets = listOf(PlannedSetUiState(reps = 10, weightKg = 60.0)),
                     ),
-                    ExerciseUiState(
+                    RoutineExerciseUiState(
                         exerciseId = 2,
                         name = "Squat",
                         category = Category.LEGS,
-                        sets = listOf(SetUiState(reps = 8, weightKg = 100.0)),
+                        sets = listOf(PlannedSetUiState(reps = 8, weightKg = 100.0)),
                     ),
                 ),
             ),
