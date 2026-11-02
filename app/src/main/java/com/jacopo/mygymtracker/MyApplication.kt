@@ -1,26 +1,16 @@
 package com.jacopo.mygymtracker
 
 import android.app.Application
-import com.jacopo.mygymtracker.data.db.AppDatabase
+import com.jacopo.mygymtracker.di.AppContainer
 
 class MyApplication : Application() {
 
-    // Container centralizzato delle dipendenze
-    lateinit var appContainer: AppContainer
+    /** Centralized dependency container, shared across the whole app. */
+    lateinit var container: AppContainer
         private set
 
     override fun onCreate() {
         super.onCreate()
-        val database = AppDatabase.getInstance(this)
-        appContainer = AppContainer(database)
-    }
-
-    companion object {
-        lateinit var instance: MyApplication
-            private set
-    }
-
-    init {
-        instance = this
+        container = AppContainer(this)
     }
 }

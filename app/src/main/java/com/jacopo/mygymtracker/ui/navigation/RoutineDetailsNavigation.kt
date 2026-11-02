@@ -1,49 +1,47 @@
 package com.jacopo.mygymtracker.ui.navigation
 
-import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import com.jacopo.mygymtracker.data.repositories.RoutineRepository
-import com.jacopo.mygymtracker.ui.screen.RoutineScreen
-import com.jacopo.mygymtracker.viewModel.RoutineViewModelFactory
-import com.jacopo.mygymtracker.viewModel.RoutineViewVM
+import com.jacopo.mygymtracker.ui.routinedetail.RoutineDetailScreen
+import com.jacopo.mygymtracker.ui.routinedetail.RoutineDetailViewModel
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RoutineDetails(val routineId: Int)
+data class RoutineDetailsRoute(val routineId: Int? = null)
 
 fun NavGraphBuilder.routineDetailsDestination(
-    routineRepository: RoutineRepository, onNavigateBack: () -> Unit = {}
+    onNavigateBack: () -> Unit,
 ) {
-    composable<RoutineDetails>() { backStackEntry ->
-        val routine = backStackEntry.toRoute<RoutineDetails>()
-        val vm = viewModel<RoutineViewVM>(
-            factory = RoutineViewModelFactory(
-                routineId = if (routine.routineId == - 1) null else routine.routineId,
-                routineRepository = routineRepository
-            )
+    composable<RoutineDetailsRoute> { backStackEntry ->
+        val route = backStackEntry.toRoute<RoutineDetailsRoute>()
+        val viewModel: RoutineDetailViewModel = viewModel(
+            factory = RoutineDetailViewModel.factory(route.routineId),
         )
-        val uiState = vm.routineState
-        Log.d(
-            "RoutineDetailsNavigation",
-            "Navigating to routine details with ID: ${routine.routineId}"
+        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+        RoutineDetailScreen(
+            uiState = uiState,
+            onBack = { viewModel.saveRoutine(onSaved = onNavigateBack) },
+            onNameChange = viewModel::updateRoutineName,
+            onExerciseNameChange = viewModel::updateExerciseName,
+            onAddEmptyExercise = viewModel::addEmptyExercise,
+            onOpenCatalogSheet = viewModel::openAddExercisesSheet,
+            onDismissCatalogSheet = viewModel::closeAddExercisesSheet,
+            onConfirmCatalogExercises = viewModel::addCatalogExercises,
+            onDeleteExercise = viewModel::removeExercise,
+            onAddSet = viewModel::addSet,
+            onDeleteSet = viewModel::removeSet,
+            onRepsChange = viewModel::updateSetReps,
+            onWeightChange = viewModel::updateSetWeight,
         )
-        RoutineScreen(onBack = {
-            vm.saveRoutine()
-            onNavigateBack()
-        }, uiState = uiState, onDeleteExercise = {
-            vm.removeExercise(it)
-        }, onAddNewSet = {
-            vm.addNewSet(it)
-        }, onAddEmptyExercise = {
-            vm.addEmptyExercise()
-        })
     }
 }
 
-fun NavController.navigateToRoutineDetails(routineId: Int) {
-    navigate(route = RoutineDetails(routineId))
+fun NavController.navigateToRoutineDetails(routineId: Int? = null) {
+    navigate(route = RoutineDetailsRoute(routineId = routineId))
 }

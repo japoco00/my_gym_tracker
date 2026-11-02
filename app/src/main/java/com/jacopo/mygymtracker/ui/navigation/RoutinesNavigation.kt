@@ -1,33 +1,35 @@
 package com.jacopo.mygymtracker.ui.navigation
 
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.jacopo.mygymtracker.data.repositories.RoutineRepository
-import com.jacopo.mygymtracker.ui.screen.RoutinesListScreen
-import com.jacopo.mygymtracker.viewModel.RoutinesListVM
-import com.jacopo.mygymtracker.viewModel.RoutinesListVMFactory
+import com.jacopo.mygymtracker.ui.routines.RoutinesListScreen
+import com.jacopo.mygymtracker.ui.routines.RoutinesListViewModel
 import kotlinx.serialization.Serializable
 
 @Serializable
-object Routines
+data object RoutinesRoute
 
 fun NavGraphBuilder.routinesDestination(
-    routineRepository: RoutineRepository,
-    onNavigateToRoutineDetails: (Int) -> Unit = { /* No-op */ }
+    onCreateRoutine: () -> Unit,
+    onOpenRoutine: (Int) -> Unit,
 ) {
-    composable<Routines> {
-        val vm = viewModel<RoutinesListVM>(
-            factory = RoutinesListVMFactory(
-                routineRepository = routineRepository
-            )
-        )
+    composable<RoutinesRoute> {
+        val viewModel: RoutinesListViewModel = viewModel(factory = RoutinesListViewModel.Factory)
+        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
         RoutinesListScreen(
-            onNavigateToRoutineDetails = { routineId ->
-                onNavigateToRoutineDetails(routineId)
-            }, onDeleteRoutine = { routine ->
-                vm.deleteRoutine(routine)
-            }, routinesFlow = vm.routines
+            uiState = uiState,
+            onCreateRoutine = onCreateRoutine,
+            onRoutineClick = onOpenRoutine,
+            onDeleteRoutine = viewModel::deleteRoutine,
         )
     }
+}
+
+fun NavController.navigateToRoutines() {
+    navigate(route = RoutinesRoute)
 }
