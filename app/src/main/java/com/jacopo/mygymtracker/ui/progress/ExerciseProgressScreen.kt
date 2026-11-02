@@ -37,12 +37,14 @@ import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.domain.progress.MAX_ESTIMATE_REPS
+import com.jacopo.mygymtracker.domain.progress.MetricQuantity
 import com.jacopo.mygymtracker.domain.progress.PersonalRecord
 import com.jacopo.mygymtracker.domain.progress.ProgressMetric
 import com.jacopo.mygymtracker.domain.progress.SessionProgress
 import com.jacopo.mygymtracker.domain.progress.personalRecords
 import com.jacopo.mygymtracker.ui.format.formatDate
 import com.jacopo.mygymtracker.ui.format.formatDateTime
+import com.jacopo.mygymtracker.ui.format.formatDuration
 import com.jacopo.mygymtracker.ui.format.formatVolume
 import com.jacopo.mygymtracker.ui.format.label
 import com.jacopo.mygymtracker.ui.theme.AppTheme
@@ -107,6 +109,7 @@ private fun ProgressContent(
     ) {
         item {
             PersonalRecords(
+                metrics = uiState.metrics,
                 records = uiState.records,
                 weightUnit = uiState.weightUnit,
                 modifier = Modifier.padding(16.dp),
@@ -114,6 +117,7 @@ private fun ProgressContent(
         }
         item {
             MetricSelector(
+                metrics = uiState.metrics,
                 selected = uiState.metric,
                 onSelect = onMetricSelect,
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -156,7 +160,7 @@ private fun ProgressContent(
         }
         items(items = uiState.sessions.asReversed(), key = { it.sessionId }) { session ->
             ListItem(
-                headlineContent = { Text(uiState.weightUnit.formatMetric(uiState.metric, session.valueOf(uiState.metric))) },
+                headlineContent = { Text(uiState.metric.format(session.valueOf(uiState.metric), uiState.weightUnit)) },
                 supportingContent = { Text(formatDateTime(session.performedAt)) },
                 trailingContent = {
                     if (record?.achievedAt == session.performedAt) {
@@ -174,6 +178,7 @@ private fun ProgressContent(
 
 @Composable
 private fun PersonalRecords(
+    metrics: List<ProgressMetric>,
     records: Map<ProgressMetric, PersonalRecord>,
     weightUnit: WeightUnit,
     modifier: Modifier = Modifier,
@@ -182,7 +187,7 @@ private fun PersonalRecords(
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = stringResource(R.string.progress_records), style = MaterialTheme.typography.titleMedium)
             Row(modifier = Modifier.padding(top = 12.dp)) {
-                ProgressMetric.entries.forEach { metric ->
+                metrics.forEach { metric ->
                     val record = records[metric]
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
@@ -191,7 +196,7 @@ private fun PersonalRecords(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Text(
-                            text = weightUnit.formatMetric(metric, record?.valueKg),
+                            text = metric.format(record?.value, weightUnit),
                             style = MaterialTheme.typography.titleMedium,
                         )
                         if (record != null) {
@@ -210,28 +215,33 @@ private fun PersonalRecords(
 
 @Composable
 private fun MetricSelector(
+    metrics: List<ProgressMetric>,
     selected: ProgressMetric,
     onSelect: (ProgressMetric) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     SingleChoiceSegmentedButtonRow(modifier = modifier.fillMaxWidth()) {
-        ProgressMetric.entries.forEachIndexed { index, metric ->
+        metrics.forEachIndexed { index, metric ->
             SegmentedButton(
                 selected = metric == selected,
                 onClick = { onSelect(metric) },
-                shape = SegmentedButtonDefaults.itemShape(index = index, count = ProgressMetric.entries.size),
+                shape = SegmentedButtonDefaults.itemShape(index = index, count = metrics.size),
                 label = { Text(metric.label()) },
             )
         }
     }
 }
 
-/** Weights with decimals, volume in whole units, `–` without a positive value. */
+/** Weights with decimals, volume in whole units, durations as `m:ss`, `–` without a positive value. */
 @Composable
-private fun WeightUnit.formatMetric(metric: ProgressMetric, valueKg: Double?): String = when {
-    valueKg == null || valueKg <= 0 -> stringResource(R.string.progress_no_value)
-    metric == ProgressMetric.SESSION_VOLUME -> formatVolume(valueKg)
-    else -> stringResource(R.string.weight_with_unit, format(valueKg), label())
+private fun ProgressMetric.format(value: Double?, weightUnit: WeightUnit): String = when {
+    value == null || value <= 0 -> stringResource(R.string.progress_no_value)
+    else -> when (quantity) {
+        MetricQuantity.WEIGHT_KG -> stringResource(R.string.weight_with_unit, weightUnit.format(value), weightUnit.label())
+        MetricQuantity.VOLUME_KG -> weightUnit.formatVolume(value)
+        MetricQuantity.REPS -> pluralStringResource(R.plurals.reps_count, value.toInt(), value.toInt())
+        MetricQuantity.SECONDS -> formatDuration(value.toLong())
+    }
 }
 
 @Composable
@@ -240,6 +250,10 @@ private fun ProgressMetric.label(): String = stringResource(
         ProgressMetric.ESTIMATED_ONE_REP_MAX -> R.string.progress_metric_e1rm
         ProgressMetric.HEAVIEST_WEIGHT -> R.string.progress_metric_heaviest
         ProgressMetric.SESSION_VOLUME -> R.string.progress_metric_volume
+        ProgressMetric.MOST_REPS -> R.string.progress_metric_most_reps
+        ProgressMetric.TOTAL_REPS -> R.string.progress_metric_total_reps
+        ProgressMetric.LONGEST_SET -> R.string.progress_metric_longest
+        ProgressMetric.TOTAL_DURATION -> R.string.progress_metric_total_duration
     },
 )
 
@@ -249,6 +263,10 @@ private fun ProgressMetric.description(): String = when (this) {
         pluralStringResource(R.plurals.progress_metric_e1rm_description, MAX_ESTIMATE_REPS, MAX_ESTIMATE_REPS)
     ProgressMetric.HEAVIEST_WEIGHT -> stringResource(R.string.progress_metric_heaviest_description)
     ProgressMetric.SESSION_VOLUME -> stringResource(R.string.progress_metric_volume_description)
+    ProgressMetric.MOST_REPS -> stringResource(R.string.progress_metric_most_reps_description)
+    ProgressMetric.TOTAL_REPS -> stringResource(R.string.progress_metric_total_reps_description)
+    ProgressMetric.LONGEST_SET -> stringResource(R.string.progress_metric_longest_description)
+    ProgressMetric.TOTAL_DURATION -> stringResource(R.string.progress_metric_total_duration_description)
 }
 
 @Preview(showBackground = true)
@@ -262,6 +280,10 @@ private fun ExerciseProgressScreenPreview() {
             heaviestKg = heaviestKg,
             estimatedOneRepMaxKg = heaviestKg * (1 + 8 / 30.0),
             volumeKg = heaviestKg * 8 * 3,
+            mostReps = 8,
+            totalReps = 24,
+            longestSeconds = 0,
+            totalSeconds = 0,
         )
     }
     AppTheme {

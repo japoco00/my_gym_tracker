@@ -7,8 +7,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.domain.model.WeightUnit
+import com.jacopo.mygymtracker.domain.progress.MetricQuantity
 import com.jacopo.mygymtracker.domain.progress.ProgressMetric
 import com.jacopo.mygymtracker.domain.progress.SessionProgress
+import com.jacopo.mygymtracker.ui.format.formatDuration
 import com.jacopo.mygymtracker.ui.format.shortDateFormatter
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
@@ -57,7 +59,7 @@ fun ProgressChart(
     val modelProducer = remember { CartesianChartModelProducer() }
     LaunchedEffect(sessions, metric, weightUnit) {
         modelProducer.runTransaction {
-            lineSeries { series(sessions.map { weightUnit.fromKg(checkNotNull(it.valueOf(metric))) }) }
+            lineSeries { series(sessions.map { metric.chartValue(checkNotNull(it.valueOf(metric)), weightUnit) }) }
             extras { it[SessionDatesKey] = sessions.map(SessionProgress::performedAt) }
         }
     }
@@ -81,7 +83,13 @@ fun ProgressChart(
                     rangeProvider = FitDataRangeProvider,
                 ),
                 startAxis = VerticalAxis.rememberStart(
-                    valueFormatter = remember { CartesianValueFormatter.decimal(DecimalFormat("#.#")) },
+                    valueFormatter = remember(metric.quantity) {
+                        if (metric.quantity == MetricQuantity.SECONDS) {
+                            CartesianValueFormatter { _, value, _ -> formatDuration(value.toLong()) }
+                        } else {
+                            CartesianValueFormatter.decimal(DecimalFormat("#.#"))
+                        }
+                    },
                 ),
                 bottomAxis = HorizontalAxis.rememberBottom(
                     valueFormatter = remember(dateFormatter) {
@@ -96,6 +104,12 @@ fun ProgressChart(
             modifier = modifier,
         )
     }
+}
+
+/** Weights in the user's unit; reps and seconds as they are. */
+private fun ProgressMetric.chartValue(value: Double, weightUnit: WeightUnit): Double = when (quantity) {
+    MetricQuantity.WEIGHT_KG, MetricQuantity.VOLUME_KG -> weightUnit.fromKg(value)
+    MetricQuantity.REPS, MetricQuantity.SECONDS -> value
 }
 
 /**

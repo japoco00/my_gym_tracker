@@ -93,6 +93,18 @@
     </plurals>
     <string name="progress_metric_heaviest_description">Heaviest weight lifted in the workout.</string>
     <string name="progress_metric_volume_description">Total weight × reps in the workout.</string>
+    <string name="progress_metric_most_reps">Most reps</string>
+    <string name="progress_metric_total_reps">Total reps</string>
+    <string name="progress_metric_longest">Longest</string>
+    <string name="progress_metric_total_duration">Total time</string>
+    <string name="progress_metric_most_reps_description">Most reps in a single set.</string>
+    <string name="progress_metric_total_reps_description">All reps of the workout added up.</string>
+    <string name="progress_metric_longest_description">Longest single set.</string>
+    <string name="progress_metric_total_duration_description">Time of all sets added up.</string>
+    <plurals name="reps_count">
+        <item quantity="one">%d rep</item>
+        <item quantity="other">%d reps</item>
+    </plurals>
     <string name="progress_no_chart_data">Nothing to chart for this metric yet.</string>
     <string name="progress_workouts">Workouts</string>
     <string name="progress_personal_record">Personal record</string>
