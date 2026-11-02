@@ -35,7 +35,7 @@ class AppContainer(context: Context) {
     }
 
     val exerciseRepository: ExerciseRepository by lazy {
-        ExerciseRepository(exerciseDao = database.exerciseDao())
+        ExerciseRepository(database = database, exerciseDao = database.exerciseDao())
     }
 
     val workoutRepository: WorkoutRepository by lazy {
