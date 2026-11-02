@@ -1,3 +1,29 @@
 <resources>
     <string name="app_name">My Gym Tracker</string>
+
+    <!-- Common -->
+    <string name="action_back">Back</string>
+    <string name="unit_kg">kg</string>
+    <string name="unit_lb">lb</string>
+    <string name="rest_decrease">−%1$d s</string>
+    <string name="rest_increase">+%1$d s</string>
+
+    <!-- Navigation -->
+    <string name="nav_routines">Routines</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Routines -->
+    <string name="routines_title">Routines</string>
+    <string name="routines_empty">No routines yet. Create your first one!</string>
+    <string name="routines_create">New routine</string>
+
+    <!-- Routine editor -->
+    <string name="routine_editor_title_new">New routine</string>
+    <string name="routine_editor_title_edit">Edit routine</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_weight_unit">Weight unit</string>
+    <string name="settings_rest_time">Default rest time</string>
+    <string name="settings_rest_time_description">The rest timer starts with this duration when you complete a set.</string>
 </resources>
