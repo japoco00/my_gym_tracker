@@ -77,6 +77,25 @@ class WorkoutRepository(
         return if (wasActive) getWorkout(sessionId) else null
     }
 
+    /**
+     * Replaces the exercises and sets of a finished workout; its times and routine stay as they were.
+     * Every set counts as completed, and exercises left without sets are dropped.
+     *
+     * @return the workout as stored, or `null` if it was deleted or isn't finished.
+     */
+    suspend fun updateFinishedWorkout(sessionId: Int, exercises: List<WorkoutExercise>): WorkoutSession? {
+        val kept = exercises
+            .filter { it.sets.isNotEmpty() }
+            .map { exercise -> exercise.copy(sets = exercise.sets.map { it.copy(isCompleted = true) }) }
+        require(kept.isNotEmpty()) { "A workout needs at least one set" }
+        val wasFinished = database.withTransaction {
+            if (!workoutDao.isFinished(sessionId)) return@withTransaction false
+            writeExercises(sessionId, kept)
+            true
+        }
+        return if (wasFinished) getWorkout(sessionId) else null
+    }
+
     /** Deletes a workout, in progress (discard) or finished (history). */
     suspend fun deleteWorkout(sessionId: Int) = workoutDao.deleteSession(sessionId)
 

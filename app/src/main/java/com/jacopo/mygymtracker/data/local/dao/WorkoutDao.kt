@@ -27,6 +27,9 @@ interface WorkoutDao {
     @Query("SELECT EXISTS(SELECT 1 FROM workout_sessions WHERE sessionId = :sessionId AND finishedAtEpochMs IS NULL)")
     suspend fun isActive(sessionId: Int): Boolean
 
+    @Query("SELECT EXISTS(SELECT 1 FROM workout_sessions WHERE sessionId = :sessionId AND finishedAtEpochMs IS NOT NULL)")
+    suspend fun isFinished(sessionId: Int): Boolean
+
     @Query("SELECT EXISTS(SELECT 1 FROM workout_sessions WHERE finishedAtEpochMs IS NULL)")
     suspend fun hasActive(): Boolean
 

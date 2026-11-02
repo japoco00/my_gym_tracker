@@ -84,6 +84,35 @@ class WorkoutRepositoryTest {
     }
 
     @Test
+    fun updateFinishedWorkout_replacesSetsAndKeepsTimes() = runTest {
+        val sessionId = finishWorkout(savedRoutine(), at = 1)
+        val squat = workouts.getWorkout(sessionId)!!.exercises.single()
+        val edits = listOf(
+            squat.copy(sets = listOf(LoggedSet(6, 102.5), LoggedSet(4, 102.5))),
+            squat.copy(exercise = newExercise("Curl"), sets = emptyList()),
+        )
+
+        val updated = workouts.updateFinishedWorkout(sessionId, edits)!!
+
+        assertEquals(time(1), updated.startedAt)
+        assertEquals(time(2), updated.finishedAt)
+        assertEquals(listOf("Squat"), updated.exercises.map { it.exercise.name })
+        assertEquals(
+            listOf(LoggedSet(6, 102.5, isCompleted = true), LoggedSet(4, 102.5, isCompleted = true)),
+            updated.exercises.single().sets,
+        )
+    }
+
+    @Test
+    fun updateFinishedWorkout_returnsNullForWorkoutInProgress() = runTest {
+        val id = workouts.startWorkout(savedRoutine())!!
+        val draft = workouts.getWorkout(id)!!
+
+        assertNull(workouts.updateFinishedWorkout(id, draft.exercises))
+        assertEquals(draft, workouts.getWorkout(id))
+    }
+
+    @Test
     fun history_aggregatesCompletedSetsNewestFirst() = runTest {
         val routine = savedRoutine()
         finishWorkout(routine, at = 1)
