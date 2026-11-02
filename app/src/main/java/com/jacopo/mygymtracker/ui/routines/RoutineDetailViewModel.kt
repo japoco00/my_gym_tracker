@@ -142,11 +142,14 @@ class RoutineDetailViewModel(
         updateSet(exerciseKey, setKey) { it.copy(weightKg = weightKg.coerceAtLeast(0.0)) }
     }
 
-    /** Saves and then calls [onSaved]. An empty new routine is not saved at all. */
-    fun saveRoutine(onSaved: () -> Unit = {}) {
+    /**
+     * Saves and then calls [onSaved]. An empty new routine is not saved at all.
+     * [untitledName] is the localized name for a routine left without one.
+     */
+    fun saveRoutine(untitledName: String, onSaved: () -> Unit = {}) {
         // A second back press while saving must not insert the new routine twice.
         if (saveJob != null) return
-        val routine = _uiState.value.takeUnless { it.isLoading }?.toDomainOrNull()
+        val routine = _uiState.value.takeUnless { it.isLoading }?.toDomainOrNull(untitledName)
         if (routine == null) {
             onSaved()
             return

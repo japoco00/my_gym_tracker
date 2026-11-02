@@ -1,12 +1,14 @@
 package com.jacopo.mygymtracker.ui.navigation
 
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.ui.routines.RoutineDetailScreen
 import com.jacopo.mygymtracker.ui.routines.RoutineDetailViewModel
 import kotlinx.serialization.Serializable
@@ -23,10 +25,11 @@ fun NavGraphBuilder.routineDetailDestination(
             factory = RoutineDetailViewModel.factory(route.routineId),
         )
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+        val untitledName = stringResource(R.string.routine_untitled)
 
         RoutineDetailScreen(
             uiState = uiState,
-            onBack = { viewModel.saveRoutine(onSaved = onNavigateBack) },
+            onBack = { viewModel.saveRoutine(untitledName, onSaved = onNavigateBack) },
             onNameChange = viewModel::updateRoutineName,
             onExerciseNameChange = viewModel::updateExerciseName,
             onExerciseCategoryChange = viewModel::updateExerciseCategory,

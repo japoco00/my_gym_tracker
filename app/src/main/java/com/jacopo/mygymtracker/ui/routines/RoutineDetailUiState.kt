@@ -73,13 +73,14 @@ fun Exercise.toUiState(): RoutineExerciseUiState = RoutineExerciseUiState(
  * The routine to save, or `null` when a new routine was left completely empty
  * (no name, no exercises) and there is nothing worth keeping.
  * New exercises left without a name are dropped instead of polluting the catalog.
+ * A routine left without a name is saved as [untitledName].
  */
-fun RoutineDetailUiState.toDomainOrNull(): Routine? {
+fun RoutineDetailUiState.toDomainOrNull(untitledName: String): Routine? {
     val namedExercises = exercises.filter { it.exerciseId != null || it.name.isNotBlank() }
     if (id == null && name.isBlank() && namedExercises.isEmpty()) return null
     return Routine(
         id = id,
-        name = name.trim().ifEmpty { "Untitled Routine" },
+        name = name.trim().ifEmpty { untitledName },
         note = note?.trim()?.takeIf { it.isNotEmpty() },
         exercises = namedExercises.map { it.toDomain() },
     )

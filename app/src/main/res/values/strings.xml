@@ -110,6 +110,7 @@
     <string name="routine_editor_title_new">New routine</string>
     <string name="routine_editor_title_edit">Edit routine</string>
     <string name="routine_name_hint">Routine name</string>
+    <string name="routine_untitled">Untitled routine</string>
     <string name="routine_add_from_catalog">From catalog</string>
     <string name="routine_add_new_exercise">New exercise</string>
     <string name="exercise_name_hint">Exercise name</string>
