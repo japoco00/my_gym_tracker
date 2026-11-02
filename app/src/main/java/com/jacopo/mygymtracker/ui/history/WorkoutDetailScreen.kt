@@ -1,5 +1,6 @@
 package com.jacopo.mygymtracker.ui.history
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,7 +14,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -52,12 +55,22 @@ import java.time.Instant
 fun WorkoutDetailScreen(
     uiState: WorkoutDetailUiState,
     onBack: () -> Unit,
+    onEdit: () -> Unit,
+    onCancelEdit: () -> Unit,
+    onSaveEdits: () -> Unit,
     onDelete: () -> Unit,
     onConfirmDelete: () -> Unit,
     onDismissDeleteDialog: () -> Unit,
     onExerciseClick: (exerciseId: Int) -> Unit,
+    onAddSet: (exerciseKey: String) -> Unit,
+    onDeleteSet: (exerciseKey: String, setKey: String) -> Unit,
+    onRepsChange: (exerciseKey: String, setKey: String, Int) -> Unit,
+    onWeightChange: (exerciseKey: String, setKey: String, Double) -> Unit,
+    onDurationChange: (exerciseKey: String, setKey: String, seconds: Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    BackHandler(enabled = uiState.isEditing, onBack = onCancelEdit)
+
     if (uiState.isDeleteDialogOpen) {
         AlertDialog(
             onDismissRequest = onDismissDeleteDialog,
@@ -77,22 +90,41 @@ fun WorkoutDetailScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = uiState.workout?.routineName.orEmpty(),
+                        text = if (uiState.isEditing) {
+                            stringResource(R.string.history_edit_title)
+                        } else {
+                            uiState.workout?.routineName.orEmpty()
+                        },
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.action_back),
-                        )
+                    if (uiState.isEditing) {
+                        IconButton(onClick = onCancelEdit) {
+                            Icon(imageVector = Icons.Default.Close, contentDescription = stringResource(R.string.action_cancel))
+                        }
+                    } else {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.action_back),
+                            )
+                        }
                     }
                 },
                 actions = {
-                    IconButton(onClick = onDelete, enabled = uiState.workout != null) {
-                        Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete))
+                    if (uiState.isEditing) {
+                        TextButton(onClick = onSaveEdits, enabled = uiState.canSave) {
+                            Text(stringResource(R.string.action_save))
+                        }
+                    } else {
+                        IconButton(onClick = onEdit, enabled = uiState.workout != null) {
+                            Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(R.string.action_edit))
+                        }
+                        IconButton(onClick = onDelete, enabled = uiState.workout != null) {
+                            Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete))
+                        }
                     }
                 },
             )
@@ -100,6 +132,7 @@ fun WorkoutDetailScreen(
         modifier = modifier,
     ) { innerPadding ->
         val workout = uiState.workout ?: return@Scaffold
+        val editedExercises = uiState.editedExercises
         LazyColumn(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -115,12 +148,34 @@ fun WorkoutDetailScreen(
                     volume = uiState.weightUnit.formatVolume(uiState.volumeKg),
                 )
             }
-            items(workout.exercises) { exercise ->
-                ExerciseSetsCard(
-                    exercise = exercise,
-                    weightUnit = uiState.weightUnit,
-                    onClick = { onExerciseClick(checkNotNull(exercise.exercise.id)) },
-                )
+            if (editedExercises == null) {
+                items(workout.exercises) { exercise ->
+                    ExerciseSetsCard(
+                        exercise = exercise,
+                        weightUnit = uiState.weightUnit,
+                        onClick = { onExerciseClick(checkNotNull(exercise.exercise.id)) },
+                    )
+                }
+            } else {
+                if (!uiState.canSave) {
+                    item {
+                        Text(
+                            text = stringResource(R.string.history_edit_needs_set),
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                }
+                items(editedExercises, key = { it.key }) { exercise ->
+                    EditableExerciseCard(
+                        exercise = exercise,
+                        weightUnit = uiState.weightUnit,
+                        onAddSet = { onAddSet(exercise.key) },
+                        onDeleteSet = { setKey -> onDeleteSet(exercise.key, setKey) },
+                        onRepsChange = { setKey, reps -> onRepsChange(exercise.key, setKey, reps) },
+                        onWeightChange = { setKey, weight -> onWeightChange(exercise.key, setKey, weight) },
+                        onDurationChange = { setKey, seconds -> onDurationChange(exercise.key, setKey, seconds) },
+                    )
+                }
             }
         }
     }
@@ -228,10 +283,18 @@ private fun WorkoutDetailScreenPreview() {
                 ),
             ),
             onBack = {},
+            onEdit = {},
+            onCancelEdit = {},
+            onSaveEdits = {},
             onDelete = {},
             onConfirmDelete = {},
             onDismissDeleteDialog = {},
             onExerciseClick = {},
+            onAddSet = {},
+            onDeleteSet = { _, _ -> },
+            onRepsChange = { _, _, _ -> },
+            onWeightChange = { _, _, _ -> },
+            onDurationChange = { _, _, _ -> },
         )
     }
 }

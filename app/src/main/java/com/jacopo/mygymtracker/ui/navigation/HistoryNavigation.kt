@@ -50,10 +50,18 @@ fun NavGraphBuilder.workoutDetailDestination(
         WorkoutDetailScreen(
             uiState = uiState,
             onBack = onNavigateBack,
+            onEdit = viewModel::startEditing,
+            onCancelEdit = viewModel::cancelEditing,
+            onSaveEdits = viewModel::saveEdits,
             onDelete = viewModel::requestDelete,
             onConfirmDelete = viewModel::confirmDelete,
             onDismissDeleteDialog = viewModel::dismissDeleteDialog,
             onExerciseClick = onOpenExerciseProgress,
+            onAddSet = viewModel::addSet,
+            onDeleteSet = viewModel::removeSet,
+            onRepsChange = viewModel::updateSetReps,
+            onWeightChange = viewModel::updateSetWeight,
+            onDurationChange = viewModel::updateSetDuration,
         )
     }
 }

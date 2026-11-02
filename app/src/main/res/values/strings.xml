@@ -82,6 +82,8 @@
     <string name="history_set_added">+%1$s %2$s × %3$d</string>
     <string name="history_delete_title">Delete this workout?</string>
     <string name="history_delete_message">It will be removed from your history and progress.</string>
+    <string name="history_edit_title">Edit workout</string>
+    <string name="history_edit_needs_set">Keep at least one set, or delete the workout instead.</string>
 
     <!-- Progress -->
     <string name="progress_empty">No finished workouts with this exercise yet.</string>
