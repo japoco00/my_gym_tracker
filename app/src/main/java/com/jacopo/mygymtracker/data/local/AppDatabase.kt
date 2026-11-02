@@ -6,6 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.jacopo.mygymtracker.data.local.dao.ExerciseDao
 import com.jacopo.mygymtracker.data.local.dao.RoutineDao
+import com.jacopo.mygymtracker.data.local.dao.WorkoutDao
 import com.jacopo.mygymtracker.data.local.entity.ExerciseEntity
 import com.jacopo.mygymtracker.data.local.entity.LoggedSetEntity
 import com.jacopo.mygymtracker.data.local.entity.PlannedSetEntity
@@ -30,6 +31,7 @@ import com.jacopo.mygymtracker.data.local.entity.WorkoutSessionEntity
 abstract class AppDatabase : RoomDatabase() {
     abstract fun routineDao(): RoutineDao
     abstract fun exerciseDao(): ExerciseDao
+    abstract fun workoutDao(): WorkoutDao
 
     companion object {
         private const val DATABASE_NAME = "app_database"

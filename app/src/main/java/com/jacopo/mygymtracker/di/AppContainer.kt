@@ -10,6 +10,7 @@ import com.jacopo.mygymtracker.data.local.AppDatabase
 import com.jacopo.mygymtracker.data.repository.ExerciseRepository
 import com.jacopo.mygymtracker.data.repository.RoutineRepository
 import com.jacopo.mygymtracker.data.repository.SettingsRepository
+import com.jacopo.mygymtracker.data.repository.WorkoutRepository
 
 /**
  * Manual dependency container. Owns every app-scoped singleton.
@@ -29,6 +30,14 @@ class AppContainer(context: Context) {
 
     val exerciseRepository: ExerciseRepository by lazy {
         ExerciseRepository(exerciseDao = database.exerciseDao())
+    }
+
+    val workoutRepository: WorkoutRepository by lazy {
+        WorkoutRepository(
+            database = database,
+            workoutDao = database.workoutDao(),
+            exerciseDao = database.exerciseDao(),
+        )
     }
 
     val settingsRepository: SettingsRepository by lazy {
