@@ -35,6 +35,14 @@ android {
     buildFeatures {
         compose = true
     }
+    // MigrationTestHelper reads the exported schemas as assets. Robolectric only sees the
+    // debug variant's merged assets, so they go there (debug APK only, never release).
+    sourceSets.getByName("debug").assets.directories.add("$projectDir/schemas")
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+        // Robolectric needs this on SDK 36+: https://github.com/robolectric/robolectric/issues/11434
+        unitTests.all { it.jvmArgs("--add-exports=java.base/jdk.internal.access=ALL-UNNAMED") }
+    }
 }
 
 kotlin {
@@ -83,4 +91,5 @@ dependencies {
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.androidx.junit)
+    testImplementation(libs.androidx.room.testing)
 }
