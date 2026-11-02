@@ -161,23 +161,23 @@ class WorkoutViewModel(
         }
     }
 
-    fun removeSet(exerciseKey: String, setUuid: String) {
+    fun removeSet(exerciseKey: String, setKey: String) {
         updateExercise(exerciseKey) { exercise ->
-            exercise.copy(sets = exercise.sets.filterNot { it.uuid == setUuid })
+            exercise.copy(sets = exercise.sets.filterNot { it.key == setKey })
         }
     }
 
-    fun updateSetReps(exerciseKey: String, setUuid: String, reps: Int) {
-        updateSet(exerciseKey, setUuid) { it.copy(reps = reps.coerceAtLeast(0)) }
+    fun updateSetReps(exerciseKey: String, setKey: String, reps: Int) {
+        updateSet(exerciseKey, setKey) { it.copy(reps = reps.coerceAtLeast(0)) }
     }
 
-    fun updateSetWeight(exerciseKey: String, setUuid: String, weightKg: Double) {
-        updateSet(exerciseKey, setUuid) { it.copy(weightKg = weightKg.coerceAtLeast(0.0)) }
+    fun updateSetWeight(exerciseKey: String, setKey: String, weightKg: Double) {
+        updateSet(exerciseKey, setKey) { it.copy(weightKg = weightKg.coerceAtLeast(0.0)) }
     }
 
     /** Ticking a set off starts the rest before the next one. */
-    fun setCompleted(exerciseKey: String, setUuid: String, completed: Boolean) {
-        updateSet(exerciseKey, setUuid) { it.copy(isCompleted = completed) }
+    fun setCompleted(exerciseKey: String, setKey: String, completed: Boolean) {
+        updateSet(exerciseKey, setKey) { it.copy(isCompleted = completed) }
         if (completed) restTimer.start(restSeconds)
     }
 
@@ -297,13 +297,13 @@ class WorkoutViewModel(
 
     private inline fun updateSet(
         exerciseKey: String,
-        setUuid: String,
+        setKey: String,
         crossinline transform: (WorkoutSetUiState) -> WorkoutSetUiState,
     ) {
         updateExercise(exerciseKey) { exercise ->
             exercise.copy(
                 sets = exercise.sets.map { set ->
-                    if (set.uuid == setUuid) transform(set) else set
+                    if (set.key == setKey) transform(set) else set
                 },
             )
         }

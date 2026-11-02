@@ -50,9 +50,9 @@ fun RoutineDetailScreen(
     onConfirmAddExercises: (List<Exercise>) -> Unit,
     onDeleteExercise: (exerciseKey: String) -> Unit,
     onAddSet: (exerciseKey: String) -> Unit,
-    onDeleteSet: (exerciseKey: String, setUuid: String) -> Unit,
-    onRepsChange: (exerciseKey: String, setUuid: String, Int) -> Unit,
-    onWeightChange: (exerciseKey: String, setUuid: String, Double) -> Unit,
+    onDeleteSet: (exerciseKey: String, setKey: String) -> Unit,
+    onRepsChange: (exerciseKey: String, setKey: String, Int) -> Unit,
+    onWeightChange: (exerciseKey: String, setKey: String, Double) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     BackHandler(onBack = onBack)
@@ -130,10 +130,10 @@ fun RoutineDetailScreen(
                                 onExerciseCategoryChange(exerciseKey, category)
                             },
                             onAddSet = { onAddSet(exerciseKey) },
-                            onDeleteSet = { setUuid -> onDeleteSet(exerciseKey, setUuid) },
-                            onRepsChange = { setUuid, reps -> onRepsChange(exerciseKey, setUuid, reps) },
-                            onWeightChange = { setUuid, weight ->
-                                onWeightChange(exerciseKey, setUuid, weight)
+                            onDeleteSet = { setKey -> onDeleteSet(exerciseKey, setKey) },
+                            onRepsChange = { setKey, reps -> onRepsChange(exerciseKey, setKey, reps) },
+                            onWeightChange = { setKey, weight ->
+                                onWeightChange(exerciseKey, setKey, weight)
                             },
                             modifier = Modifier.fillMaxWidth(),
                         )

@@ -53,10 +53,10 @@ fun WorkoutExerciseCard(
     weightUnit: WeightUnit,
     onRemove: () -> Unit,
     onAddSet: () -> Unit,
-    onDeleteSet: (setUuid: String) -> Unit,
-    onRepsChange: (setUuid: String, Int) -> Unit,
-    onWeightChange: (setUuid: String, Double) -> Unit,
-    onCompletedChange: (setUuid: String, completed: Boolean) -> Unit,
+    onDeleteSet: (setKey: String) -> Unit,
+    onRepsChange: (setKey: String, Int) -> Unit,
+    onWeightChange: (setKey: String, Double) -> Unit,
+    onCompletedChange: (setKey: String, completed: Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(modifier = modifier.padding(horizontal = 12.dp, vertical = 6.dp)) {
@@ -90,16 +90,16 @@ fun WorkoutExerciseCard(
                 ColumnHeader("", Modifier.width(CheckboxWidth))
             }
             exercise.sets.forEachIndexed { index, set ->
-                key(set.uuid) {
-                    SwipeToDeleteContainer(onDelete = { onDeleteSet(set.uuid) }) {
+                key(set.key) {
+                    SwipeToDeleteContainer(onDelete = { onDeleteSet(set.key) }) {
                         SetRow(
                             number = index + 1,
                             set = set,
                             previous = previousSets.getOrNull(index),
                             weightUnit = weightUnit,
-                            onRepsChange = { reps -> onRepsChange(set.uuid, reps) },
-                            onWeightChange = { weight -> onWeightChange(set.uuid, weight) },
-                            onCompletedChange = { completed -> onCompletedChange(set.uuid, completed) },
+                            onRepsChange = { reps -> onRepsChange(set.key, reps) },
+                            onWeightChange = { weight -> onWeightChange(set.key, weight) },
+                            onCompletedChange = { completed -> onCompletedChange(set.key, completed) },
                         )
                     }
                 }

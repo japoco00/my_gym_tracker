@@ -36,7 +36,7 @@ data class RoutineExerciseUiState @OptIn(ExperimentalUuidApi::class) constructor
 )
 
 data class PlannedSetUiState @OptIn(ExperimentalUuidApi::class) constructor(
-    val uuid: String = Uuid.random().toString(),
+    val key: String = Uuid.random().toString(),
     val reps: Int = 0,
     val weightKg: Double = 0.0,
 )

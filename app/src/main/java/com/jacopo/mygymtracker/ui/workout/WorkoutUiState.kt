@@ -46,7 +46,7 @@ data class WorkoutExerciseUiState @OptIn(ExperimentalUuidApi::class) constructor
 )
 
 data class WorkoutSetUiState @OptIn(ExperimentalUuidApi::class) constructor(
-    val uuid: String = Uuid.random().toString(),
+    val key: String = Uuid.random().toString(),
     val reps: Int = 0,
     val weightKg: Double = 0.0,
     val isCompleted: Boolean = false,

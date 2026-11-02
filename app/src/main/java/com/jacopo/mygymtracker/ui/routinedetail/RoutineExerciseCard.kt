@@ -43,9 +43,9 @@ fun RoutineExerciseCard(
     onNameChange: (String) -> Unit,
     onCategoryChange: (Category) -> Unit,
     onAddSet: () -> Unit,
-    onDeleteSet: (setUuid: String) -> Unit,
-    onRepsChange: (setUuid: String, Int) -> Unit,
-    onWeightChange: (setUuid: String, Double) -> Unit,
+    onDeleteSet: (setKey: String) -> Unit,
+    onRepsChange: (setKey: String, Int) -> Unit,
+    onWeightChange: (setKey: String, Double) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -92,10 +92,10 @@ fun RoutineExerciseCard(
                 )
             }
             exercise.sets.forEach { set ->
-                key(set.uuid) {
+                key(set.key) {
                     HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp))
                     SwipeToDeleteContainer(
-                        onDelete = { onDeleteSet(set.uuid) },
+                        onDelete = { onDeleteSet(set.key) },
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -105,14 +105,14 @@ fun RoutineExerciseCard(
                         ) {
                             RepsField(
                                 reps = set.reps,
-                                onRepsChange = { reps -> onRepsChange(set.uuid, reps) },
+                                onRepsChange = { reps -> onRepsChange(set.key, reps) },
                                 showStepper = true,
                                 modifier = Modifier.weight(1f),
                             )
                             WeightField(
                                 weightKg = set.weightKg,
                                 unit = weightUnit,
-                                onWeightKgChange = { weight -> onWeightChange(set.uuid, weight) },
+                                onWeightKgChange = { weight -> onWeightChange(set.key, weight) },
                                 showStepper = true,
                                 modifier = Modifier.weight(1f),
                             )

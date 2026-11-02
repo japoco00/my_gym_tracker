@@ -128,18 +128,18 @@ class RoutineDetailViewModel(
         }
     }
 
-    fun removeSet(exerciseKey: String, setUuid: String) {
+    fun removeSet(exerciseKey: String, setKey: String) {
         updateExercise(exerciseKey) { exercise ->
-            exercise.copy(sets = exercise.sets.filterNot { it.uuid == setUuid })
+            exercise.copy(sets = exercise.sets.filterNot { it.key == setKey })
         }
     }
 
-    fun updateSetReps(exerciseKey: String, setUuid: String, reps: Int) {
-        updateSet(exerciseKey, setUuid) { it.copy(reps = reps.coerceAtLeast(0)) }
+    fun updateSetReps(exerciseKey: String, setKey: String, reps: Int) {
+        updateSet(exerciseKey, setKey) { it.copy(reps = reps.coerceAtLeast(0)) }
     }
 
-    fun updateSetWeight(exerciseKey: String, setUuid: String, weightKg: Double) {
-        updateSet(exerciseKey, setUuid) { it.copy(weightKg = weightKg.coerceAtLeast(0.0)) }
+    fun updateSetWeight(exerciseKey: String, setKey: String, weightKg: Double) {
+        updateSet(exerciseKey, setKey) { it.copy(weightKg = weightKg.coerceAtLeast(0.0)) }
     }
 
     /** Saves and then calls [onSaved]. An empty new routine is not saved at all. */
@@ -174,13 +174,13 @@ class RoutineDetailViewModel(
 
     private inline fun updateSet(
         exerciseKey: String,
-        setUuid: String,
+        setKey: String,
         crossinline transform: (PlannedSetUiState) -> PlannedSetUiState,
     ) {
         updateExercise(exerciseKey) { exercise ->
             exercise.copy(
                 sets = exercise.sets.map { set ->
-                    if (set.uuid == setUuid) transform(set) else set
+                    if (set.key == setKey) transform(set) else set
                 },
             )
         }
