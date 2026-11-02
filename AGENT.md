@@ -63,7 +63,7 @@ com.jacopo.mygymtracker
 
 ### 4.3 Schema & Migrations
 - Version 4 is the baseline; versions 1-3 are dropped destructively (development data only).
-- Every entity change from version 4 on: bump the version in [`AppDatabase`](class://com.jacopo.mygymtracker.data.local.AppDatabase), ship a `Migration` (or `@AutoMigration`), and commit the exported schema JSON in `app/schemas/`. User history must survive app updates.
+- Every entity change from version 4 on: bump the version in [`AppDatabase`](class://com.jacopo.mygymtracker.data.local.AppDatabase), ship a `Migration` (or `@AutoMigration`) with a `MigrationsTest` case, and commit the exported schema JSON in `app/schemas/`. User history must survive app updates.
 - The default exercise catalog is seeded once by `CatalogSeedCallback.onCreate`.
 
 ### 4.4 Settings & Units
@@ -113,12 +113,14 @@ com.jacopo.mygymtracker
 ---
 
 ## 8. Testing
-- JVM unit tests live in `app/src/test`; run them with `./gradlew :app:testDebugUnitTest`.
+- JVM unit tests live in `app/src/test`. CI (`.github/workflows/ci.yml`) runs unit tests, lint and a debug build on every pull request; run its Gradle command locally before pushing.
 - **Domain logic** (`domain/`): plain JUnit, no Android.
 - **Room repositories**: Robolectric (`@RunWith(AndroidJUnit4::class)`) against an in-memory database from `createTestDatabase()` (no catalog seed, so each test owns its data).
-- **`SettingsRepository`**: plain JUnit with an in-memory fake `DataStore`.
+- **Migrations**: `MigrationsTest` (Robolectric + `MigrationTestHelper`) creates the old version from `app/schemas/`, inserts rows, runs `runMigrationsAndValidate` and checks the data survived.
+- **`SettingsRepository`**: plain JUnit with `InMemoryPreferencesDataStore`.
 - **Time-based code** (`RestTimerController`): `runTest` with virtual time (`advanceTimeBy`).
-- Add or update a test with every repository query, domain rule or controller behaviour change.
+- **ViewModels**: Robolectric with real repositories over `createTestDatabase()`. `MainDispatcherRule` puts `viewModelScope` on `runTest`'s virtual clock. Create them through a `ViewModelStore`, whose `clear()` plays leaving the screen (`onCleared`). Room writes on its own threads, outside the test scheduler: wait for results with `uiState.first { … }` or a Room flow's `first { … }`.
+- Add or update a test with every repository query, domain rule, controller or ViewModel behaviour change.
 
 ---
 
