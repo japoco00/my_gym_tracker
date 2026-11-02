@@ -16,12 +16,12 @@ fun AppNavHost(
         modifier = modifier,
     ) {
         routinesDestination(
-            onCreateRoutine = { navController.navigateToRoutineDetails() },
-            onOpenRoutine = { routineId -> navController.navigateToRoutineDetails(routineId) },
+            onCreateRoutine = { navController.navigateToRoutineDetail() },
+            onOpenRoutine = { routineId -> navController.navigateToRoutineDetail(routineId) },
             onOpenWorkout = { sessionId -> navController.navigateToWorkout(sessionId) },
         )
 
-        routineDetailsDestination(
+        routineDetailDestination(
             onNavigateBack = { navController.navigateUp() },
         )
 

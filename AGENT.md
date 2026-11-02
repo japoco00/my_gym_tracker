@@ -95,7 +95,7 @@ com.jacopo.mygymtracker
 ---
 
 ## 6. Navigation Patterns
-- Use **type-safe routes** with `kotlinx.serialization` (e.g., `@Serializable data object RoutinesRoute`, `@Serializable data class RoutineDetailsRoute(val routineId: Int? = null)`). Use nullable parameters (`Int? = null`) rather than magic sentinel integers like `-1`.
+- Use **type-safe routes** with `kotlinx.serialization` (e.g., `@Serializable data object RoutinesRoute`, `@Serializable data class RoutineDetailRoute(val routineId: Int? = null)`). Use nullable parameters (`Int? = null`) rather than magic sentinel integers like `-1`.
 - Each `ui/navigation/<Feature>Navigation.kt` provides:
   - Route declaration (`@Serializable`).
   - `NavGraphBuilder.<feature>Destination(...)`: creates the ViewModel, collects state, and exposes navigation as lambdas wired in `AppNavHost`.

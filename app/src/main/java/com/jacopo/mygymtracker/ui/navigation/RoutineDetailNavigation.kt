@@ -12,13 +12,13 @@ import com.jacopo.mygymtracker.ui.routinedetail.RoutineDetailViewModel
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RoutineDetailsRoute(val routineId: Int? = null)
+data class RoutineDetailRoute(val routineId: Int? = null)
 
-fun NavGraphBuilder.routineDetailsDestination(
+fun NavGraphBuilder.routineDetailDestination(
     onNavigateBack: () -> Unit,
 ) {
-    composable<RoutineDetailsRoute> { backStackEntry ->
-        val route = backStackEntry.toRoute<RoutineDetailsRoute>()
+    composable<RoutineDetailRoute> { backStackEntry ->
+        val route = backStackEntry.toRoute<RoutineDetailRoute>()
         val viewModel: RoutineDetailViewModel = viewModel(
             factory = RoutineDetailViewModel.factory(route.routineId),
         )
@@ -43,6 +43,6 @@ fun NavGraphBuilder.routineDetailsDestination(
     }
 }
 
-fun NavController.navigateToRoutineDetails(routineId: Int? = null) {
-    navigate(route = RoutineDetailsRoute(routineId = routineId))
+fun NavController.navigateToRoutineDetail(routineId: Int? = null) {
+    navigate(route = RoutineDetailRoute(routineId = routineId))
 }
