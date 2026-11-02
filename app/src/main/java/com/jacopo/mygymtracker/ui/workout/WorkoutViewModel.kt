@@ -12,7 +12,9 @@ import com.jacopo.mygymtracker.data.repository.WorkoutRepository
 import com.jacopo.mygymtracker.di.appContainer
 import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.Routine
+import com.jacopo.mygymtracker.domain.model.UserSettings
 import com.jacopo.mygymtracker.domain.model.toRoutineExercises
+import com.jacopo.mygymtracker.resttimer.RestTimerController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
@@ -34,6 +36,7 @@ class WorkoutViewModel(
     private val routineRepository: RoutineRepository,
     private val exerciseRepository: ExerciseRepository,
     private val settingsRepository: SettingsRepository,
+    private val restTimer: RestTimerController,
     private val applicationScope: CoroutineScope,
 ) : ViewModel() {
 
@@ -49,10 +52,13 @@ class WorkoutViewModel(
     /** The routine rewritten with the finished workout's plan, waiting for the user's answer. */
     private var routineUpdate: Routine? = null
 
+    private var restSeconds = UserSettings.DEFAULT_REST_SECONDS
+
     init {
         loadWorkout()
         observeExerciseCatalog()
-        observeWeightUnit()
+        observeSettings()
+        observeRestTimer()
     }
 
     private fun loadWorkout() {
@@ -77,11 +83,18 @@ class WorkoutViewModel(
         }
     }
 
-    private fun observeWeightUnit() {
+    private fun observeSettings() {
         viewModelScope.launch {
             settingsRepository.observeSettings().collect { settings ->
+                restSeconds = settings.restSeconds
                 _uiState.update { it.copy(weightUnit = settings.weightUnit) }
             }
+        }
+    }
+
+    private fun observeRestTimer() {
+        viewModelScope.launch {
+            restTimer.state.collect { timer -> _uiState.update { it.copy(restTimer = timer) } }
         }
     }
 
@@ -162,8 +175,18 @@ class WorkoutViewModel(
         updateSet(exerciseKey, setUuid) { it.copy(weightKg = weightKg.coerceAtLeast(0.0)) }
     }
 
-    fun toggleSetCompleted(exerciseKey: String, setUuid: String) {
-        updateSet(exerciseKey, setUuid) { it.copy(isCompleted = !it.isCompleted) }
+    /** Ticking a set off starts the rest before the next one. */
+    fun setCompleted(exerciseKey: String, setUuid: String, completed: Boolean) {
+        updateSet(exerciseKey, setUuid) { it.copy(isCompleted = completed) }
+        if (completed) restTimer.start(restSeconds)
+    }
+
+    fun adjustRest(deltaSeconds: Int) {
+        restTimer.adjust(deltaSeconds)
+    }
+
+    fun skipRest() {
+        restTimer.skip()
     }
 
     fun requestFinish() {
@@ -188,6 +211,7 @@ class WorkoutViewModel(
     fun confirmFinish() {
         if (closeJob != null) return
         _uiState.update { it.copy(dialog = null) }
+        restTimer.skip()
         closeJob = viewModelScope.launch {
             draftJob?.cancelAndJoin()
             val workout = _uiState.value.toDomain(sessionId)
@@ -209,6 +233,7 @@ class WorkoutViewModel(
     fun confirmDiscard() {
         if (closeJob != null) return
         _uiState.update { it.copy(dialog = null) }
+        restTimer.skip()
         closeJob = viewModelScope.launch {
             draftJob?.cancelAndJoin()
             hasUnsavedEdits = false
@@ -290,6 +315,7 @@ class WorkoutViewModel(
                     routineRepository = container.routineRepository,
                     exerciseRepository = container.exerciseRepository,
                     settingsRepository = container.settingsRepository,
+                    restTimer = container.restTimer,
                     applicationScope = container.applicationScope,
                 )
             }

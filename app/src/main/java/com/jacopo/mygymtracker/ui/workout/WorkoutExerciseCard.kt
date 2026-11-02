@@ -56,7 +56,7 @@ fun WorkoutExerciseCard(
     onDeleteSet: (setUuid: String) -> Unit,
     onRepsChange: (setUuid: String, Int) -> Unit,
     onWeightChange: (setUuid: String, Double) -> Unit,
-    onToggleCompleted: (setUuid: String) -> Unit,
+    onCompletedChange: (setUuid: String, completed: Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(modifier = modifier.padding(horizontal = 12.dp, vertical = 6.dp)) {
@@ -99,7 +99,7 @@ fun WorkoutExerciseCard(
                             weightUnit = weightUnit,
                             onRepsChange = { reps -> onRepsChange(set.uuid, reps) },
                             onWeightChange = { weight -> onWeightChange(set.uuid, weight) },
-                            onToggleCompleted = { onToggleCompleted(set.uuid) },
+                            onCompletedChange = { completed -> onCompletedChange(set.uuid, completed) },
                         )
                     }
                 }
@@ -123,7 +123,7 @@ private fun SetRow(
     weightUnit: WeightUnit,
     onRepsChange: (Int) -> Unit,
     onWeightChange: (Double) -> Unit,
-    onToggleCompleted: () -> Unit,
+    onCompletedChange: (Boolean) -> Unit,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -166,7 +166,7 @@ private fun SetRow(
         val doneLabel = stringResource(R.string.workout_set_done, number)
         Checkbox(
             checked = set.isCompleted,
-            onCheckedChange = { onToggleCompleted() },
+            onCheckedChange = onCompletedChange,
             modifier = Modifier
                 .width(CheckboxWidth)
                 .semantics { contentDescription = doneLabel },
@@ -203,7 +203,7 @@ private fun WorkoutExerciseCardPreview() {
             onDeleteSet = {},
             onRepsChange = { _, _ -> },
             onWeightChange = { _, _ -> },
-            onToggleCompleted = {},
+            onCompletedChange = { _, _ -> },
         )
     }
 }

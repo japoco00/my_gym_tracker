@@ -5,12 +5,14 @@ import com.jacopo.mygymtracker.domain.model.LoggedSet
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.domain.model.WorkoutExercise
 import com.jacopo.mygymtracker.domain.model.WorkoutSession
+import com.jacopo.mygymtracker.resttimer.RestTimer
 import java.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
  * @property previousSets sets performed last time, by catalog exercise id, shown as a reference.
+ * @property restTimer the running rest between sets, or null.
  * @property isClosed the workout was finished or discarded (or no longer exists): leave the screen.
  */
 data class WorkoutUiState(
@@ -21,6 +23,7 @@ data class WorkoutUiState(
     val previousSets: Map<Int, List<LoggedSet>> = emptyMap(),
     val catalogExercises: List<Exercise> = emptyList(),
     val weightUnit: WeightUnit = WeightUnit.KG,
+    val restTimer: RestTimer? = null,
     val dialog: WorkoutDialog? = null,
     val isAddExercisesSheetOpen: Boolean = false,
     val isLoading: Boolean = true,

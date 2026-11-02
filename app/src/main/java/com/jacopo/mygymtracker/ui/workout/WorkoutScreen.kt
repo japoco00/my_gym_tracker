@@ -2,10 +2,12 @@ package com.jacopo.mygymtracker.ui.workout
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -17,9 +19,11 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -28,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -37,6 +42,8 @@ import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.LoggedSet
+import com.jacopo.mygymtracker.domain.model.UserSettings
+import com.jacopo.mygymtracker.resttimer.RestTimer
 import com.jacopo.mygymtracker.ui.components.AddExercisesModal
 import com.jacopo.mygymtracker.ui.format.formatDuration
 import com.jacopo.mygymtracker.ui.theme.AppTheme
@@ -59,7 +66,9 @@ fun WorkoutScreen(
     onDeleteSet: (exerciseKey: String, setUuid: String) -> Unit,
     onRepsChange: (exerciseKey: String, setUuid: String, Int) -> Unit,
     onWeightChange: (exerciseKey: String, setUuid: String, Double) -> Unit,
-    onToggleSet: (exerciseKey: String, setUuid: String) -> Unit,
+    onSetCompletedChange: (exerciseKey: String, setUuid: String, completed: Boolean) -> Unit,
+    onAdjustRest: (deltaSeconds: Int) -> Unit,
+    onSkipRest: () -> Unit,
     onConfirmFinish: () -> Unit,
     onConfirmDiscard: () -> Unit,
     onConfirmRemoveExercise: (exerciseKey: String) -> Unit,
@@ -101,6 +110,11 @@ fun WorkoutScreen(
                 },
             )
         },
+        bottomBar = {
+            uiState.restTimer?.let { timer ->
+                RestTimerBar(timer = timer, onAdjust = onAdjustRest, onSkip = onSkipRest)
+            }
+        },
         modifier = modifier,
     ) { innerPadding ->
         if (uiState.isLoading) return@Scaffold
@@ -123,7 +137,7 @@ fun WorkoutScreen(
                     onDeleteSet = { setUuid -> onDeleteSet(exerciseKey, setUuid) },
                     onRepsChange = { setUuid, reps -> onRepsChange(exerciseKey, setUuid, reps) },
                     onWeightChange = { setUuid, weight -> onWeightChange(exerciseKey, setUuid, weight) },
-                    onToggleCompleted = { setUuid -> onToggleSet(exerciseKey, setUuid) },
+                    onCompletedChange = { setUuid, completed -> onSetCompletedChange(exerciseKey, setUuid, completed) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .animateItem(),
@@ -177,6 +191,47 @@ private fun ElapsedTime(startedAt: Instant) {
 }
 
 private fun millisSince(instant: Instant): Long = Duration.between(instant, Instant.now()).toMillis()
+
+/** Remaining rest with a progress bar, ticking on whole seconds. */
+@Composable
+private fun RestTimerBar(
+    timer: RestTimer,
+    onAdjust: (deltaSeconds: Int) -> Unit,
+    onSkip: () -> Unit,
+) {
+    val remainingMs by produceState(initialValue = timer.remainingMillis(System.currentTimeMillis()), timer) {
+        while (value > 0) {
+            delay((value % 1_000).takeIf { it > 0 } ?: 1_000)
+            value = timer.remainingMillis(System.currentTimeMillis())
+        }
+    }
+    val step = UserSettings.REST_STEP_SECONDS
+    Surface(color = MaterialTheme.colorScheme.secondaryContainer) {
+        Column(modifier = Modifier.navigationBarsPadding()) {
+            LinearProgressIndicator(
+                progress = { remainingMs / (timer.totalSeconds * 1_000f) },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
+            ) {
+                Icon(painter = painterResource(R.drawable.ic_timer), contentDescription = null)
+                Text(
+                    // Rounded up, so it reads 0:01 during the last second, not 0:00.
+                    text = formatDuration((remainingMs + 999) / 1_000),
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 12.dp),
+                )
+                TextButton(onClick = { onAdjust(-step) }) { Text(stringResource(R.string.rest_remove_time, step)) }
+                TextButton(onClick = { onAdjust(step) }) { Text(stringResource(R.string.rest_add_time, step)) }
+                TextButton(onClick = onSkip) { Text(stringResource(R.string.rest_skip)) }
+            }
+        }
+    }
+}
 
 @Composable
 private fun WorkoutDialogHost(
@@ -284,6 +339,7 @@ private fun WorkoutScreenPreview() {
                     ),
                 ),
                 previousSets = mapOf(1 to listOf(LoggedSet(reps = 8, weightKg = 77.5, isCompleted = true))),
+                restTimer = RestTimer(endsAtMillis = System.currentTimeMillis() + 62_000, totalSeconds = 90),
                 isLoading = false,
             ),
             onBack = {},
@@ -297,7 +353,9 @@ private fun WorkoutScreenPreview() {
             onDeleteSet = { _, _ -> },
             onRepsChange = { _, _, _ -> },
             onWeightChange = { _, _, _ -> },
-            onToggleSet = { _, _ -> },
+            onSetCompletedChange = { _, _, _ -> },
+            onAdjustRest = {},
+            onSkipRest = {},
             onConfirmFinish = {},
             onConfirmDiscard = {},
             onConfirmRemoveExercise = {},
