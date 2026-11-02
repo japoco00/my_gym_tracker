@@ -17,8 +17,6 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -66,9 +64,8 @@ dependencies {
     implementation(libs.androidx.material.icons.core)
     debugImplementation(libs.androidx.ui.tooling)
 
-    // Navigation & Serialization
+    // Navigation (type-safe routes are @Serializable)
     implementation(libs.androidx.navigation.compose)
-    implementation(libs.kotlinx.serialization.json)
 
     // Room Persistence
     implementation(libs.androidx.room.runtime)
@@ -86,10 +83,4 @@ dependencies {
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.androidx.junit)
-
-    // Instrumented Tests
-    androidTestImplementation(libs.androidx.test.runner)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.test.core)
-    androidTestImplementation(libs.kotlinx.coroutines.test)
 }
