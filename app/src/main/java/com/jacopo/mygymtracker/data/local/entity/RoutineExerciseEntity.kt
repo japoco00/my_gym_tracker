@@ -3,11 +3,14 @@ package com.jacopo.mygymtracker.data.local.entity
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
+import androidx.room.PrimaryKey
 
-/** Many-to-many link between [RoutineEntity] and catalog [ExerciseEntity]. */
+/**
+ * A catalog [ExerciseEntity] placed inside a [RoutineEntity] at [position].
+ * Deleting the routine removes the link; a catalog exercise cannot be deleted while linked.
+ */
 @Entity(
-    tableName = "routine_exercise_cross_ref",
-    primaryKeys = ["routineId", "exerciseId"],
+    tableName = "routine_exercises",
     foreignKeys = [
         ForeignKey(
             entity = RoutineEntity::class,
@@ -19,12 +22,15 @@ import androidx.room.Index
             entity = ExerciseEntity::class,
             parentColumns = ["exerciseId"],
             childColumns = ["exerciseId"],
-            onDelete = ForeignKey.CASCADE,
+            onDelete = ForeignKey.RESTRICT,
         ),
     ],
     indices = [Index("routineId"), Index("exerciseId")],
 )
-data class RoutineExerciseCrossRef(
+data class RoutineExerciseEntity(
+    @PrimaryKey(autoGenerate = true)
+    val routineExerciseId: Int = 0,
     val routineId: Int,
     val exerciseId: Int,
+    val position: Int,
 )

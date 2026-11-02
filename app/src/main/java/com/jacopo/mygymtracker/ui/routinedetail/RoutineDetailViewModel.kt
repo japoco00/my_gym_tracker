@@ -69,7 +69,7 @@ class RoutineDetailViewModel(
     fun addEmptyExercise() {
         val newExercise = ExerciseUiState(
             name = "",
-            category = Category.STRENGTH,
+            category = Category.OTHER,
             sets = listOf(SetUiState()),
         )
         _uiState.update { state ->
@@ -79,7 +79,7 @@ class RoutineDetailViewModel(
 
     fun addCatalogExercises(selected: List<Exercise>) {
         _uiState.update { state ->
-            val existingCatalogIds = state.exercises.mapNotNull { it.id }.toSet()
+            val existingCatalogIds = state.exercises.mapNotNull { it.exerciseId }.toSet()
             val toAdd = selected
                 .filter { it.id == null || it.id !in existingCatalogIds }
                 .map { it.toUiState() }
@@ -109,7 +109,7 @@ class RoutineDetailViewModel(
             val lastSet = exercise.sets.lastOrNull()
             val nextSet = SetUiState(
                 reps = lastSet?.reps ?: 0,
-                weight = lastSet?.weight ?: 0,
+                weightKg = lastSet?.weightKg ?: 0.0,
             )
             exercise.copy(sets = exercise.sets + nextSet)
         }
@@ -125,8 +125,8 @@ class RoutineDetailViewModel(
         updateSet(exerciseKey, setUuid) { it.copy(reps = reps.coerceAtLeast(0)) }
     }
 
-    fun updateSetWeight(exerciseKey: String, setUuid: String, weight: Int) {
-        updateSet(exerciseKey, setUuid) { it.copy(weight = weight.coerceAtLeast(0)) }
+    fun updateSetWeight(exerciseKey: String, setUuid: String, weightKg: Double) {
+        updateSet(exerciseKey, setUuid) { it.copy(weightKg = weightKg.coerceAtLeast(0.0)) }
     }
 
     fun saveRoutine(onSaved: () -> Unit = {}) {

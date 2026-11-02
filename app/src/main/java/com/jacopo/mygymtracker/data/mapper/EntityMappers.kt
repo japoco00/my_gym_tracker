@@ -1,38 +1,14 @@
 package com.jacopo.mygymtracker.data.mapper
 
 import com.jacopo.mygymtracker.data.local.entity.ExerciseEntity
+import com.jacopo.mygymtracker.data.local.entity.PlannedSetEntity
 import com.jacopo.mygymtracker.data.local.entity.RoutineEntity
+import com.jacopo.mygymtracker.data.local.entity.RoutineExerciseWithDetails
 import com.jacopo.mygymtracker.data.local.entity.RoutineWithExercises
-import com.jacopo.mygymtracker.data.local.entity.SetEntity
 import com.jacopo.mygymtracker.domain.model.Exercise
-import com.jacopo.mygymtracker.domain.model.ExerciseSet
+import com.jacopo.mygymtracker.domain.model.PlannedSet
 import com.jacopo.mygymtracker.domain.model.Routine
-
-// region Routine
-
-fun Routine.toEntity(): RoutineEntity = RoutineEntity(
-    routineId = id ?: 0,
-    name = name,
-    note = note,
-)
-
-/**
- * Assembles a fully populated [Routine] from its Room relation and the sets that belong to it.
- * Sets are matched to exercises by `exerciseId`.
- */
-fun RoutineWithExercises.toDomain(routineSets: List<SetEntity>): Routine {
-    val setsByExercise = routineSets.groupBy { it.exerciseId }
-    return Routine(
-        id = routine.routineId,
-        name = routine.name,
-        note = routine.note,
-        exercises = exercises.map { exercise ->
-            exercise.toDomain(sets = setsByExercise[exercise.exerciseId].orEmpty().map { it.toDomain() })
-        },
-    )
-}
-
-// endregion
+import com.jacopo.mygymtracker.domain.model.RoutineExercise
 
 // region Exercise
 
@@ -43,30 +19,47 @@ fun Exercise.toEntity(): ExerciseEntity = ExerciseEntity(
     note = note,
 )
 
-fun ExerciseEntity.toDomain(sets: List<ExerciseSet> = emptyList()): Exercise = Exercise(
+fun ExerciseEntity.toDomain(): Exercise = Exercise(
     id = exerciseId,
     name = name,
     category = category,
     note = note,
-    sets = sets,
 )
 
 // endregion
 
-// region Set
+// region Routine
 
-fun ExerciseSet.toEntity(exerciseId: Int, routineId: Int): SetEntity = SetEntity(
-    setId = id ?: 0,
-    exerciseId = exerciseId,
-    routineId = routineId,
-    weight = weight,
-    reps = reps,
+fun Routine.toEntity(): RoutineEntity = RoutineEntity(
+    routineId = id ?: 0,
+    name = name,
+    note = note,
 )
 
-fun SetEntity.toDomain(): ExerciseSet = ExerciseSet(
-    id = setId,
+fun RoutineWithExercises.toDomain(): Routine = Routine(
+    id = routine.routineId,
+    name = routine.name,
+    note = routine.note,
+    exercises = exercises
+        .sortedBy { it.routineExercise.position }
+        .map { it.toDomain() },
+)
+
+fun RoutineExerciseWithDetails.toDomain(): RoutineExercise = RoutineExercise(
+    exercise = exercise.toDomain(),
+    sets = sets.sortedBy { it.position }.map { it.toDomain() },
+)
+
+fun PlannedSet.toEntity(routineExerciseId: Int, position: Int): PlannedSetEntity = PlannedSetEntity(
+    routineExerciseId = routineExerciseId,
+    position = position,
     reps = reps,
-    weight = weight,
+    weightKg = weightKg,
+)
+
+fun PlannedSetEntity.toDomain(): PlannedSet = PlannedSet(
+    reps = reps,
+    weightKg = weightKg,
 )
 
 // endregion

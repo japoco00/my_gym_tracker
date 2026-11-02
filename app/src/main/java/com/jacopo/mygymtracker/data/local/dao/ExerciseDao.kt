@@ -11,6 +11,10 @@ interface ExerciseDao {
     @Insert
     suspend fun insert(exercise: ExerciseEntity): Long
 
+    /** Case-insensitive lookup, thanks to the `NOCASE` collation of the name column. */
+    @Query("SELECT * FROM exercises WHERE name = :name LIMIT 1")
+    suspend fun findByName(name: String): ExerciseEntity?
+
     @Query("SELECT * FROM exercises ORDER BY name")
     fun observeAll(): Flow<List<ExerciseEntity>>
 }

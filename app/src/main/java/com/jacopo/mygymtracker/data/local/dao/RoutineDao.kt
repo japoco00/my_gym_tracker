@@ -2,12 +2,12 @@ package com.jacopo.mygymtracker.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
+import com.jacopo.mygymtracker.data.local.entity.PlannedSetEntity
 import com.jacopo.mygymtracker.data.local.entity.RoutineEntity
-import com.jacopo.mygymtracker.data.local.entity.RoutineExerciseCrossRef
+import com.jacopo.mygymtracker.data.local.entity.RoutineExerciseEntity
 import com.jacopo.mygymtracker.data.local.entity.RoutineWithExercises
 import kotlinx.coroutines.flow.Flow
 
@@ -22,17 +22,21 @@ interface RoutineDao {
     @Query("DELETE FROM routines WHERE routineId = :routineId")
     suspend fun deleteById(routineId: Int)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCrossRef(crossRef: RoutineExerciseCrossRef)
+    @Insert
+    suspend fun insertRoutineExercise(routineExercise: RoutineExerciseEntity): Long
 
-    @Query("DELETE FROM routine_exercise_cross_ref WHERE routineId = :routineId")
-    suspend fun deleteCrossRefsForRoutine(routineId: Int)
+    @Insert
+    suspend fun insertPlannedSets(sets: List<PlannedSetEntity>)
+
+    /** Removes every exercise link of a routine. Planned sets cascade. */
+    @Query("DELETE FROM routine_exercises WHERE routineId = :routineId")
+    suspend fun deleteRoutineExercises(routineId: Int)
 
     @Transaction
-    @Query("SELECT * FROM routines")
-    fun observeRoutinesWithExercises(): Flow<List<RoutineWithExercises>>
+    @Query("SELECT * FROM routines ORDER BY routineId")
+    fun observeAllWithExercises(): Flow<List<RoutineWithExercises>>
 
     @Transaction
     @Query("SELECT * FROM routines WHERE routineId = :routineId")
-    suspend fun getRoutineWithExercises(routineId: Int): RoutineWithExercises?
+    suspend fun getWithExercises(routineId: Int): RoutineWithExercises?
 }

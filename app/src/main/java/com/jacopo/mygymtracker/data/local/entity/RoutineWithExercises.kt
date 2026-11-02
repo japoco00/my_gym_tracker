@@ -1,17 +1,19 @@
 package com.jacopo.mygymtracker.data.local.entity
 
 import androidx.room.Embedded
-import androidx.room.Junction
 import androidx.room.Relation
 
-/** Room relation: a routine together with the catalog exercises linked to it. */
+/**
+ * Room relation: a routine with its exercise links, catalog exercises, and planned sets.
+ * [exercises] come back in no particular order; sort them by `position` when mapping.
+ */
 data class RoutineWithExercises(
     @Embedded
     val routine: RoutineEntity,
     @Relation(
+        entity = RoutineExerciseEntity::class,
         parentColumn = "routineId",
-        entityColumn = "exerciseId",
-        associateBy = Junction(RoutineExerciseCrossRef::class),
+        entityColumn = "routineId",
     )
-    val exercises: List<ExerciseEntity>,
+    val exercises: List<RoutineExerciseWithDetails>,
 )

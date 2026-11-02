@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.ui.components.SwipeToDeleteContainer
 import com.jacopo.mygymtracker.ui.theme.AppTheme
+import kotlin.math.roundToInt
 
 @Composable
 fun ExerciseCard(
@@ -38,7 +39,7 @@ fun ExerciseCard(
     onAddSet: () -> Unit,
     onDeleteSet: (setUuid: String) -> Unit,
     onRepsChange: (setUuid: String, Int) -> Unit,
-    onWeightChange: (setUuid: String, Int) -> Unit,
+    onWeightChange: (setUuid: String, Double) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -104,7 +105,7 @@ fun ExerciseCard(
 private fun SetRow(
     set: SetUiState,
     onRepsChange: (Int) -> Unit,
-    onWeightChange: (Int) -> Unit,
+    onWeightChange: (Double) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -120,9 +121,9 @@ private fun SetRow(
             modifier = Modifier.weight(1f),
         )
         StepperNumberField(
-            value = set.weight,
+            value = set.weightKg.roundToInt(),
             step = 5,
-            onValueChange = onWeightChange,
+            onValueChange = { onWeightChange(it.toDouble()) },
             modifier = Modifier.weight(1f),
         )
     }
@@ -178,10 +179,10 @@ private fun ExerciseCardPreview() {
     AppTheme {
         ExerciseCard(
             exercise = ExerciseUiState(
-                id = 1,
+                exerciseId = 1,
                 name = "Bench Press",
                 category = Category.CHEST,
-                sets = listOf(SetUiState(reps = 8, weight = 80)),
+                sets = listOf(SetUiState(reps = 8, weightKg = 80.0)),
             ),
             onNameChange = {},
             onAddSet = {},

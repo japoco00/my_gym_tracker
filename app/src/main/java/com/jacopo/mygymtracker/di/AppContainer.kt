@@ -21,7 +21,6 @@ class AppContainer(context: Context) {
             database = database,
             routineDao = database.routineDao(),
             exerciseDao = database.exerciseDao(),
-            setDao = database.setDao(),
         )
     }
 

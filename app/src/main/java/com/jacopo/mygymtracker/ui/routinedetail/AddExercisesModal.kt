@@ -244,7 +244,7 @@ private fun AddExercisesSheetContentPreview() {
             exercises = listOf(
                 Exercise(id = 1, name = "Bench Press", category = Category.CHEST),
                 Exercise(id = 2, name = "Squat", category = Category.LEGS),
-                Exercise(id = 3, name = "Deadlift", category = Category.STRENGTH),
+                Exercise(id = 3, name = "Deadlift", category = Category.BACK),
             ),
             selectedExercises = listOf(
                 Exercise(id = 1, name = "Bench Press", category = Category.CHEST),

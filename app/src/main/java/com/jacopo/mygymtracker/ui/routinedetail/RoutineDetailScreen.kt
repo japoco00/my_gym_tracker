@@ -41,7 +41,7 @@ fun RoutineDetailScreen(
     onAddSet: (exerciseKey: String) -> Unit,
     onDeleteSet: (exerciseKey: String, setUuid: String) -> Unit,
     onRepsChange: (exerciseKey: String, setUuid: String, Int) -> Unit,
-    onWeightChange: (exerciseKey: String, setUuid: String, Int) -> Unit,
+    onWeightChange: (exerciseKey: String, setUuid: String, Double) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     BackHandler(onBack = onBack)
@@ -137,16 +137,16 @@ private fun RoutineDetailScreenPreview() {
                 isLoading = false,
                 exercises = listOf(
                     ExerciseUiState(
-                        id = 1,
+                        exerciseId = 1,
                         name = "Bench Press",
                         category = Category.CHEST,
-                        sets = listOf(SetUiState(reps = 10, weight = 60)),
+                        sets = listOf(SetUiState(reps = 10, weightKg = 60.0)),
                     ),
                     ExerciseUiState(
-                        id = 2,
+                        exerciseId = 2,
                         name = "Squat",
                         category = Category.LEGS,
-                        sets = listOf(SetUiState(reps = 8, weight = 100)),
+                        sets = listOf(SetUiState(reps = 8, weightKg = 100.0)),
                     ),
                 ),
             ),

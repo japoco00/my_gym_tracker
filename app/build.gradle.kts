@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.androidx.room)
     id("com.google.devtools.ksp") version "2.3.6"
     id("org.jetbrains.kotlin.plugin.serialization") version "2.2.0"
 }
@@ -42,6 +43,10 @@ kotlin {
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 

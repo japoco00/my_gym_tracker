@@ -13,8 +13,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
-import com.jacopo.mygymtracker.domain.model.ExerciseSet
+import com.jacopo.mygymtracker.domain.model.PlannedSet
 import com.jacopo.mygymtracker.domain.model.Routine
+import com.jacopo.mygymtracker.domain.model.RoutineExercise
 import com.jacopo.mygymtracker.ui.theme.AppTheme
 
 @Composable
@@ -50,11 +51,11 @@ fun RoutineOverviewCard(
                         .padding(top = 4.dp),
                 )
             }
-            routine.exercises.forEach { exercise ->
-                val summary = if (exercise.sets.isEmpty()) {
+            routine.exercises.forEach { (exercise, sets) ->
+                val summary = if (sets.isEmpty()) {
                     "No sets"
                 } else {
-                    "${exercise.sets.size} x ${exercise.sets.joinToString(", ") { it.reps.toString() }}"
+                    "${sets.size} x ${sets.joinToString(", ") { it.reps.toString() }}"
                 }
                 Text(
                     text = "${exercise.name}: $summary",
@@ -76,13 +77,11 @@ private fun RoutineOverviewCardPreview() {
                 name = "Push Day",
                 note = "Focus on controlled tempo",
                 exercises = listOf(
-                    Exercise(
-                        id = 1,
-                        name = "Bench Press",
-                        category = Category.CHEST,
+                    RoutineExercise(
+                        exercise = Exercise(id = 1, name = "Bench Press", category = Category.CHEST),
                         sets = listOf(
-                            ExerciseSet(reps = 8, weight = 80),
-                            ExerciseSet(reps = 8, weight = 80),
+                            PlannedSet(reps = 8, weightKg = 80.0),
+                            PlannedSet(reps = 8, weightKg = 80.0),
                         ),
                     ),
                 ),
