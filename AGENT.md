@@ -32,7 +32,7 @@ com.jacopo.mygymtracker
     ├── components/       # Shared, feature-agnostic composables
     ├── format/           # Display formatting: dates, durations, weights, enum labels
     ├── navigation/       # AppNavHost, TopLevelDestination, one *Navigation.kt per feature
-    ├── <feature>/        # routines, routinedetail, workout, history, progress, exercises, settings
+    ├── <feature>/        # routines, workout, history, progress, exercises, settings (list + detail screens together)
     └── theme/            # Material 3 Theme, Color, Typography
 ```
 

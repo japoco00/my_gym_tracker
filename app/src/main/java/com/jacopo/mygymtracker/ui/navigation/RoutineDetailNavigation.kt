@@ -7,8 +7,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import com.jacopo.mygymtracker.ui.routinedetail.RoutineDetailScreen
-import com.jacopo.mygymtracker.ui.routinedetail.RoutineDetailViewModel
+import com.jacopo.mygymtracker.ui.routines.RoutineDetailScreen
+import com.jacopo.mygymtracker.ui.routines.RoutineDetailViewModel
 import kotlinx.serialization.Serializable
 
 @Serializable

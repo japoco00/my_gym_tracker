@@ -1,4 +1,4 @@
-package com.jacopo.mygymtracker.ui.routinedetail
+package com.jacopo.mygymtracker.ui.routines
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement

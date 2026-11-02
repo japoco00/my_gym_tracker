@@ -1,4 +1,4 @@
-package com.jacopo.mygymtracker.ui.routinedetail
+package com.jacopo.mygymtracker.ui.routines
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

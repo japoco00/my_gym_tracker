@@ -1,4 +1,4 @@
-package com.jacopo.mygymtracker.ui.routinedetail
+package com.jacopo.mygymtracker.ui.routines
 
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
