@@ -6,6 +6,11 @@
     <string name="action_clear">Clear</string>
     <string name="action_delete">Delete</string>
     <string name="action_undo">Undo</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_save">Save</string>
+    <string name="action_ok">OK</string>
+    <string name="action_done">Done</string>
+    <string name="action_search">Search</string>
     <string name="unit_kg">kg</string>
     <string name="unit_lb">lb</string>
     <string name="rest_decrease">−%1$d s</string>
@@ -13,6 +18,7 @@
 
     <!-- Navigation -->
     <string name="nav_routines">Routines</string>
+    <string name="nav_exercises">Exercises</string>
     <string name="nav_settings">Settings</string>
 
     <!-- Routines -->
@@ -31,6 +37,22 @@
     <string name="set_reps">Reps</string>
     <string name="set_weight">Weight (%1$s)</string>
     <string name="action_add_set">Add set</string>
+
+    <!-- Exercise catalog -->
+    <string name="exercises_title">Exercises</string>
+    <string name="exercises_search_hint">Search exercises</string>
+    <string name="exercises_empty">No exercises found.</string>
+    <string name="exercises_create">New exercise</string>
+    <string name="exercise_dialog_title_new">New exercise</string>
+    <string name="exercise_dialog_title_edit">Edit exercise</string>
+    <string name="exercise_name_taken">An exercise with this name already exists.</string>
+    <string name="exercise_delete_title">Delete “%1$s”?</string>
+    <string name="exercise_delete_message">It will be removed from the exercise list.</string>
+    <string name="exercise_in_use_title">Can’t delete “%1$s”</string>
+    <string name="exercise_in_use_message">It’s used in a routine or a logged workout. Remove it from those first.</string>
+    <string name="add_exercises_title">Add exercises</string>
+    <string name="add_exercises_select">Select</string>
+    <string name="add_exercises_deselect">Deselect</string>
 
     <!-- Exercise categories -->
     <string name="category_chest">Chest</string>

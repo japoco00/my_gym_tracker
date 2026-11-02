@@ -1,4 +1,4 @@
-package com.jacopo.mygymtracker.ui.routinedetail
+package com.jacopo.mygymtracker.ui.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,10 +37,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
+import com.jacopo.mygymtracker.ui.format.label
 import com.jacopo.mygymtracker.ui.theme.AppTheme
 import kotlinx.coroutines.launch
 
@@ -118,27 +121,27 @@ private fun AddExercisesSheetContent(
             ) {
                 if (!isSearching) {
                     Text(
-                        text = "Add Exercises",
+                        text = stringResource(R.string.add_exercises_title),
                         style = MaterialTheme.typography.headlineSmall,
                         modifier = Modifier.weight(1f),
                     )
                     IconButton(onClick = onStartSearch) {
                         Icon(
                             imageVector = Icons.Default.Search,
-                            contentDescription = "Search exercises",
+                            contentDescription = stringResource(R.string.action_search),
                         )
                     }
                 } else {
                     TextField(
                         value = searchQuery,
                         onValueChange = onSearchQueryChange,
-                        placeholder = { Text(text = "Search exercises") },
+                        placeholder = { Text(text = stringResource(R.string.exercises_search_hint)) },
                         singleLine = true,
                         trailingIcon = {
                             IconButton(onClick = onClearSearch) {
                                 Icon(
                                     imageVector = Icons.Default.Clear,
-                                    contentDescription = "Clear search",
+                                    contentDescription = stringResource(R.string.action_clear),
                                 )
                             }
                         },
@@ -153,7 +156,7 @@ private fun AddExercisesSheetContent(
                     modifier = Modifier.fillMaxSize(),
                 ) {
                     Text(
-                        text = "No exercises in catalog yet.",
+                        text = stringResource(R.string.exercises_empty),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -195,9 +198,9 @@ private fun AddExercisesSheetContent(
                                             Icons.Default.AddCircle
                                         },
                                         contentDescription = if (isSelected) {
-                                            "Deselect exercise"
+                                            stringResource(R.string.add_exercises_deselect)
                                         } else {
-                                            "Select exercise"
+                                            stringResource(R.string.add_exercises_select)
                                         },
                                     )
                                 }
@@ -212,7 +215,7 @@ private fun AddExercisesSheetContent(
                                     onClick = {},
                                     label = {
                                         Text(
-                                            text = exercise.category.name,
+                                            text = exercise.category.label(),
                                             style = MaterialTheme.typography.labelSmall,
                                         )
                                     },
@@ -231,7 +234,7 @@ private fun AddExercisesSheetContent(
                 .align(Alignment.BottomEnd)
                 .padding(16.dp),
         ) {
-            Icon(imageVector = Icons.Default.Done, contentDescription = "Confirm selection")
+            Icon(imageVector = Icons.Default.Done, contentDescription = stringResource(R.string.action_done))
         }
     }
 }

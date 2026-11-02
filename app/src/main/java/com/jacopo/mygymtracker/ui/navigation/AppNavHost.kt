@@ -24,6 +24,8 @@ fun AppNavHost(
             onNavigateBack = { navController.navigateUp() },
         )
 
+        exercisesDestination()
+
         settingsDestination()
     }
 }
