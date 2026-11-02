@@ -25,6 +25,8 @@ fun NavGraphBuilder.routinesDestination(
             onCreateRoutine = onCreateRoutine,
             onRoutineClick = onOpenRoutine,
             onDeleteRoutine = viewModel::deleteRoutine,
+            onUndoDelete = viewModel::undoDelete,
+            onConfirmDelete = viewModel::confirmDelete,
         )
     }
 }

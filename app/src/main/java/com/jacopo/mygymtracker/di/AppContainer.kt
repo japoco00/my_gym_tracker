@@ -11,12 +11,18 @@ import com.jacopo.mygymtracker.data.repository.ExerciseRepository
 import com.jacopo.mygymtracker.data.repository.RoutineRepository
 import com.jacopo.mygymtracker.data.repository.SettingsRepository
 import com.jacopo.mygymtracker.data.repository.WorkoutRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 
 /**
  * Manual dependency container. Owns every app-scoped singleton.
  * Dependencies are created lazily on first access.
  */
 class AppContainer(context: Context) {
+
+    /** For work that must finish even if the screen that started it goes away. */
+    val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private val database: AppDatabase by lazy { AppDatabase.create(context) }
 
