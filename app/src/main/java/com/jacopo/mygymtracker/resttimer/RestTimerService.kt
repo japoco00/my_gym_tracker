@@ -51,6 +51,8 @@ class RestTimerService : Service() {
                 this,
                 RestTimerNotifications.COUNTDOWN_ID,
                 RestTimerNotifications.countdown(this, controller.state.value),
+                // ServiceCompat drops this API 34 type on older releases.
+                //noinspection InlinedApi
                 ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
             )
         }
