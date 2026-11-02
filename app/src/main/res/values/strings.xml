@@ -87,7 +87,10 @@
     <string name="progress_metric_e1rm">e1RM</string>
     <string name="progress_metric_heaviest">Heaviest</string>
     <string name="progress_metric_volume">Volume</string>
-    <string name="progress_metric_e1rm_description">Estimated one-rep max of your best set with %1$d reps or fewer.</string>
+    <plurals name="progress_metric_e1rm_description">
+        <item quantity="one">Estimated one-rep max of your best single.</item>
+        <item quantity="other">Estimated one-rep max of your best set with %d reps or fewer.</item>
+    </plurals>
     <string name="progress_metric_heaviest_description">Heaviest weight lifted in the workout.</string>
     <string name="progress_metric_volume_description">Total weight × reps in the workout.</string>
     <string name="progress_no_chart_data">Nothing to chart for this metric yet.</string>
