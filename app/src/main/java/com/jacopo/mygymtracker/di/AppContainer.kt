@@ -11,6 +11,9 @@ import com.jacopo.mygymtracker.data.repository.ExerciseRepository
 import com.jacopo.mygymtracker.data.repository.RoutineRepository
 import com.jacopo.mygymtracker.data.repository.SettingsRepository
 import com.jacopo.mygymtracker.data.repository.WorkoutRepository
+import com.jacopo.mygymtracker.resttimer.RestTimerController
+import com.jacopo.mygymtracker.resttimer.RestTimerNotifications
+import com.jacopo.mygymtracker.resttimer.RestTimerService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -49,6 +52,14 @@ class AppContainer(context: Context) {
     val settingsRepository: SettingsRepository by lazy {
         SettingsRepository(
             PreferenceDataStoreFactory.create { context.preferencesDataStoreFile("settings") },
+        )
+    }
+
+    val restTimer: RestTimerController by lazy {
+        RestTimerController(
+            scope = applicationScope,
+            onRestStarted = { RestTimerService.start(context) },
+            onRestFinished = { RestTimerNotifications.notifyRestOver(context) },
         )
     }
 }
