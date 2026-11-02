@@ -3,6 +3,7 @@
 
     <!-- Common -->
     <string name="action_back">Back</string>
+    <string name="action_clear">Clear</string>
     <string name="action_delete">Delete</string>
     <string name="action_undo">Undo</string>
     <string name="unit_kg">kg</string>
@@ -23,6 +24,26 @@
     <!-- Routine editor -->
     <string name="routine_editor_title_new">New routine</string>
     <string name="routine_editor_title_edit">Edit routine</string>
+    <string name="routine_name_hint">Routine name</string>
+    <string name="routine_add_from_catalog">From catalog</string>
+    <string name="routine_add_new_exercise">New exercise</string>
+    <string name="exercise_name_hint">Exercise name</string>
+    <string name="set_reps">Reps</string>
+    <string name="set_weight">Weight (%1$s)</string>
+    <string name="action_add_set">Add set</string>
+
+    <!-- Exercise categories -->
+    <string name="category_chest">Chest</string>
+    <string name="category_back">Back</string>
+    <string name="category_shoulders">Shoulders</string>
+    <string name="category_biceps">Biceps</string>
+    <string name="category_triceps">Triceps</string>
+    <string name="category_legs">Legs</string>
+    <string name="category_glutes">Glutes</string>
+    <string name="category_core">Core</string>
+    <string name="category_full_body">Full body</string>
+    <string name="category_cardio">Cardio</string>
+    <string name="category_other">Other</string>
 
     <!-- Settings -->
     <string name="settings_title">Settings</string>

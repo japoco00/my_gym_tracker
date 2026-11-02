@@ -5,6 +5,7 @@ import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.PlannedSet
 import com.jacopo.mygymtracker.domain.model.Routine
 import com.jacopo.mygymtracker.domain.model.RoutineExercise
+import com.jacopo.mygymtracker.domain.model.WeightUnit
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -15,6 +16,7 @@ data class RoutineDetailUiState(
     val exercises: List<ExerciseUiState> = emptyList(),
     val catalogExercises: List<Exercise> = emptyList(),
     val isAddExercisesSheetOpen: Boolean = false,
+    val weightUnit: WeightUnit = WeightUnit.KG,
     val isLoading: Boolean = true,
 )
 
@@ -41,14 +43,12 @@ data class SetUiState @OptIn(ExperimentalUuidApi::class) constructor(
 
 // region Mappers
 
-fun Routine.toUiState(
-    catalogExercises: List<Exercise> = emptyList(),
-): RoutineDetailUiState = RoutineDetailUiState(
-    id = id,
-    name = name,
-    note = note,
-    exercises = exercises.map { it.toUiState() },
-    catalogExercises = catalogExercises,
+/** Fills the editor with [routine], keeping screen-level state such as the catalog and unit. */
+fun RoutineDetailUiState.withRoutine(routine: Routine): RoutineDetailUiState = copy(
+    id = routine.id,
+    name = routine.name,
+    note = routine.note,
+    exercises = routine.exercises.map { it.toUiState() },
     isLoading = false,
 )
 
@@ -69,24 +69,25 @@ fun Exercise.toUiState(): ExerciseUiState = ExerciseUiState(
     sets = List(3) { SetUiState() },
 )
 
-/** New exercises left without a name are dropped instead of polluting the catalog. */
-fun RoutineDetailUiState.toDomain(): Routine = Routine(
-    id = id,
-    name = name.trim().ifEmpty { "Untitled Routine" },
-    note = note?.trim()?.takeIf { it.isNotEmpty() },
-    exercises = exercises
-        .filter { it.exerciseId != null || it.name.isNotBlank() }
-        .map { exercise ->
-            RoutineExercise(
-                exercise = Exercise(
-                    id = exercise.exerciseId,
-                    name = exercise.name.trim(),
-                    category = exercise.category,
-                    note = exercise.note,
-                ),
-                sets = exercise.sets.map { PlannedSet(reps = it.reps, weightKg = it.weightKg) },
-            )
-        },
+/**
+ * The routine to save, or `null` when a new routine was left completely empty
+ * (no name, no exercises) and there is nothing worth keeping.
+ * New exercises left without a name are dropped instead of polluting the catalog.
+ */
+fun RoutineDetailUiState.toDomainOrNull(): Routine? {
+    val namedExercises = exercises.filter { it.exerciseId != null || it.name.isNotBlank() }
+    if (id == null && name.isBlank() && namedExercises.isEmpty()) return null
+    return Routine(
+        id = id,
+        name = name.trim().ifEmpty { "Untitled Routine" },
+        note = note?.trim()?.takeIf { it.isNotEmpty() },
+        exercises = namedExercises.map { it.toDomain() },
+    )
+}
+
+private fun ExerciseUiState.toDomain(): RoutineExercise = RoutineExercise(
+    exercise = Exercise(id = exerciseId, name = name.trim(), category = category, note = note),
+    sets = sets.map { PlannedSet(reps = it.reps, weightKg = it.weightKg) },
 )
 
 // endregion

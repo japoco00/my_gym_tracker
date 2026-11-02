@@ -7,9 +7,11 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.jacopo.mygymtracker.data.repository.ExerciseRepository
 import com.jacopo.mygymtracker.data.repository.RoutineRepository
+import com.jacopo.mygymtracker.data.repository.SettingsRepository
 import com.jacopo.mygymtracker.di.appContainer
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,22 +24,33 @@ class RoutineDetailViewModel(
     private val routineId: Int?,
     private val routineRepository: RoutineRepository,
     private val exerciseRepository: ExerciseRepository,
+    private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RoutineDetailUiState())
     val uiState: StateFlow<RoutineDetailUiState> = _uiState.asStateFlow()
 
+    private var saveJob: Job? = null
+
     init {
         loadInitialRoutine()
         observeExerciseCatalog()
+        observeWeightUnit()
     }
 
     private fun loadInitialRoutine() {
         viewModelScope.launch {
             val routine = routineId?.let { routineRepository.getRoutine(it) }
             _uiState.update { state ->
-                routine?.toUiState(catalogExercises = state.catalogExercises)
-                    ?: state.copy(name = "New Routine", isLoading = false)
+                routine?.let(state::withRoutine) ?: state.copy(isLoading = false)
+            }
+        }
+    }
+
+    private fun observeWeightUnit() {
+        viewModelScope.launch {
+            settingsRepository.observeSettings().collect { settings ->
+                _uiState.update { it.copy(weightUnit = settings.weightUnit) }
             }
         }
     }
@@ -129,15 +142,18 @@ class RoutineDetailViewModel(
         updateSet(exerciseKey, setUuid) { it.copy(weightKg = weightKg.coerceAtLeast(0.0)) }
     }
 
+    /** Saves and then calls [onSaved]. An empty new routine is not saved at all. */
     fun saveRoutine(onSaved: () -> Unit = {}) {
-        val snapshot = _uiState.value
-        if (snapshot.isLoading) {
+        // A second back press while saving must not insert the new routine twice.
+        if (saveJob != null) return
+        val routine = _uiState.value.takeUnless { it.isLoading }?.toDomainOrNull()
+        if (routine == null) {
             onSaved()
             return
         }
-        viewModelScope.launch {
+        saveJob = viewModelScope.launch {
             withContext(NonCancellable) {
-                routineRepository.saveRoutine(snapshot.toDomain())
+                routineRepository.saveRoutine(routine)
             }
             onSaved()
         }
@@ -178,6 +194,7 @@ class RoutineDetailViewModel(
                     routineId = routineId,
                     routineRepository = container.routineRepository,
                     exerciseRepository = container.exerciseRepository,
+                    settingsRepository = container.settingsRepository,
                 )
             }
         }

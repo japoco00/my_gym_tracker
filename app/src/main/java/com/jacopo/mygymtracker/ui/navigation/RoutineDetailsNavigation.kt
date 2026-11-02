@@ -29,6 +29,7 @@ fun NavGraphBuilder.routineDetailsDestination(
             onBack = { viewModel.saveRoutine(onSaved = onNavigateBack) },
             onNameChange = viewModel::updateRoutineName,
             onExerciseNameChange = viewModel::updateExerciseName,
+            onExerciseCategoryChange = viewModel::updateExerciseCategory,
             onAddEmptyExercise = viewModel::addEmptyExercise,
             onOpenCatalogSheet = viewModel::openAddExercisesSheet,
             onDismissCatalogSheet = viewModel::closeAddExercisesSheet,

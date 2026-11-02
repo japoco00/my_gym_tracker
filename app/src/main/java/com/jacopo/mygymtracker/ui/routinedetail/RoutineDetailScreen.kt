@@ -4,8 +4,10 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -40,6 +42,7 @@ fun RoutineDetailScreen(
     onBack: () -> Unit,
     onNameChange: (String) -> Unit,
     onExerciseNameChange: (exerciseKey: String, String) -> Unit,
+    onExerciseCategoryChange: (exerciseKey: String, Category) -> Unit,
     onAddEmptyExercise: () -> Unit,
     onOpenCatalogSheet: () -> Unit,
     onDismissCatalogSheet: () -> Unit,
@@ -76,29 +79,26 @@ fun RoutineDetailScreen(
         },
         modifier = modifier,
     ) { innerPadding ->
+        if (uiState.isLoading) return@Scaffold
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
+                .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
+                .imePadding(),
         ) {
             TextField(
                 value = uiState.name,
                 onValueChange = onNameChange,
-                placeholder = { Text(text = "Routine name") },
+                placeholder = { Text(text = stringResource(R.string.routine_name_hint)) },
                 singleLine = true,
-                isError = uiState.name.isBlank(),
-                supportingText = {
-                    if (uiState.name.isBlank()) {
-                        Text(text = "Routine name cannot be empty")
-                    }
-                },
                 trailingIcon = {
                     if (uiState.name.isNotEmpty()) {
                         IconButton(onClick = { onNameChange("") }) {
                             Icon(
                                 imageVector = Icons.Default.Clear,
-                                contentDescription = "Clear routine name",
+                                contentDescription = stringResource(R.string.action_clear),
                             )
                         }
                     }
@@ -123,7 +123,11 @@ fun RoutineDetailScreen(
                     ) {
                         ExerciseCard(
                             exercise = exercise,
+                            weightUnit = uiState.weightUnit,
                             onNameChange = { name -> onExerciseNameChange(exerciseKey, name) },
+                            onCategoryChange = { category ->
+                                onExerciseCategoryChange(exerciseKey, category)
+                            },
                             onAddSet = { onAddSet(exerciseKey) },
                             onDeleteSet = { setUuid -> onDeleteSet(exerciseKey, setUuid) },
                             onRepsChange = { setUuid, reps -> onRepsChange(exerciseKey, setUuid, reps) },
@@ -141,10 +145,10 @@ fun RoutineDetailScreen(
                 modifier = Modifier.padding(16.dp),
             ) {
                 OutlinedButton(onClick = onOpenCatalogSheet) {
-                    Text(text = "From Catalog")
+                    Text(text = stringResource(R.string.routine_add_from_catalog))
                 }
                 Button(onClick = onAddEmptyExercise) {
-                    Text(text = "New Exercise")
+                    Text(text = stringResource(R.string.routine_add_new_exercise))
                 }
             }
         }
@@ -186,6 +190,7 @@ private fun RoutineDetailScreenPreview() {
             onBack = {},
             onNameChange = {},
             onExerciseNameChange = { _, _ -> },
+            onExerciseCategoryChange = { _, _ -> },
             onAddEmptyExercise = {},
             onOpenCatalogSheet = {},
             onDismissCatalogSheet = {},

@@ -3,6 +3,7 @@ package com.jacopo.mygymtracker.ui.format
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.jacopo.mygymtracker.R
+import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import java.util.Locale
 
@@ -24,5 +25,22 @@ fun WeightUnit.label(): String = stringResource(
     when (this) {
         WeightUnit.KG -> R.string.unit_kg
         WeightUnit.LB -> R.string.unit_lb
+    },
+)
+
+@Composable
+fun Category.label(): String = stringResource(
+    when (this) {
+        Category.CHEST -> R.string.category_chest
+        Category.BACK -> R.string.category_back
+        Category.SHOULDERS -> R.string.category_shoulders
+        Category.BICEPS -> R.string.category_biceps
+        Category.TRICEPS -> R.string.category_triceps
+        Category.LEGS -> R.string.category_legs
+        Category.GLUTES -> R.string.category_glutes
+        Category.CORE -> R.string.category_core
+        Category.FULL_BODY -> R.string.category_full_body
+        Category.CARDIO -> R.string.category_cardio
+        Category.OTHER -> R.string.category_other
     },
 )
