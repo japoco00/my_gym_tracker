@@ -72,8 +72,12 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
 
+    // Settings
+    implementation(libs.androidx.datastore.preferences)
+
     // Unit Tests
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
 
     // Instrumented Tests
     androidTestImplementation(libs.androidx.test.runner)

@@ -1,12 +1,15 @@
 package com.jacopo.mygymtracker.di
 
 import android.content.Context
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.jacopo.mygymtracker.MyApplication
 import com.jacopo.mygymtracker.data.local.AppDatabase
 import com.jacopo.mygymtracker.data.repository.ExerciseRepository
 import com.jacopo.mygymtracker.data.repository.RoutineRepository
+import com.jacopo.mygymtracker.data.repository.SettingsRepository
 
 /**
  * Manual dependency container. Owns every app-scoped singleton.
@@ -26,6 +29,12 @@ class AppContainer(context: Context) {
 
     val exerciseRepository: ExerciseRepository by lazy {
         ExerciseRepository(exerciseDao = database.exerciseDao())
+    }
+
+    val settingsRepository: SettingsRepository by lazy {
+        SettingsRepository(
+            PreferenceDataStoreFactory.create { context.preferencesDataStoreFile("settings") },
+        )
     }
 }
 
