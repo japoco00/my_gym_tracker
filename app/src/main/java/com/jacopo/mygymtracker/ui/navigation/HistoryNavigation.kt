@@ -36,6 +36,7 @@ fun NavGraphBuilder.historyDestination(
 
 fun NavGraphBuilder.workoutDetailDestination(
     onNavigateBack: () -> Unit,
+    onOpenExerciseProgress: (exerciseId: Int) -> Unit,
 ) {
     composable<WorkoutDetailRoute> { backStackEntry ->
         val route = backStackEntry.toRoute<WorkoutDetailRoute>()
@@ -52,6 +53,7 @@ fun NavGraphBuilder.workoutDetailDestination(
             onDelete = viewModel::requestDelete,
             onConfirmDelete = viewModel::confirmDelete,
             onDismissDeleteDialog = viewModel::dismissDeleteDialog,
+            onExerciseClick = onOpenExerciseProgress,
         )
     }
 }

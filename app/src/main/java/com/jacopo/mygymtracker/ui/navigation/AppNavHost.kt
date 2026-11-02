@@ -36,9 +36,12 @@ fun AppNavHost(
 
         workoutDetailDestination(
             onNavigateBack = { navController.closeWorkoutDetail() },
+            onOpenExerciseProgress = { exerciseId -> navController.navigateToExerciseProgress(exerciseId) },
         )
 
-        exercisesDestination()
+        exercisesDestination(
+            onOpenExerciseProgress = { exerciseId -> navController.navigateToExerciseProgress(exerciseId) },
+        )
 
         exerciseProgressDestination(
             onNavigateBack = { navController.closeExerciseProgress() },

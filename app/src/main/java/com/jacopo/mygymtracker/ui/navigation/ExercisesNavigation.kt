@@ -12,7 +12,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data object ExercisesRoute
 
-fun NavGraphBuilder.exercisesDestination() {
+fun NavGraphBuilder.exercisesDestination(
+    onOpenExerciseProgress: (exerciseId: Int) -> Unit,
+) {
     composable<ExercisesRoute> {
         val viewModel: ExercisesViewModel = viewModel(factory = ExercisesViewModel.Factory)
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -21,7 +23,8 @@ fun NavGraphBuilder.exercisesDestination() {
             uiState = uiState,
             onQueryChange = viewModel::onQueryChange,
             onCategoryFilterChange = viewModel::onCategoryFilterChange,
-            onExerciseClick = viewModel::openEditExercise,
+            onExerciseClick = { exercise -> onOpenExerciseProgress(checkNotNull(exercise.id)) },
+            onEditExercise = viewModel::openEditExercise,
             onCreateExercise = viewModel::openNewExercise,
             onDeleteExercise = viewModel::requestDelete,
             onSaveExercise = viewModel::saveExercise,

@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -51,6 +53,7 @@ fun WorkoutDetailScreen(
     onDelete: () -> Unit,
     onConfirmDelete: () -> Unit,
     onDismissDeleteDialog: () -> Unit,
+    onExerciseClick: (exerciseId: Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (uiState.isDeleteDialogOpen) {
@@ -111,7 +114,11 @@ fun WorkoutDetailScreen(
                 )
             }
             items(workout.exercises) { exercise ->
-                ExerciseSetsCard(exercise = exercise, weightUnit = uiState.weightUnit)
+                ExerciseSetsCard(
+                    exercise = exercise,
+                    weightUnit = uiState.weightUnit,
+                    onClick = { onExerciseClick(checkNotNull(exercise.exercise.id)) },
+                )
             }
         }
     }
@@ -154,10 +161,22 @@ private fun Stat(label: String, value: String, modifier: Modifier = Modifier) {
 private fun ExerciseSetsCard(
     exercise: WorkoutExercise,
     weightUnit: WeightUnit,
+    onClick: () -> Unit,
 ) {
-    OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+    OutlinedCard(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = exercise.exercise.name, style = MaterialTheme.typography.titleMedium)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = exercise.exercise.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f),
+                )
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             exercise.sets.forEachIndexed { index, set ->
                 Row(modifier = Modifier.padding(top = 8.dp)) {
                     Text(
@@ -200,6 +219,7 @@ private fun WorkoutDetailScreenPreview() {
             onDelete = {},
             onConfirmDelete = {},
             onDismissDeleteDialog = {},
+            onExerciseClick = {},
         )
     }
 }

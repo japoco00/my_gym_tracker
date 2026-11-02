@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -48,6 +50,7 @@ fun ExercisesScreen(
     onQueryChange: (String) -> Unit,
     onCategoryFilterChange: (Category?) -> Unit,
     onExerciseClick: (Exercise) -> Unit,
+    onEditExercise: (Exercise) -> Unit,
     onCreateExercise: () -> Unit,
     onDeleteExercise: (Exercise) -> Unit,
     onSaveExercise: (name: String, category: Category) -> Unit,
@@ -105,11 +108,19 @@ fun ExercisesScreen(
                             headlineContent = { Text(exercise.name) },
                             supportingContent = { Text(exercise.category.label()) },
                             trailingContent = {
-                                IconButton(onClick = { onDeleteExercise(exercise) }) {
-                                    Icon(
-                                        imageVector = Icons.Default.Delete,
-                                        contentDescription = stringResource(R.string.action_delete),
-                                    )
+                                Row {
+                                    IconButton(onClick = { onEditExercise(exercise) }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Edit,
+                                            contentDescription = stringResource(R.string.action_edit),
+                                        )
+                                    }
+                                    IconButton(onClick = { onDeleteExercise(exercise) }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = stringResource(R.string.action_delete),
+                                        )
+                                    }
                                 }
                             },
                             modifier = Modifier
@@ -224,6 +235,7 @@ private fun ExercisesScreenPreview() {
             onQueryChange = {},
             onCategoryFilterChange = {},
             onExerciseClick = {},
+            onEditExercise = {},
             onCreateExercise = {},
             onDeleteExercise = {},
             onSaveExercise = { _, _ -> },
