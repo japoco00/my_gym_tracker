@@ -33,17 +33,8 @@ class RoutineDetailViewModel(
     }
 
     private fun loadInitialRoutine() {
-        if (routineId == null) {
-            _uiState.update { state ->
-                state.copy(
-                    name = "New Routine",
-                    isLoading = false,
-                )
-            }
-            return
-        }
         viewModelScope.launch {
-            val routine = routineRepository.getRoutine(routineId)
+            val routine = routineId?.let { routineRepository.getRoutine(it) }
             _uiState.update { state ->
                 routine?.toUiState(catalogExercises = state.catalogExercises)
                     ?: state.copy(name = "New Routine", isLoading = false)

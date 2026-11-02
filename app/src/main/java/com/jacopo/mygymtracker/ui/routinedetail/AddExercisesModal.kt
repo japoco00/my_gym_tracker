@@ -58,11 +58,7 @@ fun AddExercisesModal(
     val selectedExercises = remember { mutableStateListOf<Exercise>() }
 
     val displayedExercises = remember(catalogExercises, searchQuery) {
-        if (searchQuery.isBlank()) {
-            catalogExercises
-        } else {
-            catalogExercises.filter { it.name.contains(searchQuery, ignoreCase = true) }
-        }
+        catalogExercises.filter { it.name.contains(searchQuery.trim(), ignoreCase = true) }
     }
 
     ModalBottomSheet(

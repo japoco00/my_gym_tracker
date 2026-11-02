@@ -19,16 +19,12 @@ data class RoutineDetailUiState(
 
 data class ExerciseUiState @OptIn(ExperimentalUuidApi::class) constructor(
     val id: Int? = null,
-    val draftId: String = Uuid.random().toString(),
+    val key: String = Uuid.random().toString(),
     val name: String = "",
     val note: String? = null,
     val category: Category = Category.STRENGTH,
     val sets: List<SetUiState> = emptyList(),
-) {
-    /** Stable identifier across recompositions for both persisted and draft exercises. */
-    val key: String
-        get() = id?.let { "id_$it" } ?: "draft_$draftId"
-}
+)
 
 data class SetUiState @OptIn(ExperimentalUuidApi::class) constructor(
     val id: Int? = null,
