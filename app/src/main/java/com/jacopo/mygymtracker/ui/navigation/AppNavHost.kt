@@ -40,6 +40,10 @@ fun AppNavHost(
 
         exercisesDestination()
 
+        exerciseProgressDestination(
+            onNavigateBack = { navController.closeExerciseProgress() },
+        )
+
         settingsDestination()
     }
 }

@@ -77,6 +77,9 @@ dependencies {
     // Settings
     implementation(libs.androidx.datastore.preferences)
 
+    // Charts
+    implementation(libs.vico.compose.m3)
+
     // Unit Tests
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

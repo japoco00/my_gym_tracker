@@ -80,6 +80,20 @@
     <string name="history_delete_title">Delete this workout?</string>
     <string name="history_delete_message">It will be removed from your history and progress.</string>
 
+    <!-- Progress -->
+    <string name="progress_empty">No finished workouts with this exercise yet.</string>
+    <string name="progress_records">Personal records</string>
+    <string name="progress_metric_e1rm">e1RM</string>
+    <string name="progress_metric_heaviest">Heaviest</string>
+    <string name="progress_metric_volume">Volume</string>
+    <string name="progress_metric_e1rm_description">Estimated one-rep max of your best set with %1$d reps or fewer.</string>
+    <string name="progress_metric_heaviest_description">Heaviest weight lifted in the workout.</string>
+    <string name="progress_metric_volume_description">Total weight × reps in the workout.</string>
+    <string name="progress_no_chart_data">Nothing to chart for this metric yet.</string>
+    <string name="progress_workouts">Workouts</string>
+    <string name="progress_personal_record">Personal record</string>
+    <string name="progress_no_value">–</string>
+
     <!-- Rest timer -->
     <string name="rest_countdown_channel">Rest countdown</string>
     <string name="rest_over_channel">Rest over</string>

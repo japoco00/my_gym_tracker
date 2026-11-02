@@ -1,5 +1,6 @@
 package com.jacopo.mygymtracker.ui.format
 
+import android.text.format.DateFormat
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.jacopo.mygymtracker.R
@@ -29,6 +30,17 @@ fun formatDuration(totalSeconds: Long): String {
 fun formatDateTime(instant: Instant): String =
     DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
         .format(instant.atZone(ZoneId.systemDefault()))
+
+/** Date in the device's locale and time zone, e.g. `Jul 14, 2025`. */
+fun formatDate(instant: Instant): String =
+    DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(instant.atZone(ZoneId.systemDefault()))
+
+/** Day and abbreviated month in the device's locale and time zone, e.g. `Jul 14` or `14 Jul`. */
+fun shortDateFormatter(): DateTimeFormatter {
+    val locale = Locale.getDefault()
+    return DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(locale, "MMMd"), locale)
+        .withZone(ZoneId.systemDefault())
+}
 
 /** Total volume in whole units, e.g. `4320 kg`. */
 @Composable
