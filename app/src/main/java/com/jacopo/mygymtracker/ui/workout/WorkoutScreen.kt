@@ -225,8 +225,8 @@ private fun RestTimerBar(
                         .weight(1f)
                         .padding(start = 12.dp),
                 )
-                TextButton(onClick = { onAdjust(-step) }) { Text(stringResource(R.string.rest_remove_time, step)) }
-                TextButton(onClick = { onAdjust(step) }) { Text(stringResource(R.string.rest_add_time, step)) }
+                TextButton(onClick = { onAdjust(-step) }) { Text(stringResource(R.string.rest_decrease, step)) }
+                TextButton(onClick = { onAdjust(step) }) { Text(stringResource(R.string.rest_increase, step)) }
                 TextButton(onClick = onSkip) { Text(stringResource(R.string.rest_skip)) }
             }
         }

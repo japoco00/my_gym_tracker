@@ -56,7 +56,7 @@ object RestTimerNotifications {
             }
             .addAction(
                 0,
-                context.getString(R.string.rest_add_time, UserSettings.REST_STEP_SECONDS),
+                context.getString(R.string.rest_increase, UserSettings.REST_STEP_SECONDS),
                 RestTimerService.actionIntent(context, RestTimerService.ACTION_ADD_TIME),
             )
             .addAction(
