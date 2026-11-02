@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
  * @property pendingDelete routine hidden from the list and waiting for the undo snackbar to close.
  * @property startConflict routine the user tried to start while [activeWorkout] is still running.
  */
-data class RoutinesListUiState(
+data class RoutinesUiState(
     val routines: List<Routine> = emptyList(),
     val pendingDelete: Routine? = null,
     val activeWorkout: WorkoutSession? = null,
@@ -33,7 +33,7 @@ data class RoutinesListUiState(
     val isLoading: Boolean = true,
 )
 
-class RoutinesListViewModel(
+class RoutinesViewModel(
     private val routineRepository: RoutineRepository,
     private val workoutRepository: WorkoutRepository,
     private val applicationScope: CoroutineScope,
@@ -43,13 +43,13 @@ class RoutinesListViewModel(
     private val startConflict = MutableStateFlow<Routine?>(null)
     private var startJob: Job? = null
 
-    val uiState: StateFlow<RoutinesListUiState> = combine(
+    val uiState: StateFlow<RoutinesUiState> = combine(
         routineRepository.observeRoutines(),
         workoutRepository.observeActiveWorkout(),
         pendingDelete,
         startConflict,
     ) { routines, activeWorkout, pending, conflict ->
-        RoutinesListUiState(
+        RoutinesUiState(
             routines = routines.filterNot { it.id == pending?.id },
             pendingDelete = pending,
             activeWorkout = activeWorkout,
@@ -59,7 +59,7 @@ class RoutinesListViewModel(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = RoutinesListUiState(),
+        initialValue = RoutinesUiState(),
     )
 
     /** Starts a workout from [routine], or asks what to do if another one is still running. */
@@ -116,7 +116,7 @@ class RoutinesListViewModel(
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val container = appContainer()
-                RoutinesListViewModel(
+                RoutinesViewModel(
                     routineRepository = container.routineRepository,
                     workoutRepository = container.workoutRepository,
                     applicationScope = container.applicationScope,

@@ -48,8 +48,8 @@ import java.time.Instant
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RoutinesListScreen(
-    uiState: RoutinesListUiState,
+fun RoutinesScreen(
+    uiState: RoutinesUiState,
     onCreateRoutine: () -> Unit,
     onRoutineClick: (Int) -> Unit,
     onDeleteRoutine: (Routine) -> Unit,
@@ -242,10 +242,10 @@ private fun UndoDeleteSnackbar(
 
 @Preview(showBackground = true)
 @Composable
-private fun RoutinesListScreenPreview() {
+private fun RoutinesScreenPreview() {
     AppTheme {
-        RoutinesListScreen(
-            uiState = RoutinesListUiState(
+        RoutinesScreen(
+            uiState = RoutinesUiState(
                 routines = listOf(
                     Routine(id = 1, name = "Upper Body", note = "Monday"),
                     Routine(id = 2, name = "Lower Body", note = "Thursday"),

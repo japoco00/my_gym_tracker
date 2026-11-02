@@ -5,8 +5,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.jacopo.mygymtracker.ui.routines.RoutinesListScreen
-import com.jacopo.mygymtracker.ui.routines.RoutinesListViewModel
+import com.jacopo.mygymtracker.ui.routines.RoutinesScreen
+import com.jacopo.mygymtracker.ui.routines.RoutinesViewModel
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -18,10 +18,10 @@ fun NavGraphBuilder.routinesDestination(
     onOpenWorkout: (sessionId: Int) -> Unit,
 ) {
     composable<RoutinesRoute> {
-        val viewModel: RoutinesListViewModel = viewModel(factory = RoutinesListViewModel.Factory)
+        val viewModel: RoutinesViewModel = viewModel(factory = RoutinesViewModel.Factory)
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-        RoutinesListScreen(
+        RoutinesScreen(
             uiState = uiState,
             onCreateRoutine = onCreateRoutine,
             onRoutineClick = onOpenRoutine,
