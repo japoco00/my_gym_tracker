@@ -11,6 +11,8 @@
     <string name="action_ok">OK</string>
     <string name="action_done">Done</string>
     <string name="action_search">Search</string>
+    <string name="action_remove">Remove</string>
+    <string name="action_discard">Discard</string>
     <string name="unit_kg">kg</string>
     <string name="unit_lb">lb</string>
     <string name="rest_decrease">−%1$d s</string>
@@ -26,6 +28,40 @@
     <string name="routines_empty">No routines yet. Create your first one!</string>
     <string name="routines_create">New routine</string>
     <string name="routine_deleted">Deleted “%1$s”</string>
+    <string name="routine_exercise_sets">%1$s: %2$d × %3$s</string>
+    <string name="routine_exercise_no_sets">%1$s: no sets</string>
+
+    <!-- Workout -->
+    <string name="workout_start">Start</string>
+    <string name="workout_resume">Resume</string>
+    <string name="workout_in_progress">Workout in progress</string>
+    <string name="workout_conflict_message">“%1$s” is still in progress. Resume it, or discard it and start “%2$s”.</string>
+    <string name="workout_discard_and_start">Discard and start</string>
+    <string name="workout_finish">Finish</string>
+    <string name="workout_discard">Discard workout</string>
+    <string name="workout_add_exercises">Add exercises</string>
+    <string name="workout_remove_exercise">Remove exercise</string>
+    <string name="workout_set">Set</string>
+    <string name="workout_previous">Previous</string>
+    <string name="workout_previous_set">%1$s × %2$d</string>
+    <string name="workout_no_previous">–</string>
+    <string name="workout_set_done">Set %1$d done</string>
+    <string name="workout_finish_title">Finish workout?</string>
+    <plurals name="workout_unchecked_sets_dropped">
+        <item quantity="one">%d set isn’t ticked and won’t be saved.</item>
+        <item quantity="other">%d sets aren’t ticked and won’t be saved.</item>
+    </plurals>
+    <string name="workout_nothing_completed_title">Nothing logged yet</string>
+    <string name="workout_nothing_completed_message">Tick at least one set to save this workout.</string>
+    <string name="workout_keep_going">Keep going</string>
+    <string name="workout_discard_title">Discard workout?</string>
+    <string name="workout_discard_message">Everything logged in this workout will be lost.</string>
+    <string name="workout_remove_exercise_title">Remove “%1$s”?</string>
+    <string name="workout_remove_exercise_message">Its sets in this workout will be lost.</string>
+    <string name="workout_update_routine_title">Update “%1$s”?</string>
+    <string name="workout_update_routine_message">This workout differs from the routine. Save its exercises, sets, weights and reps as the new plan?</string>
+    <string name="workout_update_routine">Update</string>
+    <string name="workout_keep_routine">Keep routine</string>
 
     <!-- Routine editor -->
     <string name="routine_editor_title_new">New routine</string>

@@ -15,6 +15,7 @@ data object RoutinesRoute
 fun NavGraphBuilder.routinesDestination(
     onCreateRoutine: () -> Unit,
     onOpenRoutine: (Int) -> Unit,
+    onOpenWorkout: (sessionId: Int) -> Unit,
 ) {
     composable<RoutinesRoute> {
         val viewModel: RoutinesListViewModel = viewModel(factory = RoutinesListViewModel.Factory)
@@ -27,6 +28,10 @@ fun NavGraphBuilder.routinesDestination(
             onDeleteRoutine = viewModel::deleteRoutine,
             onUndoDelete = viewModel::undoDelete,
             onConfirmDelete = viewModel::confirmDelete,
+            onStartWorkout = { routine -> viewModel.startWorkout(routine, onStarted = onOpenWorkout) },
+            onResumeWorkout = onOpenWorkout,
+            onDiscardActiveAndStart = { viewModel.discardActiveAndStart(onStarted = onOpenWorkout) },
+            onDismissStartConflict = viewModel::dismissStartConflict,
         )
     }
 }

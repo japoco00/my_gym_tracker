@@ -4,13 +4,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.PlannedSet
@@ -18,10 +22,15 @@ import com.jacopo.mygymtracker.domain.model.Routine
 import com.jacopo.mygymtracker.domain.model.RoutineExercise
 import com.jacopo.mygymtracker.ui.theme.AppTheme
 
+/**
+ * @param isWorkoutActive a workout from this routine is in progress: the button resumes it.
+ */
 @Composable
 fun RoutineOverviewCard(
     routine: Routine,
+    isWorkoutActive: Boolean,
     onClick: () -> Unit,
+    onStartWorkout: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -53,14 +62,32 @@ fun RoutineOverviewCard(
             }
             routine.exercises.forEach { (exercise, sets) ->
                 val summary = if (sets.isEmpty()) {
-                    "No sets"
+                    stringResource(R.string.routine_exercise_no_sets, exercise.name)
                 } else {
-                    "${sets.size} x ${sets.joinToString(", ") { it.reps.toString() }}"
+                    stringResource(
+                        R.string.routine_exercise_sets,
+                        exercise.name,
+                        sets.size,
+                        sets.joinToString(", ") { it.reps.toString() },
+                    )
                 }
                 Text(
-                    text = "${exercise.name}: $summary",
+                    text = summary,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(top = 4.dp),
+                )
+            }
+            FilledTonalButton(
+                onClick = onStartWorkout,
+                enabled = isWorkoutActive || routine.exercises.isNotEmpty(),
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .padding(top = 8.dp),
+            ) {
+                Text(
+                    text = stringResource(
+                        if (isWorkoutActive) R.string.workout_resume else R.string.workout_start,
+                    ),
                 )
             }
         }
@@ -86,7 +113,9 @@ private fun RoutineOverviewCardPreview() {
                     ),
                 ),
             ),
+            isWorkoutActive = false,
             onClick = {},
+            onStartWorkout = {},
         )
     }
 }

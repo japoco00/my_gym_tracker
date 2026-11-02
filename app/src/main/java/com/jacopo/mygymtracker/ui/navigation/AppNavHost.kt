@@ -18,10 +18,15 @@ fun AppNavHost(
         routinesDestination(
             onCreateRoutine = { navController.navigateToRoutineDetails() },
             onOpenRoutine = { routineId -> navController.navigateToRoutineDetails(routineId) },
+            onOpenWorkout = { sessionId -> navController.navigateToWorkout(sessionId) },
         )
 
         routineDetailsDestination(
             onNavigateBack = { navController.navigateUp() },
+        )
+
+        workoutDestination(
+            onNavigateBack = { navController.closeWorkout() },
         )
 
         exercisesDestination()
