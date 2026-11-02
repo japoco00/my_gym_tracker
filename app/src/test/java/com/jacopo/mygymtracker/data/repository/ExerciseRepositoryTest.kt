@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -62,6 +63,16 @@ class ExerciseRepositoryTest {
 
         assertTrue(exercises.saveExercise(squat.copy(name = "SQUAT", category = Category.LEGS)))
         assertEquals("SQUAT", catalogEntry("SQUAT").name)
+    }
+
+    @Test
+    fun observeExercise_emitsCurrentEntryOrNull() = runTest {
+        exercises.saveExercise(newExercise("Bench"))
+        val bench = catalogEntry("Bench")
+        exercises.saveExercise(bench.copy(name = "Bench Press"))
+
+        assertEquals("Bench Press", exercises.observeExercise(bench.id!!).first()?.name)
+        assertNull(exercises.observeExercise(bench.id!! + 1).first())
     }
 
     @Test

@@ -18,6 +18,10 @@ class ExerciseRepository(
     fun observeCatalog(): Flow<List<Exercise>> =
         exerciseDao.observeAll().map { exercises -> exercises.map { it.toDomain() } }
 
+    /** Emits one catalog entry, or `null` if it doesn't exist. */
+    fun observeExercise(exerciseId: Int): Flow<Exercise?> =
+        exerciseDao.observeById(exerciseId).map { it?.toDomain() }
+
     /**
      * Adds [exercise] if it has no id, otherwise renames/recategorises it everywhere it is used.
      * Returns `false`, changing nothing, if another exercise already has the same name (ignoring case).
