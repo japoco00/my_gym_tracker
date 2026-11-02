@@ -78,6 +78,9 @@ dependencies {
     // Unit Tests
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.androidx.junit)
 
     // Instrumented Tests
     androidTestImplementation(libs.androidx.test.runner)
