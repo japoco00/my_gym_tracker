@@ -19,6 +19,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.jacopo.mygymtracker.ui.workout.WorkoutExit
 import com.jacopo.mygymtracker.ui.workout.WorkoutScreen
 import com.jacopo.mygymtracker.ui.workout.WorkoutViewModel
 import kotlinx.serialization.Serializable
@@ -29,14 +30,19 @@ data class WorkoutRoute(val sessionId: Int)
 /** Leaving the screen keeps the workout running; it ends only through Finish or Discard. */
 fun NavGraphBuilder.workoutDestination(
     onNavigateBack: () -> Unit,
+    onFinished: (sessionId: Int) -> Unit,
 ) {
     composable<WorkoutRoute> { backStackEntry ->
         val route = backStackEntry.toRoute<WorkoutRoute>()
         val viewModel: WorkoutViewModel = viewModel(factory = WorkoutViewModel.factory(route.sessionId))
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-        LaunchedEffect(uiState.isClosed) {
-            if (uiState.isClosed) onNavigateBack()
+        LaunchedEffect(uiState.exit) {
+            when (uiState.exit) {
+                WorkoutExit.FINISHED -> onFinished(route.sessionId)
+                WorkoutExit.CLOSED -> onNavigateBack()
+                null -> Unit
+            }
         }
         RequestNotificationPermission()
 
@@ -87,6 +93,14 @@ private fun RequestNotificationPermission() {
 
 fun NavController.navigateToWorkout(sessionId: Int) {
     navigate(route = WorkoutRoute(sessionId = sessionId)) { launchSingleTop = true }
+}
+
+/** Replaces the workout screen with its summary, so Back returns to where the workout was started. */
+fun NavController.openFinishedWorkout(sessionId: Int) {
+    navigate(route = WorkoutDetailRoute(sessionId = sessionId)) {
+        popUpTo<WorkoutRoute> { inclusive = true }
+        launchSingleTop = true
+    }
 }
 
 /** Pops the workout screen only, so a repeated call can't pop the screen below it. */

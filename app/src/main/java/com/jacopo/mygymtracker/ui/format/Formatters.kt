@@ -5,7 +5,12 @@ import androidx.compose.ui.res.stringResource
 import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.WeightUnit
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.util.Locale
+import kotlin.math.roundToLong
 
 /** `m:ss`, or `h:mm:ss` from one hour on. */
 fun formatDuration(totalSeconds: Long): String {
@@ -19,6 +24,16 @@ fun formatDuration(totalSeconds: Long): String {
         String.format(Locale.ROOT, "%d:%02d", minutes, secs)
     }
 }
+
+/** Date and time in the device's locale and time zone, e.g. `Jul 14, 2025, 6:30 PM`. */
+fun formatDateTime(instant: Instant): String =
+    DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
+        .format(instant.atZone(ZoneId.systemDefault()))
+
+/** Total volume in whole units, e.g. `4320 kg`. */
+@Composable
+fun WeightUnit.formatVolume(volumeKg: Double): String =
+    stringResource(R.string.weight_with_unit, fromKg(volumeKg).roundToLong().toString(), label())
 
 @Composable
 fun WeightUnit.label(): String = stringResource(

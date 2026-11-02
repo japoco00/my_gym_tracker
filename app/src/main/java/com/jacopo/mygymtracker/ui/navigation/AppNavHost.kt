@@ -27,6 +27,15 @@ fun AppNavHost(
 
         workoutDestination(
             onNavigateBack = { navController.closeWorkout() },
+            onFinished = { sessionId -> navController.openFinishedWorkout(sessionId) },
+        )
+
+        historyDestination(
+            onOpenWorkoutDetail = { sessionId -> navController.navigateToWorkoutDetail(sessionId) },
+        )
+
+        workoutDetailDestination(
+            onNavigateBack = { navController.closeWorkoutDetail() },
         )
 
         exercisesDestination()

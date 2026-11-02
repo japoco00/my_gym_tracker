@@ -65,7 +65,7 @@ class WorkoutViewModel(
         viewModelScope.launch {
             val workout = workoutRepository.getWorkout(sessionId)?.takeIf { it.finishedAt == null }
             if (workout == null) {
-                _uiState.update { it.copy(isLoading = false, isClosed = true) }
+                _uiState.update { it.copy(isLoading = false, exit = WorkoutExit.CLOSED) }
                 return@launch
             }
             val previousSets = workoutRepository.getLastPerformance(
@@ -225,7 +225,11 @@ class WorkoutViewModel(
                 ?.takeIf { it.exercises != performedPlan }
                 ?.copy(exercises = performedPlan)
             _uiState.update {
-                if (routineUpdate != null) it.copy(dialog = WorkoutDialog.UpdateRoutine) else it.copy(isClosed = true)
+                if (routineUpdate != null) {
+                    it.copy(dialog = WorkoutDialog.UpdateRoutine)
+                } else {
+                    it.copy(exit = WorkoutExit.FINISHED)
+                }
             }
         }
     }
@@ -238,7 +242,7 @@ class WorkoutViewModel(
             draftJob?.cancelAndJoin()
             hasUnsavedEdits = false
             withContext(NonCancellable) { workoutRepository.deleteWorkout(sessionId) }
-            _uiState.update { it.copy(isClosed = true) }
+            _uiState.update { it.copy(exit = WorkoutExit.CLOSED) }
         }
     }
 
@@ -247,7 +251,7 @@ class WorkoutViewModel(
         val routine = routineUpdate?.takeIf { update }
         routineUpdate = null
         if (routine != null) applicationScope.launch { routineRepository.saveRoutine(routine) }
-        _uiState.update { it.copy(dialog = null, isClosed = true) }
+        _uiState.update { it.copy(dialog = null, exit = WorkoutExit.FINISHED) }
     }
 
     /** viewModelScope is already cancelled here, so a pending draft is saved in the app scope. */

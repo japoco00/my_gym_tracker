@@ -16,6 +16,7 @@ enum class TopLevelDestination(
     @param:StringRes val labelRes: Int,
 ) {
     ROUTINES(RoutinesRoute, R.drawable.ic_fitness_center, R.string.nav_routines),
+    HISTORY(HistoryRoute, R.drawable.ic_history, R.string.nav_history),
     EXERCISES(ExercisesRoute, R.drawable.ic_list, R.string.nav_exercises),
     SETTINGS(SettingsRoute, R.drawable.ic_settings, R.string.nav_settings),
 }

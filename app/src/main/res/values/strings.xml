@@ -15,11 +15,13 @@
     <string name="action_discard">Discard</string>
     <string name="unit_kg">kg</string>
     <string name="unit_lb">lb</string>
+    <string name="weight_with_unit">%1$s %2$s</string>
     <string name="rest_decrease">−%1$d s</string>
     <string name="rest_increase">+%1$d s</string>
 
     <!-- Navigation -->
     <string name="nav_routines">Routines</string>
+    <string name="nav_history">History</string>
     <string name="nav_exercises">Exercises</string>
     <string name="nav_settings">Settings</string>
 
@@ -62,6 +64,21 @@
     <string name="workout_update_routine_message">This workout differs from the routine. Save its exercises, sets, weights and reps as the new plan?</string>
     <string name="workout_update_routine">Update</string>
     <string name="workout_keep_routine">Keep routine</string>
+
+    <!-- History -->
+    <string name="history_title">History</string>
+    <string name="history_empty">No workouts yet. Finish one and it will show up here.</string>
+    <plurals name="history_set_count">
+        <item quantity="one">%d set</item>
+        <item quantity="other">%d sets</item>
+    </plurals>
+    <string name="history_workout_stats">%1$s · %2$s · %3$s</string>
+    <string name="history_duration">Duration</string>
+    <string name="history_sets">Sets</string>
+    <string name="history_volume">Volume</string>
+    <string name="history_set">%1$s %2$s × %3$d</string>
+    <string name="history_delete_title">Delete this workout?</string>
+    <string name="history_delete_message">It will be removed from your history and progress.</string>
 
     <!-- Rest timer -->
     <string name="rest_countdown_channel">Rest countdown</string>

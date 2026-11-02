@@ -13,7 +13,7 @@ import kotlin.uuid.Uuid
 /**
  * @property previousSets sets performed last time, by catalog exercise id, shown as a reference.
  * @property restTimer the running rest between sets, or null.
- * @property isClosed the workout was finished or discarded (or no longer exists): leave the screen.
+ * @property exit set once the screen should close, saying why.
  */
 data class WorkoutUiState(
     val routineId: Int? = null,
@@ -27,8 +27,16 @@ data class WorkoutUiState(
     val dialog: WorkoutDialog? = null,
     val isAddExercisesSheetOpen: Boolean = false,
     val isLoading: Boolean = true,
-    val isClosed: Boolean = false,
+    val exit: WorkoutExit? = null,
 )
+
+enum class WorkoutExit {
+    /** Saved to history: show its summary. */
+    FINISHED,
+
+    /** Discarded, or no longer in progress: just go back. */
+    CLOSED,
+}
 
 /** An exercise of the workout. [key] is a stable UI identity for list keys and callbacks. */
 data class WorkoutExerciseUiState @OptIn(ExperimentalUuidApi::class) constructor(
