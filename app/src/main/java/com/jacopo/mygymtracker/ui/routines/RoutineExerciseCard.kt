@@ -20,7 +20,6 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.R
@@ -28,6 +27,7 @@ import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.ui.components.ChipDropdown
+import com.jacopo.mygymtracker.ui.components.ColumnHeader
 import com.jacopo.mygymtracker.ui.components.DurationField
 import com.jacopo.mygymtracker.ui.components.RepsField
 import com.jacopo.mygymtracker.ui.components.SwipeToDeleteContainer
@@ -167,16 +167,6 @@ fun RoutineExerciseCard(
             }
         }
     }
-}
-
-@Composable
-private fun ColumnHeader(text: String, modifier: Modifier = Modifier) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.labelMedium,
-        textAlign = TextAlign.Center,
-        modifier = modifier,
-    )
 }
 
 @Preview(showBackground = true)

@@ -35,12 +35,11 @@ import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.LoggedSet
 import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.domain.model.WeightUnit
-import com.jacopo.mygymtracker.ui.components.DurationField
-import com.jacopo.mygymtracker.ui.components.RepsField
+import com.jacopo.mygymtracker.ui.components.ColumnHeader
+import com.jacopo.mygymtracker.ui.components.SetFieldHeaders
+import com.jacopo.mygymtracker.ui.components.SetFields
 import com.jacopo.mygymtracker.ui.components.SwipeToDeleteContainer
-import com.jacopo.mygymtracker.ui.components.WeightField
 import com.jacopo.mygymtracker.ui.format.formatDuration
-import com.jacopo.mygymtracker.ui.format.label
 import com.jacopo.mygymtracker.ui.theme.AppTheme
 
 private val SetNumberWidth = 32.dp
@@ -91,18 +90,7 @@ fun WorkoutExerciseCard(
             Row(modifier = Modifier.padding(horizontal = 8.dp)) {
                 ColumnHeader(stringResource(R.string.workout_set), Modifier.width(SetNumberWidth))
                 ColumnHeader(stringResource(R.string.workout_previous), Modifier.weight(1.2f))
-                when (trackingType) {
-                    TrackingType.DURATION -> ColumnHeader(stringResource(R.string.set_time), Modifier.weight(2f))
-                    TrackingType.WEIGHT_REPS, TrackingType.REPS -> {
-                        val weightHeader = if (trackingType == TrackingType.REPS) {
-                            stringResource(R.string.workout_added_weight, weightUnit.label())
-                        } else {
-                            weightUnit.label()
-                        }
-                        ColumnHeader(weightHeader, Modifier.weight(1f))
-                        ColumnHeader(stringResource(R.string.set_reps), Modifier.weight(1f))
-                    }
-                }
+                SetFieldHeaders(trackingType, weightUnit)
                 ColumnHeader("", Modifier.width(CheckboxWidth))
             }
             exercise.sets.forEachIndexed { index, set ->
@@ -166,32 +154,16 @@ private fun SetRow(
             textAlign = TextAlign.Center,
             modifier = Modifier.weight(1.2f),
         )
-        when (trackingType) {
-            TrackingType.DURATION -> DurationField(
-                seconds = set.durationSeconds,
-                onSecondsChange = onDurationChange,
-                modifier = Modifier
-                    .weight(2f)
-                    .padding(horizontal = 2.dp),
-            )
-            TrackingType.WEIGHT_REPS, TrackingType.REPS -> {
-                WeightField(
-                    weightKg = set.weightKg,
-                    unit = weightUnit,
-                    onWeightKgChange = onWeightChange,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 2.dp),
-                )
-                RepsField(
-                    reps = set.reps,
-                    onRepsChange = onRepsChange,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 2.dp),
-                )
-            }
-        }
+        SetFields(
+            trackingType = trackingType,
+            weightUnit = weightUnit,
+            reps = set.reps,
+            weightKg = set.weightKg,
+            durationSeconds = set.durationSeconds,
+            onRepsChange = onRepsChange,
+            onWeightKgChange = onWeightChange,
+            onDurationChange = onDurationChange,
+        )
         val doneLabel = stringResource(R.string.workout_set_done, number)
         Checkbox(
             checked = set.isCompleted,
@@ -211,16 +183,6 @@ private fun LoggedSet.summary(trackingType: TrackingType, weightUnit: WeightUnit
         stringResource(R.string.workout_previous_set_added, weightUnit.format(weightKg), reps)
     trackingType == TrackingType.REPS -> pluralStringResource(R.plurals.reps_count, reps, reps)
     else -> stringResource(R.string.workout_previous_set, weightUnit.format(weightKg), reps)
-}
-
-@Composable
-private fun ColumnHeader(text: String, modifier: Modifier = Modifier) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.labelMedium,
-        textAlign = TextAlign.Center,
-        modifier = modifier,
-    )
 }
 
 @Preview(showBackground = true)
