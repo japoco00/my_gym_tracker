@@ -28,6 +28,7 @@ fun Exercise.toEntity(): ExerciseEntity = ExerciseEntity(
     exerciseId = id ?: 0,
     name = name,
     category = category,
+    trackingType = trackingType,
     note = note,
 )
 
@@ -35,6 +36,7 @@ fun ExerciseEntity.toDomain(): Exercise = Exercise(
     id = exerciseId,
     name = name,
     category = category,
+    trackingType = trackingType,
     note = note,
 )
 
@@ -67,11 +69,13 @@ fun PlannedSet.toEntity(routineExerciseId: Int, position: Int): PlannedSetEntity
     position = position,
     reps = reps,
     weightKg = weightKg,
+    durationSeconds = durationSeconds,
 )
 
 fun PlannedSetEntity.toDomain(): PlannedSet = PlannedSet(
     reps = reps,
     weightKg = weightKg,
+    durationSeconds = durationSeconds,
 )
 
 // endregion
@@ -107,12 +111,14 @@ fun LoggedSet.toEntity(workoutExerciseId: Int, position: Int): LoggedSetEntity =
     position = position,
     reps = reps,
     weightKg = weightKg,
+    durationSeconds = durationSeconds,
     isCompleted = isCompleted,
 )
 
 fun LoggedSetEntity.toDomain(): LoggedSet = LoggedSet(
     reps = reps,
     weightKg = weightKg,
+    durationSeconds = durationSeconds,
     isCompleted = isCompleted,
 )
 
@@ -131,7 +137,14 @@ fun List<ExerciseHistoryRow>.toExerciseHistory(): List<ExerciseHistoryEntry> =
         ExerciseHistoryEntry(
             sessionId = sessionId,
             performedAt = Instant.ofEpochMilli(rows.first().startedAtEpochMs),
-            sets = rows.map { LoggedSet(reps = it.reps, weightKg = it.weightKg, isCompleted = true) },
+            sets = rows.map {
+                LoggedSet(
+                    reps = it.reps,
+                    weightKg = it.weightKg,
+                    durationSeconds = it.durationSeconds,
+                    isCompleted = true,
+                )
+            },
         )
     }
 

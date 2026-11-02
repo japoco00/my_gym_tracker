@@ -83,7 +83,7 @@ interface WorkoutDao {
     /** Every completed set of [exerciseId] in finished sessions, oldest session first. */
     @Query(
         """
-        SELECT s.sessionId, s.startedAtEpochMs, ls.reps, ls.weightKg
+        SELECT s.sessionId, s.startedAtEpochMs, ls.reps, ls.weightKg, ls.durationSeconds
         FROM logged_sets ls
         JOIN workout_exercises we ON we.workoutExerciseId = ls.workoutExerciseId
         JOIN workout_sessions s ON s.sessionId = we.sessionId

@@ -20,9 +20,11 @@ data class WorkoutExercise(
     val sets: List<LoggedSet>,
 )
 
+/** A performed set; like [PlannedSet], the fields that matter depend on the exercise's [TrackingType]. */
 data class LoggedSet(
-    val reps: Int,
-    val weightKg: Double,
+    val reps: Int = 0,
+    val weightKg: Double = 0.0,
+    val durationSeconds: Int = 0,
     val isCompleted: Boolean = false,
 )
 
@@ -34,7 +36,9 @@ fun Routine.toWorkoutSession(startedAt: Instant): WorkoutSession = WorkoutSessio
     exercises = exercises.map { routineExercise ->
         WorkoutExercise(
             exercise = routineExercise.exercise,
-            sets = routineExercise.sets.map { LoggedSet(reps = it.reps, weightKg = it.weightKg) },
+            sets = routineExercise.sets.map {
+                LoggedSet(reps = it.reps, weightKg = it.weightKg, durationSeconds = it.durationSeconds)
+            },
         )
     },
 )
@@ -50,6 +54,8 @@ fun WorkoutSession.withCompletedSetsOnly(): WorkoutSession = copy(
 fun WorkoutSession.toRoutineExercises(): List<RoutineExercise> = exercises.map { exercise ->
     RoutineExercise(
         exercise = exercise.exercise,
-        sets = exercise.sets.map { PlannedSet(reps = it.reps, weightKg = it.weightKg) },
+        sets = exercise.sets.map {
+            PlannedSet(reps = it.reps, weightKg = it.weightKg, durationSeconds = it.durationSeconds)
+        },
     )
 }

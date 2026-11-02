@@ -3,6 +3,7 @@ package com.jacopo.mygymtracker.data.local
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.jacopo.mygymtracker.domain.model.Category
+import com.jacopo.mygymtracker.domain.model.TrackingType
 
 /**
  * Fills the exercise catalog with common exercises.
@@ -15,50 +16,56 @@ internal object CatalogSeedCallback : RoomDatabase.Callback() {
     override fun onDestructiveMigration(db: SupportSQLiteDatabase) = seed(db)
 
     private fun seed(db: SupportSQLiteDatabase) {
-        SEED_EXERCISES.forEach { (name, category) ->
+        SEED_EXERCISES.forEach { exercise ->
             db.execSQL(
-                "INSERT OR IGNORE INTO exercises (name, category) VALUES (?, ?)",
-                arrayOf(name, category.name),
+                "INSERT OR IGNORE INTO exercises (name, category, trackingType) VALUES (?, ?, ?)",
+                arrayOf(exercise.name, exercise.category.name, exercise.trackingType.name),
             )
         }
     }
 
-    private val SEED_EXERCISES: List<Pair<String, Category>> = listOf(
-        "Bench Press" to Category.CHEST,
-        "Incline Dumbbell Press" to Category.CHEST,
-        "Chest Fly" to Category.CHEST,
-        "Push-Up" to Category.CHEST,
-        "Deadlift" to Category.BACK,
-        "Pull-Up" to Category.BACK,
-        "Lat Pulldown" to Category.BACK,
-        "Barbell Row" to Category.BACK,
-        "Seated Cable Row" to Category.BACK,
-        "Overhead Press" to Category.SHOULDERS,
-        "Dumbbell Shoulder Press" to Category.SHOULDERS,
-        "Lateral Raise" to Category.SHOULDERS,
-        "Face Pull" to Category.SHOULDERS,
-        "Barbell Curl" to Category.BICEPS,
-        "Dumbbell Curl" to Category.BICEPS,
-        "Hammer Curl" to Category.BICEPS,
-        "Triceps Pushdown" to Category.TRICEPS,
-        "Skull Crusher" to Category.TRICEPS,
-        "Overhead Triceps Extension" to Category.TRICEPS,
-        "Dip" to Category.TRICEPS,
-        "Squat" to Category.LEGS,
-        "Leg Press" to Category.LEGS,
-        "Romanian Deadlift" to Category.LEGS,
-        "Leg Extension" to Category.LEGS,
-        "Leg Curl" to Category.LEGS,
-        "Walking Lunge" to Category.LEGS,
-        "Calf Raise" to Category.LEGS,
-        "Hip Thrust" to Category.GLUTES,
-        "Bulgarian Split Squat" to Category.GLUTES,
-        "Plank" to Category.CORE,
-        "Hanging Leg Raise" to Category.CORE,
-        "Cable Crunch" to Category.CORE,
-        "Kettlebell Swing" to Category.FULL_BODY,
-        "Burpee" to Category.FULL_BODY,
-        "Rowing Machine" to Category.CARDIO,
-        "Running" to Category.CARDIO,
+    private class SeedExercise(
+        val name: String,
+        val category: Category,
+        val trackingType: TrackingType = TrackingType.WEIGHT_REPS,
+    )
+
+    private val SEED_EXERCISES: List<SeedExercise> = listOf(
+        SeedExercise("Bench Press", Category.CHEST),
+        SeedExercise("Incline Dumbbell Press", Category.CHEST),
+        SeedExercise("Chest Fly", Category.CHEST),
+        SeedExercise("Push-Up", Category.CHEST, TrackingType.REPS),
+        SeedExercise("Deadlift", Category.BACK),
+        SeedExercise("Pull-Up", Category.BACK, TrackingType.REPS),
+        SeedExercise("Lat Pulldown", Category.BACK),
+        SeedExercise("Barbell Row", Category.BACK),
+        SeedExercise("Seated Cable Row", Category.BACK),
+        SeedExercise("Overhead Press", Category.SHOULDERS),
+        SeedExercise("Dumbbell Shoulder Press", Category.SHOULDERS),
+        SeedExercise("Lateral Raise", Category.SHOULDERS),
+        SeedExercise("Face Pull", Category.SHOULDERS),
+        SeedExercise("Barbell Curl", Category.BICEPS),
+        SeedExercise("Dumbbell Curl", Category.BICEPS),
+        SeedExercise("Hammer Curl", Category.BICEPS),
+        SeedExercise("Triceps Pushdown", Category.TRICEPS),
+        SeedExercise("Skull Crusher", Category.TRICEPS),
+        SeedExercise("Overhead Triceps Extension", Category.TRICEPS),
+        SeedExercise("Dip", Category.TRICEPS, TrackingType.REPS),
+        SeedExercise("Squat", Category.LEGS),
+        SeedExercise("Leg Press", Category.LEGS),
+        SeedExercise("Romanian Deadlift", Category.LEGS),
+        SeedExercise("Leg Extension", Category.LEGS),
+        SeedExercise("Leg Curl", Category.LEGS),
+        SeedExercise("Walking Lunge", Category.LEGS),
+        SeedExercise("Calf Raise", Category.LEGS),
+        SeedExercise("Hip Thrust", Category.GLUTES),
+        SeedExercise("Bulgarian Split Squat", Category.GLUTES),
+        SeedExercise("Plank", Category.CORE, TrackingType.DURATION),
+        SeedExercise("Hanging Leg Raise", Category.CORE, TrackingType.REPS),
+        SeedExercise("Cable Crunch", Category.CORE),
+        SeedExercise("Kettlebell Swing", Category.FULL_BODY),
+        SeedExercise("Burpee", Category.FULL_BODY, TrackingType.REPS),
+        SeedExercise("Rowing Machine", Category.CARDIO, TrackingType.DURATION),
+        SeedExercise("Running", Category.CARDIO, TrackingType.DURATION),
     )
 }

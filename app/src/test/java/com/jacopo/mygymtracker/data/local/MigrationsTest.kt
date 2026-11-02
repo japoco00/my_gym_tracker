@@ -1,0 +1,59 @@
+package com.jacopo.mygymtracker.data.local
+
+import androidx.room.testing.MigrationTestHelper
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import org.junit.Assert.assertEquals
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+
+@RunWith(AndroidJUnit4::class)
+class MigrationsTest {
+
+    @get:Rule
+    val helper = MigrationTestHelper(InstrumentationRegistry.getInstrumentation(), AppDatabase::class.java)
+
+    @Test
+    fun migrate4To5_keepsDataAndAssignsTrackingTypes() {
+        helper.createDatabase(DB_NAME, 4).use { db ->
+            db.execSQL(
+                """
+                INSERT INTO exercises (exerciseId, name, category) VALUES
+                (1, 'Bench Press', 'CHEST'), (2, 'pull-up', 'BACK'), (3, 'Plank', 'CORE')
+                """,
+            )
+            db.execSQL("INSERT INTO workout_sessions (sessionId, routineName, startedAtEpochMs) VALUES (1, 'Push', 0)")
+            db.execSQL("INSERT INTO workout_exercises (workoutExerciseId, sessionId, exerciseId, position) VALUES (1, 1, 1, 0)")
+            db.execSQL(
+                """
+                INSERT INTO logged_sets (workoutExerciseId, position, reps, weightKg, isCompleted)
+                VALUES (1, 0, 5, 100.0, 1)
+                """,
+            )
+        }
+
+        // Also validates the migrated schema against the v5 entities.
+        val db = helper.runMigrationsAndValidate(DB_NAME, 5, true, MIGRATION_4_5)
+
+        db.query("SELECT name, trackingType FROM exercises ORDER BY exerciseId").use { cursor ->
+            val types = buildList {
+                while (cursor.moveToNext()) add(cursor.getString(0) to cursor.getString(1))
+            }
+            assertEquals(
+                listOf("Bench Press" to "WEIGHT_REPS", "pull-up" to "REPS", "Plank" to "DURATION"),
+                types,
+            )
+        }
+        db.query("SELECT reps, weightKg, durationSeconds FROM logged_sets").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals(5, cursor.getInt(0))
+            assertEquals(100.0, cursor.getDouble(1), 0.0)
+            assertEquals(0, cursor.getInt(2))
+        }
+    }
+
+    private companion object {
+        const val DB_NAME = "migration-test"
+    }
+}

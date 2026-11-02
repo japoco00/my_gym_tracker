@@ -9,5 +9,6 @@ data class Exercise(
     val id: Int? = null,
     val name: String,
     val category: Category,
+    val trackingType: TrackingType = TrackingType.WEIGHT_REPS,
     val note: String? = null,
 )

@@ -18,8 +18,12 @@ data class RoutineExercise(
     val sets: List<PlannedSet> = emptyList(),
 )
 
-/** A single planned set. Weight is always stored in kilograms. */
+/**
+ * A single planned set. Weight is always stored in kilograms.
+ * Which fields matter depends on the exercise's [TrackingType]; the others stay 0.
+ */
 data class PlannedSet(
-    val reps: Int,
-    val weightKg: Double,
+    val reps: Int = 0,
+    val weightKg: Double = 0.0,
+    val durationSeconds: Int = 0,
 )

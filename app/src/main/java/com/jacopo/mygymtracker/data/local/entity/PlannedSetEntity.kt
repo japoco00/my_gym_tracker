@@ -1,5 +1,6 @@
 package com.jacopo.mygymtracker.data.local.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -25,4 +26,6 @@ data class PlannedSetEntity(
     val position: Int,
     val reps: Int,
     val weightKg: Double,
+    @ColumnInfo(defaultValue = "0")
+    val durationSeconds: Int = 0,
 )

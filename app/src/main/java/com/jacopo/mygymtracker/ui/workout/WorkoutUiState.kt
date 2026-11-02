@@ -97,7 +97,9 @@ fun WorkoutUiState.toDomain(sessionId: Int): WorkoutSession = WorkoutSession(
     exercises = exercises.map { exercise ->
         WorkoutExercise(
             exercise = exercise.exercise,
-            sets = exercise.sets.map { LoggedSet(it.reps, it.weightKg, it.isCompleted) },
+            sets = exercise.sets.map {
+                LoggedSet(reps = it.reps, weightKg = it.weightKg, isCompleted = it.isCompleted)
+            },
         )
     },
 )

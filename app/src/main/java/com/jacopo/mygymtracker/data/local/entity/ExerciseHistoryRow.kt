@@ -6,4 +6,5 @@ data class ExerciseHistoryRow(
     val startedAtEpochMs: Long,
     val reps: Int,
     val weightKg: Double,
+    val durationSeconds: Int,
 )

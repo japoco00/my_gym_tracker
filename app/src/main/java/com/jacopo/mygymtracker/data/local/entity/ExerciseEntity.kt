@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.jacopo.mygymtracker.domain.model.Category
+import com.jacopo.mygymtracker.domain.model.TrackingType
 
 /**
  * A reusable exercise in the global catalog.
@@ -22,5 +23,7 @@ data class ExerciseEntity(
     @ColumnInfo(collate = ColumnInfo.NOCASE)
     val name: String,
     val category: Category,
+    @ColumnInfo(defaultValue = "WEIGHT_REPS")
+    val trackingType: TrackingType = TrackingType.WEIGHT_REPS,
     val note: String? = null,
 )

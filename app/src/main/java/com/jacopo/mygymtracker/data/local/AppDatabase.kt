@@ -25,7 +25,7 @@ import com.jacopo.mygymtracker.data.local.entity.WorkoutSessionEntity
         WorkoutExerciseEntity::class,
         LoggedSetEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -42,6 +42,7 @@ abstract class AppDatabase : RoomDatabase() {
                 // Versions 1-3 were development schemas with no data worth keeping.
                 // From version 4 on, every schema change MUST ship a Migration.
                 .fallbackToDestructiveMigrationFrom(dropAllTables = true, 1, 2, 3)
+                .addMigrations(MIGRATION_4_5)
                 .addCallback(CatalogSeedCallback)
                 .build()
     }
