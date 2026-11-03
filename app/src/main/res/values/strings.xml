@@ -173,7 +173,10 @@
     <string name="exercises_search_hint">Search exercises</string>
     <string name="exercises_empty">No exercises found.</string>
     <string name="exercises_create">New exercise</string>
-    <string name="exercise_category_and_type">%1$s · %2$s</string>
+    <plurals name="exercises_catalog_count">
+        <item quantity="one">%d in catalog</item>
+        <item quantity="other">%d in catalog</item>
+    </plurals>
     <string name="exercise_dialog_title_new">New exercise</string>
     <string name="exercise_dialog_title_edit">Edit exercise</string>
     <string name="exercise_name_taken">An exercise with this name already exists.</string>
