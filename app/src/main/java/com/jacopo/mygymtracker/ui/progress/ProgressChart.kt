@@ -10,6 +10,7 @@ import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.domain.progress.MetricQuantity
 import com.jacopo.mygymtracker.domain.progress.ProgressMetric
 import com.jacopo.mygymtracker.domain.progress.SessionProgress
+import com.jacopo.mygymtracker.domain.progress.recordFor
 import com.jacopo.mygymtracker.ui.format.formatDuration
 import com.jacopo.mygymtracker.ui.format.shortDateFormatter
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
@@ -32,6 +33,7 @@ import com.patrykandpatrick.vico.core.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
+import com.patrykandpatrick.vico.core.cartesian.data.LineCartesianLayerModel
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 import java.text.DecimalFormat
@@ -42,6 +44,7 @@ import kotlin.math.log10
 import kotlin.math.pow
 
 private val SessionDatesKey = ExtraStore.Key<List<Instant>>()
+private val RecordIndexKey = ExtraStore.Key<Int>()
 
 /**
  * Line chart of [metric] over [sessions], one evenly spaced point per workout, labelled with its date.
@@ -60,23 +63,34 @@ fun ProgressChart(
     LaunchedEffect(sessions, metric, weightUnit) {
         modelProducer.runTransaction {
             lineSeries { series(sessions.map { metric.chartValue(checkNotNull(it.valueOf(metric)), weightUnit) }) }
-            extras { it[SessionDatesKey] = sessions.map(SessionProgress::performedAt) }
+            extras {
+                it[SessionDatesKey] = sessions.map(SessionProgress::performedAt)
+                it[RecordIndexKey] = sessions.recordFor(metric)?.let(sessions::indexOf) ?: -1
+            }
         }
     }
 
     val dateFormatter = remember { shortDateFormatter() }
-    val pointColor = MaterialTheme.colorScheme.primary
+    val colors = MaterialTheme.colorScheme
+    val regularPoint = LineCartesianLayer.point(rememberShapeComponent(fill(colors.primary), CorneredShape.Pill))
+    val recordPoint = LineCartesianLayer.point(
+        component = rememberShapeComponent(
+            fill = fill(colors.primary),
+            shape = CorneredShape.Pill,
+            strokeFill = fill(colors.primaryContainer),
+            strokeThickness = 4.dp,
+        ),
+        size = 16.dp,
+    )
     ProvideVicoTheme(rememberM3VicoTheme()) {
         CartesianChartHost(
             chart = rememberCartesianChart(
                 rememberLineCartesianLayer(
                     lineProvider = LineCartesianLayer.LineProvider.series(
                         LineCartesianLayer.rememberLine(
-                            pointProvider = LineCartesianLayer.PointProvider.single(
-                                LineCartesianLayer.point(
-                                    component = rememberShapeComponent(fill(pointColor), CorneredShape.Pill),
-                                ),
-                            ),
+                            pointProvider = remember(regularPoint, recordPoint) {
+                                RecordPointProvider(regular = regularPoint, record = recordPoint)
+                            },
                         ),
                     ),
                     pointSpacing = 56.dp,
@@ -104,6 +118,20 @@ fun ProgressChart(
             modifier = modifier,
         )
     }
+}
+
+/** Draws the record workout, at [RecordIndexKey], with a bigger haloed point. */
+private data class RecordPointProvider(
+    private val regular: LineCartesianLayer.Point,
+    private val record: LineCartesianLayer.Point,
+) : LineCartesianLayer.PointProvider {
+    override fun getPoint(
+        entry: LineCartesianLayerModel.Entry,
+        seriesIndex: Int,
+        extraStore: ExtraStore,
+    ): LineCartesianLayer.Point = if (entry.x.toInt() == extraStore.getOrNull(RecordIndexKey)) record else regular
+
+    override fun getLargestPoint(extraStore: ExtraStore): LineCartesianLayer.Point = record
 }
 
 /** Weights in the user's unit; reps and seconds as they are. */
