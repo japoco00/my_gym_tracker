@@ -10,7 +10,6 @@ import com.jacopo.mygymtracker.di.appContainer
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.TrackingType
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -39,6 +38,22 @@ data class ExercisesUiState(
         (categoryFilter == null || it.category == categoryFilter) &&
             it.name.contains(query.trim(), ignoreCase = true)
     }
+
+    /** [visibleExercises] grouped by category, in [Category] order. */
+    val visibleGroups: Map<Category, List<Exercise>> = visibleExercises.sortedBy { it.category }.groupBy { it.category }
+
+    /** Categories that have exercises, plus the filtered one so its chip can always be cleared. */
+    val categories: List<Category> = Category.entries.filter { category ->
+        category == categoryFilter || catalog.any { it.category == category }
+    }
+
+    /** Whether [name] belongs to another catalog exercise, or is the name the repository just refused. */
+    fun isNameTaken(name: String): Boolean {
+        val edit = dialog as? ExerciseDialog.Edit ?: return false
+        val trimmed = name.trim()
+        return trimmed.equals(edit.rejectedName, ignoreCase = true) ||
+            catalog.any { it.id != edit.exercise?.id && it.name.equals(trimmed, ignoreCase = true) }
+    }
 }
 
 class ExercisesViewModel(
@@ -49,7 +64,6 @@ class ExercisesViewModel(
     private val _uiState = MutableStateFlow(ExercisesUiState())
     val uiState: StateFlow<ExercisesUiState> = _uiState.asStateFlow()
 
-    private var saveJob: Job? = null
 
     init {
         viewModelScope.launch {
@@ -69,14 +83,14 @@ class ExercisesViewModel(
 
     fun dismissDialog() = showDialog(null)
 
+    /** Closes the editor at once, and re-opens it with [name] flagged if the repository refuses a duplicate. */
     fun saveExercise(name: String, category: Category, trackingType: TrackingType) {
         val edit = _uiState.value.dialog as? ExerciseDialog.Edit ?: return
-        if (saveJob?.isActive == true) return
         val exercise = edit.exercise?.copy(name = name, category = category, trackingType = trackingType)
             ?: Exercise(name = name, category = category, trackingType = trackingType)
-        saveJob = viewModelScope.launch {
-            val saved = exerciseRepository.saveExercise(exercise)
-            showDialog(if (saved) null else edit.copy(rejectedName = name.trim()))
+        showDialog(null)
+        viewModelScope.launch {
+            if (!exerciseRepository.saveExercise(exercise)) showDialog(edit.copy(rejectedName = name.trim()))
         }
     }
 
