@@ -45,6 +45,30 @@ fun TrackingType.progressMetrics(): List<ProgressMetric> = when (this) {
     TrackingType.DURATION -> listOf(ProgressMetric.LONGEST_SET, ProgressMetric.TOTAL_DURATION)
 }
 
+/** One set's value for a per-set metric (e1RM, heaviest, most reps, longest), `null` for per-workout totals. */
+fun ProgressMetric.setValue(set: LoggedSet): Double? = when (this) {
+    ProgressMetric.ESTIMATED_ONE_REP_MAX -> estimatedOneRepMax(set.reps, set.weightKg)
+    ProgressMetric.HEAVIEST_WEIGHT -> set.weightKg
+    ProgressMetric.MOST_REPS -> set.reps.toDouble()
+    ProgressMetric.LONGEST_SET -> set.durationSeconds.toDouble()
+    ProgressMetric.SESSION_VOLUME, ProgressMetric.TOTAL_REPS, ProgressMetric.TOTAL_DURATION -> null
+}
+
+/**
+ * The set of [sets] that beat every [earlier] set on [trackingType]'s main metric, so a record
+ * stays one even after it's beaten later. `null` if none did, a tie included, or if there's
+ * nothing earlier to beat: a first time isn't a record.
+ */
+fun prSetIndex(sets: List<LoggedSet>, earlier: List<LoggedSet>, trackingType: TrackingType): Int? {
+    val metric = trackingType.progressMetrics().first()
+    val toBeat = earlier.mapNotNull(metric::setValue).maxOrNull() ?: return null
+    val best = sets.indices
+        .mapNotNull { index -> metric.setValue(sets[index])?.let { index to it } }
+        .maxByOrNull { (_, value) -> value }
+        ?: return null
+    return best.first.takeIf { best.second > toBeat }
+}
+
 /** How one exercise went in one workout. */
 data class SessionProgress(
     val sessionId: Int,

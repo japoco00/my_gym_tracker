@@ -76,6 +76,31 @@ class ExerciseProgressTest {
         assertEquals(setOf(ProgressMetric.MOST_REPS, ProgressMetric.TOTAL_REPS), records.keys)
     }
 
+    @Test
+    fun prSetIndex_isTheBestSetWhenItBeatsEveryEarlierSet() {
+        val earlier = listOf(LoggedSet(5, 100.0), LoggedSet(8, 90.0))
+        val sets = listOf(LoggedSet(5, 100.0), LoggedSet(5, 105.0), LoggedSet(4, 105.0))
+
+        assertEquals(1, prSetIndex(sets, earlier, TrackingType.WEIGHT_REPS))
+    }
+
+    @Test
+    fun prSetIndex_isNullForATieOrAFirstTime() {
+        val sets = listOf(LoggedSet(5, 100.0))
+
+        assertNull(prSetIndex(sets, earlier = listOf(LoggedSet(5, 100.0)), TrackingType.WEIGHT_REPS))
+        assertNull(prSetIndex(sets, earlier = emptyList(), TrackingType.WEIGHT_REPS))
+    }
+
+    @Test
+    fun prSetIndex_usesTheTrackingTypesMainMetric() {
+        val earlier = listOf(LoggedSet(reps = 12, durationSeconds = 60))
+
+        assertEquals(0, prSetIndex(listOf(LoggedSet(reps = 13)), earlier, TrackingType.REPS))
+        assertEquals(0, prSetIndex(listOf(LoggedSet(durationSeconds = 61)), earlier, TrackingType.DURATION))
+        assertNull(prSetIndex(listOf(LoggedSet(reps = 12)), earlier, TrackingType.REPS))
+    }
+
     private fun day(day: Long): Instant = Instant.EPOCH.plusSeconds(day * 86_400)
 
     private fun entry(sessionId: Int, day: Long, vararg sets: LoggedSet) =
