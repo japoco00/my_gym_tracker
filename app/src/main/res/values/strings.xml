@@ -56,7 +56,6 @@
     <string name="workout_finish">Finish</string>
     <string name="workout_discard">Discard workout</string>
     <string name="workout_add_exercises">Add exercises</string>
-    <string name="workout_remove_exercise">Remove exercise</string>
     <string name="workout_set_done">Set %1$d done</string>
     <plurals name="workout_sets_progress">
         <item quantity="one">%1$d of %2$d set</item>
@@ -157,17 +156,16 @@
     <string name="rest_skip_description">Skip rest</string>
 
     <!-- Routine editor -->
-    <string name="routine_editor_title_new">New routine</string>
-    <string name="routine_editor_title_edit">Edit routine</string>
-    <string name="routine_name_hint">Routine name</string>
     <string name="routine_untitled">Untitled routine</string>
+    <string name="routine_note_hint">Add a note</string>
+    <string name="routine_exercise_subtitle">%1$s · %2$s</string>
+    <string name="routine_editor_empty">No exercises yet. Add some from the catalog or create a new one.</string>
     <string name="routine_add_from_catalog">From catalog</string>
     <string name="routine_add_new_exercise">New exercise</string>
     <string name="exercise_name_hint">Exercise name</string>
     <string name="set_reps">Reps</string>
     <string name="set_weight">Weight (%1$s)</string>
     <string name="set_added_weight">Added (%1$s)</string>
-    <string name="set_added_weight_short">+%1$s</string>
     <string name="set_time">Time</string>
     <string name="set_editor_title">%1$s · Set %2$d</string>
     <string name="set_editor_last_time">Last time: %1$s</string>
@@ -175,6 +173,7 @@
     <string name="set_summary">%1$s %2$s × %3$d</string>
     <string name="set_summary_added">+%1$s %2$s × %3$d</string>
     <string name="action_add_set">Add set</string>
+    <string name="action_remove_exercise">Remove exercise</string>
 
     <!-- Exercise catalog -->
     <string name="exercises_title">Exercises</string>

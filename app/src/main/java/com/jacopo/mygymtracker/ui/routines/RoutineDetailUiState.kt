@@ -7,10 +7,14 @@ import com.jacopo.mygymtracker.domain.model.Routine
 import com.jacopo.mygymtracker.domain.model.RoutineExercise
 import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.domain.model.WeightUnit
+import com.jacopo.mygymtracker.ui.components.EditingSet
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-/** @property isClosed saving is done (or there was nothing to save), so the editor can close. */
+/**
+ * @property editingSet the set open in the editor sheet, or null.
+ * @property isClosed saving is done (or there was nothing to save), so the editor can close.
+ */
 data class RoutineDetailUiState(
     val id: Int? = null,
     val name: String = "",
@@ -18,10 +22,24 @@ data class RoutineDetailUiState(
     val exercises: List<RoutineExerciseUiState> = emptyList(),
     val catalogExercises: List<Exercise> = emptyList(),
     val isAddExercisesSheetOpen: Boolean = false,
+    val isNewExerciseSheetOpen: Boolean = false,
+    val editingSet: EditingSet? = null,
     val weightUnit: WeightUnit = WeightUnit.KG,
     val isLoading: Boolean = true,
     val isClosed: Boolean = false,
-)
+) {
+    val setCount: Int get() = exercises.sumOf { it.sets.size }
+
+    /**
+     * A new exercise can't reuse a catalog name, or one already typed here:
+     * saving would silently link it to that exercise instead.
+     */
+    fun isNameTaken(name: String): Boolean {
+        val trimmed = name.trim()
+        return catalogExercises.any { it.name.equals(trimmed, ignoreCase = true) } ||
+            exercises.any { it.exerciseId == null && it.name.equals(trimmed, ignoreCase = true) }
+    }
+}
 
 /**
  * An exercise inside the routine being edited.
@@ -81,17 +99,15 @@ fun Exercise.toUiState(): RoutineExerciseUiState = RoutineExerciseUiState(
 /**
  * The routine to save, or `null` when a new routine was left completely empty
  * (no name, no exercises) and there is nothing worth keeping.
- * New exercises left without a name are dropped instead of polluting the catalog.
  * A routine left without a name is saved as [untitledName].
  */
 fun RoutineDetailUiState.toDomainOrNull(untitledName: String): Routine? {
-    val namedExercises = exercises.filter { it.exerciseId != null || it.name.isNotBlank() }
-    if (id == null && name.isBlank() && namedExercises.isEmpty()) return null
+    if (id == null && name.isBlank() && exercises.isEmpty()) return null
     return Routine(
         id = id,
         name = name.trim().ifEmpty { untitledName },
         note = note?.trim()?.takeIf { it.isNotEmpty() },
-        exercises = namedExercises.map { it.toDomain() },
+        exercises = exercises.map { it.toDomain() },
     )
 }
 

@@ -12,6 +12,7 @@ import com.jacopo.mygymtracker.di.appContainer
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.TrackingType
+import com.jacopo.mygymtracker.ui.components.EditingSet
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -80,14 +81,19 @@ class RoutineDetailViewModel(
         _uiState.update { it.copy(isAddExercisesSheetOpen = false) }
     }
 
-    fun addEmptyExercise() {
-        val newExercise = RoutineExerciseUiState(
-            name = "",
-            category = Category.OTHER,
-            sets = listOf(PlannedSetUiState()),
-        )
+    fun openNewExerciseSheet() {
+        _uiState.update { it.copy(isNewExerciseSheetOpen = true) }
+    }
+
+    fun closeNewExerciseSheet() {
+        _uiState.update { it.copy(isNewExerciseSheetOpen = false) }
+    }
+
+    /** Adds an exercise that isn't in the catalog yet; saving the routine adds it there. */
+    fun addNewExercise(name: String, category: Category, trackingType: TrackingType) {
+        val exercise = Exercise(name = name.trim(), category = category, trackingType = trackingType)
         _uiState.update { state ->
-            state.copy(exercises = state.exercises + newExercise)
+            state.copy(exercises = state.exercises + exercise.toUiState(), isNewExerciseSheetOpen = false)
         }
     }
 
@@ -104,21 +110,12 @@ class RoutineDetailViewModel(
         }
     }
 
-    fun updateExerciseName(exerciseKey: String, name: String) {
-        updateExercise(exerciseKey) { it.copy(name = name) }
-    }
-
-    fun updateExerciseCategory(exerciseKey: String, category: Category) {
-        updateExercise(exerciseKey) { it.copy(category = category) }
-    }
-
-    fun updateExerciseTrackingType(exerciseKey: String, trackingType: TrackingType) {
-        updateExercise(exerciseKey) { it.copy(trackingType = trackingType) }
-    }
-
     fun removeExercise(exerciseKey: String) {
         _uiState.update { state ->
-            state.copy(exercises = state.exercises.filterNot { it.key == exerciseKey })
+            state.copy(
+                exercises = state.exercises.filterNot { it.key == exerciseKey },
+                editingSet = state.editingSet?.takeIf { it.exerciseKey != exerciseKey },
+            )
         }
     }
 
@@ -138,6 +135,15 @@ class RoutineDetailViewModel(
         updateExercise(exerciseKey) { exercise ->
             exercise.copy(sets = exercise.sets.filterNot { it.key == setKey })
         }
+        _uiState.update { state -> state.copy(editingSet = state.editingSet?.takeIf { it.setKey != setKey }) }
+    }
+
+    fun openSetEditor(exerciseKey: String, setKey: String) {
+        _uiState.update { it.copy(editingSet = EditingSet(exerciseKey, setKey)) }
+    }
+
+    fun closeSetEditor() {
+        _uiState.update { it.copy(editingSet = null) }
     }
 
     fun updateSetReps(exerciseKey: String, setKey: String, reps: Int) {

@@ -88,7 +88,7 @@ fun WorkoutExerciseSection(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            DestructiveOverflowMenu(action = stringResource(R.string.workout_remove_exercise), onAction = onRemove)
+            DestructiveOverflowMenu(action = stringResource(R.string.action_remove_exercise), onAction = onRemove)
         }
         sets.forEachIndexed { index, set ->
             key(set.key) {
