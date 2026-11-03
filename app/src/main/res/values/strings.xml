@@ -218,7 +218,10 @@
 
     <!-- Settings -->
     <string name="settings_title">Settings</string>
+    <string name="settings_units">Units</string>
+    <string name="settings_workout">Workout</string>
     <string name="settings_weight_unit">Weight unit</string>
+    <string name="settings_weight_unit_description">Used on every screen</string>
     <string name="settings_rest_time">Default rest time</string>
     <string name="settings_rest_time_description">The rest timer starts with this duration when you complete a set.</string>
 </resources>
