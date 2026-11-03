@@ -60,6 +60,7 @@ import com.jacopo.mygymtracker.domain.model.WorkoutSession
 import com.jacopo.mygymtracker.domain.model.WorkoutSummary
 import com.jacopo.mygymtracker.ui.components.AppHeader
 import com.jacopo.mygymtracker.ui.components.Pill
+import com.jacopo.mygymtracker.ui.components.SectionLabel
 import com.jacopo.mygymtracker.ui.components.SwipeToDeleteContainer
 import com.jacopo.mygymtracker.ui.components.rememberElapsedTime
 import com.jacopo.mygymtracker.ui.format.formatRelativeDay
@@ -144,14 +145,9 @@ fun RoutinesScreen(
                 }
             }
             item(key = "section") {
-                Text(
+                SectionLabel(
                     text = stringResource(R.string.routines_section),
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .animateItem()
-                        .padding(start = 12.dp, bottom = 8.dp),
+                    modifier = Modifier.animateItem(),
                 )
             }
             if (uiState.routines.isEmpty()) {

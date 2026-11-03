@@ -7,11 +7,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
@@ -21,7 +19,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.toShape
@@ -30,7 +27,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -43,9 +39,11 @@ import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.LoggedSet
-import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.domain.model.WeightUnit
+import com.jacopo.mygymtracker.ui.components.DestructiveOverflowMenu
+import com.jacopo.mygymtracker.ui.components.SetRow
 import com.jacopo.mygymtracker.ui.components.SwipeToDeleteContainer
+import com.jacopo.mygymtracker.ui.components.popScale
 import com.jacopo.mygymtracker.ui.format.formatSet
 import com.jacopo.mygymtracker.ui.theme.AppTheme
 
@@ -95,16 +93,32 @@ fun WorkoutExerciseSection(
         sets.forEachIndexed { index, set ->
             key(set.key) {
                 SwipeToDeleteContainer(onDelete = { onDeleteSet(set.key) }) {
-                    SetLine(
-                        number = index + 1,
-                        set = set,
-                        previous = previousSets.getOrNull(index),
-                        isNext = index == nextIndex,
-                        trackingType = exercise.exercise.trackingType,
-                        weightUnit = weightUnit,
-                        onOpen = { onOpenSet(set.key) },
-                        onCompletedChange = { completed -> onCompletedChange(set.key, completed) },
-                    )
+                    val trackingType = exercise.exercise.trackingType
+                    val previous = previousSets.getOrNull(index)
+                    SetRow(
+                        value = formatSet(trackingType, weightUnit, set.reps, set.weightKg, set.durationSeconds),
+                        leading = {
+                            SetCheck(
+                                number = index + 1,
+                                checked = set.isCompleted,
+                                onCheckedChange = { completed -> onCompletedChange(set.key, completed) },
+                            )
+                        },
+                        onClick = { onOpenSet(set.key) },
+                        isHighlighted = index == nextIndex,
+                        isDimmed = set.isCompleted,
+                    ) {
+                        if (previous != null) {
+                            Text(
+                                text = stringResource(
+                                    R.string.workout_set_last,
+                                    formatSet(trackingType, weightUnit, previous.reps, previous.weightKg, previous.durationSeconds),
+                                ),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -112,60 +126,6 @@ fun WorkoutExerciseSection(
             Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
             Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
             Text(text = stringResource(R.string.action_add_set))
-        }
-    }
-}
-
-@Composable
-private fun SetLine(
-    number: Int,
-    set: WorkoutSetUiState,
-    previous: LoggedSet?,
-    isNext: Boolean,
-    trackingType: TrackingType,
-    weightUnit: WeightUnit,
-    onOpen: () -> Unit,
-    onCompletedChange: (Boolean) -> Unit,
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            // Opaque, so the delete colour only shows where the swipe has uncovered it.
-            .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 8.dp, vertical = 2.dp),
-    ) {
-        SetCheck(number = number, checked = set.isCompleted, onCheckedChange = onCompletedChange)
-        Surface(
-            onClick = onOpen,
-            shape = if (isNext) CircleShape else RoundedCornerShape(12.dp),
-            color = if (isNext) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 4.dp),
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-            ) {
-                Text(
-                    text = formatSet(trackingType, weightUnit, set.reps, set.weightKg, set.durationSeconds),
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = if (isNext) FontWeight.SemiBold else null,
-                    color = if (set.isCompleted) MaterialTheme.colorScheme.onSurfaceVariant else Color.Unspecified,
-                    modifier = Modifier.weight(1f),
-                )
-                if (previous != null) {
-                    Text(
-                        text = stringResource(
-                            R.string.workout_set_last,
-                            formatSet(trackingType, weightUnit, previous.reps, previous.weightKg, previous.durationSeconds),
-                        ),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
         }
     }
 }

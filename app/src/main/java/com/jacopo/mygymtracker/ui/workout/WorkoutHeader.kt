@@ -1,8 +1,5 @@
 package com.jacopo.mygymtracker.ui.workout
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -14,27 +11,25 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialShapes
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.ui.components.AppHeader
+import com.jacopo.mygymtracker.ui.components.DestructiveOverflowMenu
 import com.jacopo.mygymtracker.ui.components.Pill
+import com.jacopo.mygymtracker.ui.components.ShapeBadge
+import com.jacopo.mygymtracker.ui.components.popScale
 import com.jacopo.mygymtracker.ui.components.rememberElapsedTime
 import com.jacopo.mygymtracker.ui.format.formatVolume
 import com.jacopo.mygymtracker.ui.theme.AppTheme
@@ -102,31 +97,16 @@ fun WorkoutHeader(
 @Composable
 private fun SetsBadge(completed: Int, total: Int) {
     val scale by popScale(value = completed, from = 0.85f, pops = { old, new -> new > old })
-    val description = pluralStringResource(R.plurals.workout_sets_progress, total, completed, total)
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .size(56.dp)
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
-            .background(MaterialTheme.colorScheme.primaryContainer, MaterialShapes.SoftBurst.toShape())
-            .clearAndSetSemantics { contentDescription = description },
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = "$completed/$total",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-            )
-            Text(
-                text = stringResource(R.string.workout_sets_badge),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-            )
-        }
-    }
+    ShapeBadge(
+        shape = MaterialShapes.SoftBurst,
+        value = "$completed/$total",
+        label = stringResource(R.string.workout_sets_badge),
+        contentDescription = pluralStringResource(R.plurals.workout_sets_progress, total, completed, total),
+        modifier = Modifier.graphicsLayer {
+            scaleX = scale
+            scaleY = scale
+        },
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
