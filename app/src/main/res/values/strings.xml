@@ -112,7 +112,6 @@
 
     <!-- Progress -->
     <string name="progress_empty">No finished workouts with this exercise yet.</string>
-    <string name="progress_records">Personal records</string>
     <string name="progress_metric_e1rm">e1RM</string>
     <string name="progress_metric_heaviest">Heaviest</string>
     <string name="progress_metric_volume">Volume</string>
@@ -135,7 +134,16 @@
         <item quantity="other">%d reps</item>
     </plurals>
     <string name="progress_no_chart_data">Nothing to chart for this metric yet.</string>
-    <string name="progress_workouts">Workouts</string>
+    <string name="progress_sessions">Sessions</string>
+    <string name="progress_best_set">Best set %1$s</string>
+    <!-- Read aloud for the header badge, e.g. "Best e1RM: 116.7 kg". -->
+    <string name="progress_best_description">Best %1$s: %2$s</string>
+    <plurals name="progress_unit_reps">
+        <item quantity="one">rep</item>
+        <item quantity="other">reps</item>
+    </plurals>
+    <string name="progress_unit_minutes">min</string>
+    <string name="progress_unit_hours">h</string>
     <string name="progress_personal_record">Personal record</string>
     <string name="progress_no_value">–</string>
 

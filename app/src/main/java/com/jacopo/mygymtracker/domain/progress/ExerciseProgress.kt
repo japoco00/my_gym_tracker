@@ -69,7 +69,22 @@ fun prSetIndex(sets: List<LoggedSet>, earlier: List<LoggedSet>, trackingType: Tr
     return best.first.takeIf { best.second > toBeat }
 }
 
-/** How one exercise went in one workout. */
+/**
+ * The set that ranks first on this type's main metric, then on weight, reps and duration, e.g. the
+ * top e1RM set for weight × reps. `null` without sets.
+ */
+fun TrackingType.bestSet(sets: List<LoggedSet>): LoggedSet? {
+    val metric = progressMetrics().first()
+    return sets.maxWithOrNull(
+        compareBy({ metric.setValue(it) ?: 0.0 }, { it.weightKg }, { it.reps }, { it.durationSeconds }),
+    )
+}
+
+/**
+ * How one exercise went in one workout.
+ *
+ * @property bestSet see [TrackingType.bestSet].
+ */
 data class SessionProgress(
     val sessionId: Int,
     val performedAt: Instant,
@@ -80,6 +95,7 @@ data class SessionProgress(
     val totalReps: Int,
     val longestSeconds: Int,
     val totalSeconds: Int,
+    val bestSet: LoggedSet? = null,
 ) {
     fun valueOf(metric: ProgressMetric): Double? = when (metric) {
         ProgressMetric.ESTIMATED_ONE_REP_MAX -> estimatedOneRepMaxKg
@@ -92,7 +108,7 @@ data class SessionProgress(
     }
 }
 
-fun ExerciseHistoryEntry.toSessionProgress(): SessionProgress = SessionProgress(
+fun ExerciseHistoryEntry.toSessionProgress(trackingType: TrackingType): SessionProgress = SessionProgress(
     sessionId = sessionId,
     performedAt = performedAt,
     heaviestKg = sets.maxOfOrNull { it.weightKg } ?: 0.0,
@@ -102,27 +118,12 @@ fun ExerciseHistoryEntry.toSessionProgress(): SessionProgress = SessionProgress(
     totalReps = sets.sumOf { it.reps },
     longestSeconds = sets.maxOfOrNull { it.durationSeconds } ?: 0,
     totalSeconds = sets.sumOf { it.durationSeconds },
-)
-
-/** @property value in the unit of the metric's [MetricQuantity]. */
-data class PersonalRecord(
-    val value: Double,
-    val achievedAt: Instant,
+    bestSet = trackingType.bestSet(sets),
 )
 
 /**
- * Best value per metric across [this] chronological list. Ties keep the first time it was achieved.
- * Metrics without any positive value are absent.
+ * The workout of [this] chronological list holding the record for [metric]: the best value, the first
+ * time it was achieved. `null` if no workout has a positive value.
  */
-fun List<SessionProgress>.personalRecords(): Map<ProgressMetric, PersonalRecord> =
-    ProgressMetric.entries
-        .mapNotNull { metric ->
-            this.mapNotNull { session ->
-                session.valueOf(metric)
-                    ?.takeIf { it > 0 }
-                    ?.let { PersonalRecord(value = it, achievedAt = session.performedAt) }
-            }
-                .maxByOrNull { it.value }
-                ?.let { metric to it }
-        }
-        .toMap()
+fun List<SessionProgress>.recordFor(metric: ProgressMetric): SessionProgress? =
+    maxByOrNull { it.valueOf(metric) ?: 0.0 }?.takeIf { (it.valueOf(metric) ?: 0.0) > 0 }

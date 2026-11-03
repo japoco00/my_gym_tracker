@@ -26,7 +26,8 @@ class ExerciseProgressTest {
 
     @Test
     fun toSessionProgress_aggregatesSets() {
-        val progress = entry(1, day = 1, LoggedSet(5, 100.0), LoggedSet(15, 60.0)).toSessionProgress()
+        val progress = entry(1, day = 1, LoggedSet(5, 100.0), LoggedSet(15, 60.0))
+            .toSessionProgress(TrackingType.WEIGHT_REPS)
 
         assertEquals(100.0, progress.heaviestKg, 1e-9)
         assertEquals(100.0 * (1 + 5 / 30.0), progress.estimatedOneRepMaxKg!!, 1e-9)
@@ -38,7 +39,7 @@ class ExerciseProgressTest {
     @Test
     fun toSessionProgress_aggregatesDurations() {
         val progress = entry(1, day = 1, LoggedSet(durationSeconds = 60), LoggedSet(durationSeconds = 45))
-            .toSessionProgress()
+            .toSessionProgress(TrackingType.DURATION)
 
         assertEquals(60, progress.longestSeconds)
         assertEquals(105, progress.totalSeconds)
@@ -55,25 +56,36 @@ class ExerciseProgressTest {
     }
 
     @Test
-    fun personalRecords_pickBestValueAndFirstDateAchieved() {
+    fun toSessionProgress_picksTheBestSetByTheMainMetricThenWeight() {
+        val sets = arrayOf(LoggedSet(5, 100.0), LoggedSet(8, 95.0), LoggedSet(15, 120.0))
+
+        assertEquals(LoggedSet(8, 95.0), entry(1, day = 1, *sets).toSessionProgress(TrackingType.WEIGHT_REPS).bestSet)
+        assertEquals(LoggedSet(15, 120.0), entry(1, day = 1, *sets).toSessionProgress(TrackingType.REPS).bestSet)
+        assertEquals(
+            LoggedSet(10, 5.0),
+            entry(1, day = 1, LoggedSet(10), LoggedSet(10, 5.0)).toSessionProgress(TrackingType.REPS).bestSet,
+        )
+    }
+
+    @Test
+    fun recordFor_isTheFirstWorkoutWithTheBestValue() {
         val sessions = listOf(
             entry(1, day = 1, LoggedSet(5, 100.0)),
             entry(2, day = 2, LoggedSet(3, 110.0)),
             entry(3, day = 3, LoggedSet(10, 80.0), LoggedSet(3, 110.0)),
-        ).map { it.toSessionProgress() }
+        ).map { it.toSessionProgress(TrackingType.WEIGHT_REPS) }
 
-        val records = sessions.personalRecords()
-
-        assertEquals(PersonalRecord(110.0, day(2)), records[ProgressMetric.HEAVIEST_WEIGHT])
-        assertEquals(PersonalRecord(110.0 * (1 + 3 / 30.0), day(2)), records[ProgressMetric.ESTIMATED_ONE_REP_MAX])
-        assertEquals(PersonalRecord(1130.0, day(3)), records[ProgressMetric.SESSION_VOLUME])
+        assertEquals(2, sessions.recordFor(ProgressMetric.HEAVIEST_WEIGHT)?.sessionId)
+        assertEquals(2, sessions.recordFor(ProgressMetric.ESTIMATED_ONE_REP_MAX)?.sessionId)
+        assertEquals(3, sessions.recordFor(ProgressMetric.SESSION_VOLUME)?.sessionId)
     }
 
     @Test
-    fun personalRecords_skipMetricsWithoutPositiveValue() {
-        val records = listOf(entry(1, day = 1, LoggedSet(20, 0.0))).map { it.toSessionProgress() }.personalRecords()
+    fun recordFor_isNullWithoutAPositiveValue() {
+        val sessions = listOf(entry(1, day = 1, LoggedSet(20, 0.0))).map { it.toSessionProgress(TrackingType.REPS) }
 
-        assertEquals(setOf(ProgressMetric.MOST_REPS, ProgressMetric.TOTAL_REPS), records.keys)
+        assertNull(sessions.recordFor(ProgressMetric.HEAVIEST_WEIGHT))
+        assertEquals(1, sessions.recordFor(ProgressMetric.MOST_REPS)?.sessionId)
     }
 
     @Test
