@@ -84,7 +84,6 @@ private fun WorkoutRow(
     val durationSeconds = Duration.between(workout.startedAt, workout.finishedAt).seconds
     ListItem(
         overlineContent = { Text(formatDateTime(workout.startedAt)) },
-        headlineContent = { Text(workout.routineName) },
         supportingContent = {
             Text(
                 stringResource(
@@ -96,7 +95,9 @@ private fun WorkoutRow(
             )
         },
         modifier = modifier,
-    )
+    ) {
+        Text(workout.routineName)
+    }
 }
 
 @Preview(showBackground = true)

@@ -72,7 +72,7 @@ class ExerciseRepositoryTest {
         exercises.saveExercise(bench.copy(name = "Bench Press"))
 
         assertEquals("Bench Press", exercises.observeExercise(bench.id!!).first()?.name)
-        assertNull(exercises.observeExercise(bench.id!! + 1).first())
+        assertNull(exercises.observeExercise(bench.id + 1).first())
     }
 
     @Test
@@ -95,10 +95,10 @@ class ExerciseRepositoryTest {
         val squat = catalogEntry("Squat")
 
         assertTrue(exercises.isInUse(squat.id!!))
-        assertFalse(exercises.deleteExercise(squat.id!!))
+        assertFalse(exercises.deleteExercise(squat.id))
 
         workouts.deleteWorkout(workoutId)
-        assertTrue(exercises.deleteExercise(squat.id!!))
+        assertTrue(exercises.deleteExercise(squat.id))
     }
 
     private suspend fun catalogEntry(name: String): Exercise =

@@ -160,7 +160,6 @@ private fun ProgressContent(
         }
         items(items = uiState.sessions.asReversed(), key = { it.sessionId }) { session ->
             ListItem(
-                headlineContent = { Text(uiState.metric.format(session.valueOf(uiState.metric), uiState.weightUnit)) },
                 supportingContent = { Text(formatDateTime(session.performedAt)) },
                 trailingContent = {
                     if (record?.achievedAt == session.performedAt) {
@@ -171,7 +170,9 @@ private fun ProgressContent(
                         )
                     }
                 },
-            )
+            ) {
+                Text(uiState.metric.format(session.valueOf(uiState.metric), uiState.weightUnit))
+            }
         }
     }
 }

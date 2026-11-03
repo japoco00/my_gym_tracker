@@ -106,7 +106,6 @@ fun ExercisesScreen(
                         key = { exercise -> checkNotNull(exercise.id) },
                     ) { exercise ->
                         ListItem(
-                            headlineContent = { Text(exercise.name) },
                             supportingContent = {
                                 Text(
                                     stringResource(
@@ -135,7 +134,9 @@ fun ExercisesScreen(
                             modifier = Modifier
                                 .animateItem()
                                 .clickable { onExerciseClick(exercise) },
-                        )
+                        ) {
+                            Text(exercise.name)
+                        }
                     }
                 }
             }
