@@ -91,7 +91,7 @@ com.jacopo.mygymtracker
 - **Feature Co-location**: Group each screen's `*Screen.kt`, `*ViewModel.kt`, `*UiState` and feature-specific components inside `ui/<feature>/`. Place reusable widgets shared by multiple features in `ui/components/`.
 - **Stateless Screens**: `*Screen` composables accept `uiState`, event callbacks, and `modifier: Modifier = Modifier`, never a ViewModel instance.
 - **Strings**: All user-visible text lives in `res/values/strings.xml`, read with `stringResource` / `pluralStringResource`. Formatting of dates, durations and weights goes through `ui/format/`.
-- **Scaffolds**: Each screen owns its `Scaffold` and top bar. `MyGymTrackerApp` shows the bottom `NavigationBar` only on tab roots (`TopLevelDestination`), so detail screens are full screen.
+- **Scaffolds**: Each screen owns its `Scaffold` and top bar, built with the shared `ui/components/AppHeader` (big collapsing title, `Pill` facts, rounded `surfaceContainer` block). `MyGymTrackerApp` shows the bottom `ShortNavigationBar` only on tab roots (`TopLevelDestination`), so detail screens are full screen.
 - **Previews**: Include private `@Preview` composables wrapped in `AppTheme` with realistic sample data.
 
 ---

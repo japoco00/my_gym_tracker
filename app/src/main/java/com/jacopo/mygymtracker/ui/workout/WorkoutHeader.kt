@@ -1,17 +1,11 @@
 package com.jacopo.mygymtracker.ui.workout
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -19,32 +13,29 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearWavyProgressIndicator
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.TwoRowsTopAppBar
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.WeightUnit
+import com.jacopo.mygymtracker.ui.components.AppHeader
+import com.jacopo.mygymtracker.ui.components.Pill
 import com.jacopo.mygymtracker.ui.format.formatDuration
 import com.jacopo.mygymtracker.ui.format.formatVolume
 import com.jacopo.mygymtracker.ui.theme.AppTheme
@@ -71,64 +62,35 @@ fun WorkoutHeader(
     onDiscard: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier.background(
-            color = MaterialTheme.colorScheme.surfaceContainer,
-            shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp),
-        ),
-    ) {
-        TwoRowsTopAppBar(
-            title = { expanded ->
-                Text(
-                    text = routineName,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = if (expanded) {
-                        MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.SemiBold)
-                    } else {
-                        LocalTextStyle.current
-                    },
+    AppHeader(
+        title = routineName,
+        scrollBehavior = scrollBehavior,
+        modifier = modifier,
+        navigationIcon = {
+            IconButton(onClick = onBack) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.action_back),
                 )
-            },
-            subtitle = { expanded ->
-                if (expanded) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.padding(top = 12.dp, bottom = 8.dp),
-                    ) {
-                        Pill {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_timer),
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp),
-                            )
-                            ElapsedTime(startedAt = startedAt)
-                        }
-                        Pill { Text(text = weightUnit.formatVolume(completedVolumeKg)) }
-                    }
-                } else {
-                    ElapsedTime(startedAt = startedAt)
-                }
-            },
-            navigationIcon = {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.action_back),
-                    )
-                }
-            },
-            actions = {
-                SetsBadge(completed = completedSets, total = totalSets)
-                DestructiveOverflowMenu(action = stringResource(R.string.workout_discard), onAction = onDiscard)
-            },
-            expandedHeight = 168.dp,
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.Transparent,
-                scrolledContainerColor = Color.Transparent,
-            ),
-            scrollBehavior = scrollBehavior,
-        )
+            }
+        },
+        actions = {
+            SetsBadge(completed = completedSets, total = totalSets)
+            DestructiveOverflowMenu(action = stringResource(R.string.workout_discard), onAction = onDiscard)
+        },
+        pills = {
+            Pill {
+                Icon(
+                    painter = painterResource(R.drawable.ic_timer),
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+                ElapsedTime(startedAt = startedAt)
+            }
+            Pill { Text(text = weightUnit.formatVolume(completedVolumeKg)) }
+        },
+        collapsedSubtitle = { ElapsedTime(startedAt = startedAt) },
+    ) {
         LinearWavyProgressIndicator(
             progress = { if (totalSets == 0) 0f else completedSets / totalSets.toFloat() },
             modifier = Modifier
@@ -136,19 +98,6 @@ fun WorkoutHeader(
                 .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
         )
     }
-}
-
-@Composable
-private fun Pill(content: @Composable RowScope.() -> Unit) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-        modifier = Modifier
-            .height(32.dp)
-            .background(MaterialTheme.colorScheme.surfaceContainerHighest, CircleShape)
-            .padding(start = 10.dp, end = 12.dp),
-        content = content,
-    )
 }
 
 /** "done/total sets" in a soft burst; it bumps each time a set is ticked. */
