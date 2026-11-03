@@ -21,7 +21,6 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -36,11 +35,9 @@ import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.ui.components.AppHeader
 import com.jacopo.mygymtracker.ui.components.Pill
-import com.jacopo.mygymtracker.ui.format.formatDuration
+import com.jacopo.mygymtracker.ui.components.rememberElapsedTime
 import com.jacopo.mygymtracker.ui.format.formatVolume
 import com.jacopo.mygymtracker.ui.theme.AppTheme
-import kotlinx.coroutines.delay
-import java.time.Duration
 import java.time.Instant
 
 /**
@@ -85,11 +82,11 @@ fun WorkoutHeader(
                     contentDescription = null,
                     modifier = Modifier.size(18.dp),
                 )
-                ElapsedTime(startedAt = startedAt)
+                Text(text = rememberElapsedTime(startedAt))
             }
             Pill { Text(text = weightUnit.formatVolume(completedVolumeKg)) }
         },
-        collapsedSubtitle = { ElapsedTime(startedAt = startedAt) },
+        collapsedSubtitle = { Text(text = rememberElapsedTime(startedAt)) },
     ) {
         LinearWavyProgressIndicator(
             progress = { if (totalSets == 0) 0f else completedSets / totalSets.toFloat() },
@@ -131,20 +128,6 @@ private fun SetsBadge(completed: Int, total: Int) {
         }
     }
 }
-
-/** Time since [startedAt], ticking on whole seconds. */
-@Composable
-private fun ElapsedTime(startedAt: Instant) {
-    val elapsedMs by produceState(initialValue = millisSince(startedAt), startedAt) {
-        while (true) {
-            value = millisSince(startedAt)
-            delay(1_000 - value % 1_000)
-        }
-    }
-    Text(text = formatDuration(elapsedMs / 1_000))
-}
-
-private fun millisSince(instant: Instant): Long = Duration.between(instant, Instant.now()).toMillis()
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
