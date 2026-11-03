@@ -34,6 +34,14 @@ fun formatDateTime(instant: Instant): String =
     DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
         .format(instant.atZone(ZoneId.systemDefault()))
 
+/** Weekday, date and time in the device's locale and time zone, e.g. `Mon, Jul 14 · 6:30 PM`. */
+fun formatWeekdayTime(instant: Instant): String {
+    val locale = Locale.getDefault()
+    val dateTime = instant.atZone(ZoneId.systemDefault())
+    val date = DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(locale, "EEEMMMd"), locale)
+    return "${date.format(dateTime)} · ${DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).format(dateTime)}"
+}
+
 /** Date in the device's locale and time zone, e.g. `Jul 14, 2025`. */
 fun formatDate(instant: Instant): String =
     DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(instant.atZone(ZoneId.systemDefault()))

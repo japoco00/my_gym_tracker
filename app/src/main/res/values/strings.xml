@@ -87,11 +87,22 @@
     <!-- History -->
     <string name="history_title">History</string>
     <string name="history_empty">No workouts yet. Finish one and it will show up here.</string>
+    <plurals name="history_workout_count">
+        <item quantity="one">%d workout</item>
+        <item quantity="other">%d workouts</item>
+    </plurals>
+    <plurals name="history_week_streak">
+        <item quantity="one">%d-week streak</item>
+        <item quantity="other">%d-week streak</item>
+    </plurals>
+    <string name="history_this_week">This week</string>
+    <string name="history_last_week">Last week</string>
+    <string name="history_week_of">Week of %1$s</string>
+    <string name="history_day_trained">Trained</string>
     <plurals name="history_set_count">
         <item quantity="one">%d set</item>
         <item quantity="other">%d sets</item>
     </plurals>
-    <string name="history_workout_stats">%1$s · %2$s · %3$s</string>
     <string name="history_duration">Duration</string>
     <string name="history_sets">Sets</string>
     <string name="history_volume">Volume</string>
