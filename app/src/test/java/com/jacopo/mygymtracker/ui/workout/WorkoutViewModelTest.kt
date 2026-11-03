@@ -144,6 +144,44 @@ class WorkoutViewModelTest {
         assertEquals(listOf(LoggedSet(8, 100.0), LoggedSet(5, 100.0)), awaitActiveSets { it.first().reps == 8 })
     }
 
+    @Test
+    fun setEditor_opensAndCloses() = runTest {
+        val viewModel = loadedViewModel(startWorkout())
+        val squat = viewModel.uiState.value.exercises.single()
+        val firstSet = squat.sets.first()
+
+        viewModel.openSetEditor(squat.key, firstSet.key)
+        assertEquals(EditingSet(squat.key, firstSet.key), viewModel.uiState.value.editingSet)
+
+        viewModel.closeSetEditor()
+        assertNull(viewModel.uiState.value.editingSet)
+    }
+
+    @Test
+    fun removingEditedSet_closesEditor() = runTest {
+        val viewModel = loadedViewModel(startWorkout())
+        val squat = viewModel.uiState.value.exercises.single()
+        val (firstSet, secondSet) = squat.sets
+
+        viewModel.openSetEditor(squat.key, firstSet.key)
+        viewModel.removeSet(squat.key, secondSet.key)
+        assertEquals(EditingSet(squat.key, firstSet.key), viewModel.uiState.value.editingSet)
+
+        viewModel.removeSet(squat.key, firstSet.key)
+        assertNull(viewModel.uiState.value.editingSet)
+    }
+
+    @Test
+    fun removingEditedExercise_closesEditor() = runTest {
+        val viewModel = loadedViewModel(startWorkout())
+        val squat = viewModel.uiState.value.exercises.single()
+
+        viewModel.openSetEditor(squat.key, squat.sets.first().key)
+        viewModel.confirmRemoveExercise(squat.key)
+
+        assertNull(viewModel.uiState.value.editingSet)
+    }
+
     /** Starts a workout from a "Push" routine planning two squat sets of 5 x 100 kg. */
     private suspend fun startWorkout(): Int {
         val routineId = routines.saveRoutine(

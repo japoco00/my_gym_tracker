@@ -145,6 +145,7 @@ class WorkoutViewModel(
             state.copy(
                 exercises = state.exercises.filterNot { it.key == exerciseKey },
                 dialog = null,
+                editingSet = state.editingSet?.takeIf { it.exerciseKey != exerciseKey },
             )
         }
     }
@@ -166,6 +167,17 @@ class WorkoutViewModel(
         updateExercise(exerciseKey) { exercise ->
             exercise.copy(sets = exercise.sets.filterNot { it.key == setKey })
         }
+        _uiState.update { state ->
+            state.copy(editingSet = state.editingSet?.takeIf { it.setKey != setKey })
+        }
+    }
+
+    fun openSetEditor(exerciseKey: String, setKey: String) {
+        _uiState.update { it.copy(editingSet = EditingSet(exerciseKey, setKey)) }
+    }
+
+    fun closeSetEditor() {
+        _uiState.update { it.copy(editingSet = null) }
     }
 
     fun updateSetReps(exerciseKey: String, setKey: String, reps: Int) {

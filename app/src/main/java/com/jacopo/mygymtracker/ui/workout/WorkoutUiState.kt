@@ -13,6 +13,7 @@ import kotlin.uuid.Uuid
 /**
  * @property previousSets sets performed last time, by catalog exercise id, shown as a reference.
  * @property restTimer the running rest between sets, or null.
+ * @property editingSet the set open in the editor sheet, or null.
  * @property exit set once the screen should close, saying why.
  */
 data class WorkoutUiState(
@@ -26,9 +27,12 @@ data class WorkoutUiState(
     val restTimer: RestTimer? = null,
     val dialog: WorkoutDialog? = null,
     val isAddExercisesSheetOpen: Boolean = false,
+    val editingSet: EditingSet? = null,
     val isLoading: Boolean = true,
     val exit: WorkoutExit? = null,
 )
+
+data class EditingSet(val exerciseKey: String, val setKey: String)
 
 enum class WorkoutExit {
     /** Saved to history: show its summary. */
