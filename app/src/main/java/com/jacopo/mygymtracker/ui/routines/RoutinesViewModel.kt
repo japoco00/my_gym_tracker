@@ -10,6 +10,7 @@ import com.jacopo.mygymtracker.data.repository.WorkoutRepository
 import com.jacopo.mygymtracker.di.appContainer
 import com.jacopo.mygymtracker.domain.model.Routine
 import com.jacopo.mygymtracker.domain.model.WorkoutSession
+import com.jacopo.mygymtracker.domain.model.WorkoutSummary
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,12 +23,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
+ * @property lastWorkout most recent finished workout, or `null` before the first one.
  * @property pendingDelete routine hidden from the list and waiting for the undo snackbar to close.
  * @property startConflict routine the user tried to start while [activeWorkout] is still running.
  * @property startedWorkoutId workout just started, waiting for the screen to open it.
  */
 data class RoutinesUiState(
     val routines: List<Routine> = emptyList(),
+    val lastWorkout: WorkoutSummary? = null,
     val pendingDelete: Routine? = null,
     val activeWorkout: WorkoutSession? = null,
     val startConflict: Routine? = null,
@@ -47,14 +50,19 @@ class RoutinesViewModel(
     private var startJob: Job? = null
 
     val uiState: StateFlow<RoutinesUiState> = combine(
-        routineRepository.observeRoutines(),
-        workoutRepository.observeActiveWorkout(),
+        combine(
+            routineRepository.observeRoutines(),
+            workoutRepository.observeActiveWorkout(),
+            workoutRepository.observeHistory(),
+            ::Triple,
+        ),
         pendingDelete,
         startConflict,
         startedWorkoutId,
-    ) { routines, activeWorkout, pending, conflict, startedId ->
+    ) { (routines, activeWorkout, history), pending, conflict, startedId ->
         RoutinesUiState(
             routines = routines.filterNot { it.id == pending?.id },
+            lastWorkout = history.firstOrNull(),
             pendingDelete = pending,
             activeWorkout = activeWorkout,
             startConflict = conflict,
