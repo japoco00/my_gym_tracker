@@ -19,6 +19,7 @@ import com.jacopo.mygymtracker.domain.model.LoggedSet
 import com.jacopo.mygymtracker.domain.model.PlannedSet
 import com.jacopo.mygymtracker.resttimer.RestTimerController
 import com.jacopo.mygymtracker.ui.MainDispatcherRule
+import com.jacopo.mygymtracker.ui.components.EditingSet
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map

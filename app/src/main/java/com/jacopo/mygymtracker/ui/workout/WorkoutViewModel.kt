@@ -15,6 +15,7 @@ import com.jacopo.mygymtracker.domain.model.Routine
 import com.jacopo.mygymtracker.domain.model.UserSettings
 import com.jacopo.mygymtracker.domain.model.toRoutineExercises
 import com.jacopo.mygymtracker.resttimer.RestTimerController
+import com.jacopo.mygymtracker.ui.components.EditingSet
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable

@@ -52,6 +52,7 @@ import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.domain.model.UserSettings
 import com.jacopo.mygymtracker.resttimer.RestTimer
 import com.jacopo.mygymtracker.ui.components.AddExercisesSheet
+import com.jacopo.mygymtracker.ui.components.SetEditorSheet
 import com.jacopo.mygymtracker.ui.format.formatDuration
 import com.jacopo.mygymtracker.ui.theme.AppTheme
 import kotlinx.coroutines.delay
@@ -179,19 +180,23 @@ fun WorkoutScreen(
         val index = exercise.sets.indexOfFirst { it.key == editing.setKey }.takeIf { it >= 0 } ?: return@let
         val exerciseKey = exercise.key
         val setKey = editing.setKey
+        val set = exercise.sets[index]
         SetEditorSheet(
             exerciseName = exercise.exercise.name,
             number = index + 1,
-            set = exercise.sets[index],
-            previous = exercise.exercise.id?.let { uiState.previousSets[it]?.getOrNull(index) },
             trackingType = exercise.exercise.trackingType,
             weightUnit = uiState.weightUnit,
+            reps = set.reps,
+            weightKg = set.weightKg,
+            durationSeconds = set.durationSeconds,
             onRepsChange = { onRepsChange(exerciseKey, setKey, it) },
             onWeightChange = { onWeightChange(exerciseKey, setKey, it) },
             onDurationChange = { onDurationChange(exerciseKey, setKey, it) },
-            onCompletedChange = { onSetCompletedChange(exerciseKey, setKey, it) },
             onDelete = { onDeleteSet(exerciseKey, setKey) },
             onDismiss = onCloseSetEditor,
+            previous = exercise.exercise.id?.let { uiState.previousSets[it]?.getOrNull(index) },
+            isCompleted = set.isCompleted,
+            onCompletedChange = { onSetCompletedChange(exerciseKey, setKey, it) },
         )
     }
 

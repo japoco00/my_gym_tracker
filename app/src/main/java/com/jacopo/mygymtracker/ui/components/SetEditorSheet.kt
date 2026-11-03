@@ -1,4 +1,4 @@
-package com.jacopo.mygymtracker.ui.workout
+package com.jacopo.mygymtracker.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,33 +31,40 @@ import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.LoggedSet
 import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.domain.model.WeightUnit
-import com.jacopo.mygymtracker.ui.components.DurationField
-import com.jacopo.mygymtracker.ui.components.RepsField
-import com.jacopo.mygymtracker.ui.components.WeightField
 import com.jacopo.mygymtracker.ui.format.formatSet
 import com.jacopo.mygymtracker.ui.format.label
 import com.jacopo.mygymtracker.ui.theme.AppTheme
 import kotlinx.coroutines.launch
 
+/** Which set is open in a [SetEditorSheet], by the UI keys of its exercise and of itself. */
+data class EditingSet(val exerciseKey: String, val setKey: String)
+
 /**
  * Edits one set with big stepper fields. Values are saved as they change; the buttons
  * slide the sheet away first and then act, so it never vanishes mid-animation.
+ *
+ * @param previous the same set last time, shown as a reference.
+ * @param isCompleted whether a live workout's set is ticked; the main button toggles it.
+ * Null for sets that can't be ticked (a plan, a finished workout): the main button just closes.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SetEditorSheet(
     exerciseName: String,
     number: Int,
-    set: WorkoutSetUiState,
-    previous: LoggedSet?,
     trackingType: TrackingType,
     weightUnit: WeightUnit,
+    reps: Int,
+    weightKg: Double,
+    durationSeconds: Int,
     onRepsChange: (Int) -> Unit,
     onWeightChange: (Double) -> Unit,
     onDurationChange: (seconds: Int) -> Unit,
-    onCompletedChange: (Boolean) -> Unit,
     onDelete: () -> Unit,
     onDismiss: () -> Unit,
+    previous: LoggedSet? = null,
+    isCompleted: Boolean? = null,
+    onCompletedChange: (Boolean) -> Unit = {},
 ) {
     val sheetState = rememberBottomSheetState(
         initialValue = SheetValue.Hidden,
@@ -72,16 +79,19 @@ fun SetEditorSheet(
         SetEditorContent(
             exerciseName = exerciseName,
             number = number,
-            set = set,
-            previous = previous,
             trackingType = trackingType,
             weightUnit = weightUnit,
+            reps = reps,
+            weightKg = weightKg,
+            durationSeconds = durationSeconds,
+            previous = previous,
+            isCompleted = isCompleted,
             onRepsChange = onRepsChange,
             onWeightChange = onWeightChange,
             onDurationChange = onDurationChange,
-            onToggleCompleted = {
+            onPrimary = {
                 hideThen {
-                    onCompletedChange(!set.isCompleted)
+                    if (isCompleted != null) onCompletedChange(!isCompleted)
                     onDismiss()
                 }
             },
@@ -94,25 +104,28 @@ fun SetEditorSheet(
 private fun SetEditorContent(
     exerciseName: String,
     number: Int,
-    set: WorkoutSetUiState,
-    previous: LoggedSet?,
     trackingType: TrackingType,
     weightUnit: WeightUnit,
+    reps: Int,
+    weightKg: Double,
+    durationSeconds: Int,
+    previous: LoggedSet?,
+    isCompleted: Boolean?,
     onRepsChange: (Int) -> Unit,
     onWeightChange: (Double) -> Unit,
     onDurationChange: (seconds: Int) -> Unit,
-    onToggleCompleted: () -> Unit,
+    onPrimary: () -> Unit,
     onDelete: () -> Unit,
 ) {
     Column(modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 24.dp)) {
         Text(
-            text = stringResource(R.string.workout_set_editor_title, exerciseName, number),
+            text = stringResource(R.string.set_editor_title, exerciseName, number),
             style = MaterialTheme.typography.titleLarge,
         )
         if (previous != null) {
             Text(
                 text = stringResource(
-                    R.string.workout_set_editor_last_time,
+                    R.string.set_editor_last_time,
                     formatSet(trackingType, weightUnit, previous.reps, previous.weightKg, previous.durationSeconds),
                 ),
                 style = MaterialTheme.typography.bodyMedium,
@@ -122,24 +135,15 @@ private fun SetEditorContent(
         Spacer(modifier = Modifier.size(8.dp))
         when (trackingType) {
             TrackingType.DURATION -> LabeledField(stringResource(R.string.set_time)) {
-                DurationField(
-                    seconds = set.durationSeconds,
-                    onSecondsChange = onDurationChange,
-                    showStepper = true,
-                )
+                DurationField(seconds = durationSeconds, onSecondsChange = onDurationChange, showStepper = true)
             }
             TrackingType.WEIGHT_REPS, TrackingType.REPS -> {
                 val weightLabel = if (trackingType == TrackingType.REPS) R.string.set_added_weight else R.string.set_weight
                 LabeledField(stringResource(weightLabel, weightUnit.label())) {
-                    WeightField(
-                        weightKg = set.weightKg,
-                        unit = weightUnit,
-                        onWeightKgChange = onWeightChange,
-                        showStepper = true,
-                    )
+                    WeightField(weightKg = weightKg, unit = weightUnit, onWeightKgChange = onWeightChange, showStepper = true)
                 }
                 LabeledField(stringResource(R.string.set_reps)) {
-                    RepsField(reps = set.reps, onRepsChange = onRepsChange, showStepper = true)
+                    RepsField(reps = reps, onRepsChange = onRepsChange, showStepper = true)
                 }
             }
         }
@@ -156,14 +160,13 @@ private fun SetEditorContent(
             ) {
                 Icon(imageVector = Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
                 Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
-                Text(text = stringResource(R.string.workout_delete_set))
+                Text(text = stringResource(R.string.set_delete))
             }
-            if (set.isCompleted) {
-                TextButton(onClick = onToggleCompleted) { Text(text = stringResource(R.string.workout_uncomplete_set)) }
+            if (isCompleted == true) {
+                TextButton(onClick = onPrimary) { Text(text = stringResource(R.string.workout_uncomplete_set)) }
             } else {
-                Button(onClick = onToggleCompleted, shapes = ButtonDefaults.shapes()) {
-                    Text(text = stringResource(R.string.workout_complete_set))
-                }
+                val label = if (isCompleted == null) R.string.action_done else R.string.workout_complete_set
+                Button(onClick = onPrimary, shapes = ButtonDefaults.shapes()) { Text(text = stringResource(label)) }
             }
         }
     }
@@ -190,14 +193,17 @@ private fun SetEditorContentPreview() {
             SetEditorContent(
                 exerciseName = "Bench Press",
                 number = 2,
-                set = WorkoutSetUiState(reps = 8, weightKg = 80.0),
-                previous = LoggedSet(reps = 8, weightKg = 77.5, isCompleted = true),
                 trackingType = TrackingType.WEIGHT_REPS,
                 weightUnit = WeightUnit.KG,
+                reps = 8,
+                weightKg = 80.0,
+                durationSeconds = 0,
+                previous = LoggedSet(reps = 8, weightKg = 77.5, isCompleted = true),
+                isCompleted = false,
                 onRepsChange = {},
                 onWeightChange = {},
                 onDurationChange = {},
-                onToggleCompleted = {},
+                onPrimary = {},
                 onDelete = {},
             )
         }

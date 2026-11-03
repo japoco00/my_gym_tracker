@@ -6,6 +6,7 @@ import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.domain.model.WorkoutExercise
 import com.jacopo.mygymtracker.domain.model.WorkoutSession
 import com.jacopo.mygymtracker.resttimer.RestTimer
+import com.jacopo.mygymtracker.ui.components.EditingSet
 import java.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -39,8 +40,6 @@ data class WorkoutUiState(
         exercise.sets.filter { it.isCompleted }.sumOf { it.reps * it.weightKg }
     }
 }
-
-data class EditingSet(val exerciseKey: String, val setKey: String)
 
 enum class WorkoutExit {
     /** Saved to history: show its summary. */
