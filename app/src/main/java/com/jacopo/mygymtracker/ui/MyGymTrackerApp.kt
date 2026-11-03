@@ -4,9 +4,9 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ShortNavigationBar
+import androidx.compose.material3.ShortNavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,9 +35,9 @@ fun MyGymTrackerApp(
     Scaffold(
         bottomBar = {
             if (currentTab != null) {
-                NavigationBar {
+                ShortNavigationBar {
                     TopLevelDestination.entries.forEach { tab ->
-                        NavigationBarItem(
+                        ShortNavigationBarItem(
                             selected = tab == currentTab,
                             onClick = { navController.navigateToTopLevelDestination(tab) },
                             icon = { Icon(painterResource(tab.iconRes), contentDescription = null) },
