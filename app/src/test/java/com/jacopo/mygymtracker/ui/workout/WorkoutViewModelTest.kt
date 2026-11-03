@@ -182,6 +182,18 @@ class WorkoutViewModelTest {
         assertNull(viewModel.uiState.value.editingSet)
     }
 
+    @Test
+    fun totals_countOnlyCompletedSets() = runTest {
+        val viewModel = loadedViewModel(startWorkout())
+
+        viewModel.completeFirstSet()
+
+        val state = viewModel.uiState.value
+        assertEquals(2, state.totalSets)
+        assertEquals(1, state.completedSets)
+        assertEquals(500.0, state.completedVolumeKg, 0.0)
+    }
+
     /** Starts a workout from a "Push" routine planning two squat sets of 5 x 100 kg. */
     private suspend fun startWorkout(): Int {
         val routineId = routines.saveRoutine(

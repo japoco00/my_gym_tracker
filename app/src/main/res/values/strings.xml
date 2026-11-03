@@ -14,6 +14,7 @@
     <string name="action_search">Search</string>
     <string name="action_remove">Remove</string>
     <string name="action_discard">Discard</string>
+    <string name="action_more">More options</string>
     <string name="unit_kg">kg</string>
     <string name="unit_lb">lb</string>
     <string name="weight_with_unit">%1$s %2$s</string>
@@ -45,11 +46,18 @@
     <string name="workout_add_exercises">Add exercises</string>
     <string name="workout_remove_exercise">Remove exercise</string>
     <string name="workout_set">Set</string>
-    <string name="workout_previous">Previous</string>
-    <string name="workout_previous_set">%1$s × %2$d</string>
-    <string name="workout_previous_set_added">+%1$s × %2$d</string>
-    <string name="workout_no_previous">–</string>
     <string name="workout_set_done">Set %1$d done</string>
+    <plurals name="workout_sets_progress">
+        <item quantity="one">%1$d of %2$d set</item>
+        <item quantity="other">%1$d of %2$d sets</item>
+    </plurals>
+    <string name="workout_sets_badge">sets</string>
+    <string name="workout_set_last">last %1$s</string>
+    <string name="workout_set_editor_title">%1$s · Set %2$d</string>
+    <string name="workout_set_editor_last_time">Last time: %1$s</string>
+    <string name="workout_complete_set">Complete set</string>
+    <string name="workout_uncomplete_set">Mark as not done</string>
+    <string name="workout_delete_set">Delete set</string>
     <string name="workout_finish_title">Finish workout?</string>
     <plurals name="workout_unchecked_sets_dropped">
         <item quantity="one">%d set isn’t ticked and won’t be saved.</item>
@@ -119,6 +127,7 @@
     <string name="rest_over_title">Rest over</string>
     <string name="rest_over_text">Time for your next set.</string>
     <string name="rest_skip">Skip</string>
+    <string name="rest_skip_description">Skip rest</string>
 
     <!-- Routine editor -->
     <string name="routine_editor_title_new">New routine</string>

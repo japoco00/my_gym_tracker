@@ -30,7 +30,15 @@ data class WorkoutUiState(
     val editingSet: EditingSet? = null,
     val isLoading: Boolean = true,
     val exit: WorkoutExit? = null,
-)
+) {
+    val totalSets: Int = exercises.sumOf { it.sets.size }
+    val completedSets: Int = exercises.sumOf { exercise -> exercise.sets.count { it.isCompleted } }
+
+    /** Ticked sets only, so it matches the volume History shows once the workout is saved. */
+    val completedVolumeKg: Double = exercises.sumOf { exercise ->
+        exercise.sets.filter { it.isCompleted }.sumOf { it.reps * it.weightKg }
+    }
+}
 
 data class EditingSet(val exerciseKey: String, val setKey: String)
 

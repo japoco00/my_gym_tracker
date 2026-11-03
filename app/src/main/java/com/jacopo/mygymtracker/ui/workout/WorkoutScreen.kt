@@ -1,41 +1,47 @@
 package com.jacopo.mygymtracker.ui.workout
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FloatingToolbarDefaults
+import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.R
@@ -49,8 +55,10 @@ import com.jacopo.mygymtracker.ui.components.AddExercisesSheet
 import com.jacopo.mygymtracker.ui.format.formatDuration
 import com.jacopo.mygymtracker.ui.theme.AppTheme
 import kotlinx.coroutines.delay
-import java.time.Duration
 import java.time.Instant
+
+/** Keeps the last row scrollable above the floating Finish button / rest toolbar. */
+private val FloatingControlsClearance = 96.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,6 +72,8 @@ fun WorkoutScreen(
     onConfirmAddExercises: (List<Exercise>) -> Unit,
     onRemoveExercise: (exerciseKey: String) -> Unit,
     onAddSet: (exerciseKey: String) -> Unit,
+    onOpenSetEditor: (exerciseKey: String, setKey: String) -> Unit,
+    onCloseSetEditor: () -> Unit,
     onDeleteSet: (exerciseKey: String, setKey: String) -> Unit,
     onRepsChange: (exerciseKey: String, setKey: String, Int) -> Unit,
     onWeightChange: (exerciseKey: String, setKey: String, Double) -> Unit,
@@ -88,84 +98,101 @@ fun WorkoutScreen(
         onDismiss = onDismissDialog,
     )
 
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(text = uiState.routineName, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        if (!uiState.isLoading) ElapsedTime(startedAt = uiState.startedAt)
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.action_back),
-                        )
-                    }
-                },
-                actions = {
-                    TextButton(onClick = onFinish, enabled = !uiState.isLoading) {
-                        Text(text = stringResource(R.string.workout_finish))
-                    }
-                },
-            )
-        },
-        bottomBar = {
-            uiState.restTimer?.let { timer ->
-                RestTimerBar(timer = timer, onAdjust = onAdjustRest, onSkip = onSkipRest)
+            if (!uiState.isLoading) {
+                WorkoutHeader(
+                    routineName = uiState.routineName,
+                    startedAt = uiState.startedAt,
+                    completedSets = uiState.completedSets,
+                    totalSets = uiState.totalSets,
+                    completedVolumeKg = uiState.completedVolumeKg,
+                    weightUnit = uiState.weightUnit,
+                    scrollBehavior = scrollBehavior,
+                    onBack = onBack,
+                    onDiscard = onDiscard,
+                )
             }
         },
-        modifier = modifier,
+        floatingActionButton = {
+            val timer = uiState.restTimer
+            when {
+                uiState.isLoading -> Unit
+                timer != null -> RestToolbar(timer = timer, onAdjust = onAdjustRest, onSkip = onSkipRest, onFinish = onFinish)
+                else -> ExtendedFloatingActionButton(
+                    text = { Text(text = stringResource(R.string.workout_finish)) },
+                    icon = { Icon(imageVector = Icons.Default.Check, contentDescription = null) },
+                    onClick = onFinish,
+                )
+            }
+        },
+        floatingActionButtonPosition = if (uiState.restTimer != null) FabPosition.Center else FabPosition.End,
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
     ) { innerPadding ->
         if (uiState.isLoading) return@Scaffold
         LazyColumn(
-            contentPadding = PaddingValues(bottom = 16.dp),
+            contentPadding = PaddingValues(bottom = FloatingControlsClearance),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
-                .consumeWindowInsets(innerPadding)
-                .imePadding(),
+                .padding(innerPadding),
         ) {
             items(items = uiState.exercises, key = { it.key }) { exercise ->
                 val exerciseKey = exercise.key
-                WorkoutExerciseCard(
+                WorkoutExerciseSection(
                     exercise = exercise,
                     previousSets = exercise.exercise.id?.let { uiState.previousSets[it] }.orEmpty(),
                     weightUnit = uiState.weightUnit,
                     onRemove = { onRemoveExercise(exerciseKey) },
                     onAddSet = { onAddSet(exerciseKey) },
+                    onOpenSet = { setKey -> onOpenSetEditor(exerciseKey, setKey) },
                     onDeleteSet = { setKey -> onDeleteSet(exerciseKey, setKey) },
-                    onRepsChange = { setKey, reps -> onRepsChange(exerciseKey, setKey, reps) },
-                    onWeightChange = { setKey, weight -> onWeightChange(exerciseKey, setKey, weight) },
-                    onDurationChange = { setKey, seconds -> onDurationChange(exerciseKey, setKey, seconds) },
                     onCompletedChange = { setKey, completed -> onSetCompletedChange(exerciseKey, setKey, completed) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .animateItem(),
                 )
             }
-            item(key = "workout-actions") {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
+            item(key = "add-exercises") {
+                Box(
+                    contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
                 ) {
-                    OutlinedButton(onClick = onOpenAddExercises) {
-                        Icon(imageVector = Icons.Default.Add, contentDescription = null)
+                    FilledTonalButton(onClick = onOpenAddExercises, shapes = ButtonDefaults.shapes()) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null,
+                            modifier = Modifier.size(ButtonDefaults.IconSize),
+                        )
+                        Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
                         Text(text = stringResource(R.string.workout_add_exercises))
-                    }
-                    TextButton(
-                        onClick = onDiscard,
-                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                    ) {
-                        Text(text = stringResource(R.string.workout_discard))
                     }
                 }
             }
         }
+    }
+
+    uiState.editingSet?.let { editing ->
+        val exercise = uiState.exercises.find { it.key == editing.exerciseKey } ?: return@let
+        val index = exercise.sets.indexOfFirst { it.key == editing.setKey }.takeIf { it >= 0 } ?: return@let
+        val exerciseKey = exercise.key
+        val setKey = editing.setKey
+        SetEditorSheet(
+            exerciseName = exercise.exercise.name,
+            number = index + 1,
+            set = exercise.sets[index],
+            previous = exercise.exercise.id?.let { uiState.previousSets[it]?.getOrNull(index) },
+            trackingType = exercise.exercise.trackingType,
+            weightUnit = uiState.weightUnit,
+            onRepsChange = { onRepsChange(exerciseKey, setKey, it) },
+            onWeightChange = { onWeightChange(exerciseKey, setKey, it) },
+            onDurationChange = { onDurationChange(exerciseKey, setKey, it) },
+            onCompletedChange = { onSetCompletedChange(exerciseKey, setKey, it) },
+            onDelete = { onDeleteSet(exerciseKey, setKey) },
+            onDismiss = onCloseSetEditor,
+        )
     }
 
     if (uiState.isAddExercisesSheetOpen) {
@@ -177,30 +204,16 @@ fun WorkoutScreen(
     }
 }
 
-/** Time since [startedAt], ticking on whole seconds. */
+/**
+ * Remaining rest in a wavy ring, with +15 s, skip, and Finish riding along as the toolbar's FAB.
+ * Ticks on whole seconds; the ring glides between ticks.
+ */
 @Composable
-private fun ElapsedTime(startedAt: Instant) {
-    val elapsedMs by produceState(initialValue = millisSince(startedAt), startedAt) {
-        while (true) {
-            value = millisSince(startedAt)
-            delay(1_000 - value % 1_000)
-        }
-    }
-    Text(
-        text = formatDuration(elapsedMs / 1_000),
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-}
-
-private fun millisSince(instant: Instant): Long = Duration.between(instant, Instant.now()).toMillis()
-
-/** Remaining rest with a progress bar, ticking on whole seconds. */
-@Composable
-private fun RestTimerBar(
+private fun RestToolbar(
     timer: RestTimer,
     onAdjust: (deltaSeconds: Int) -> Unit,
     onSkip: () -> Unit,
+    onFinish: () -> Unit,
 ) {
     val remainingMs by produceState(initialValue = timer.remainingMillis(System.currentTimeMillis()), timer) {
         while (value > 0) {
@@ -208,30 +221,50 @@ private fun RestTimerBar(
             value = timer.remainingMillis(System.currentTimeMillis())
         }
     }
+    val progress by animateFloatAsState(
+        targetValue = remainingMs / (timer.totalSeconds * 1_000f),
+        animationSpec = tween(durationMillis = 1_000, easing = LinearEasing),
+    )
     val step = UserSettings.REST_STEP_SECONDS
-    Surface(color = MaterialTheme.colorScheme.secondaryContainer) {
-        Column(modifier = Modifier.navigationBarsPadding()) {
-            LinearProgressIndicator(
-                progress = { remainingMs / (timer.totalSeconds * 1_000f) },
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
-            ) {
-                Icon(painter = painterResource(R.drawable.ic_timer), contentDescription = null)
-                Text(
-                    // Rounded up, so it reads 0:01 during the last second, not 0:00.
-                    text = formatDuration((remainingMs + 999) / 1_000),
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 12.dp),
-                )
-                TextButton(onClick = { onAdjust(-step) }) { Text(stringResource(R.string.rest_decrease, step)) }
-                TextButton(onClick = { onAdjust(step) }) { Text(stringResource(R.string.rest_increase, step)) }
-                TextButton(onClick = onSkip) { Text(stringResource(R.string.rest_skip)) }
+    HorizontalFloatingToolbar(
+        expanded = true,
+        floatingActionButton = {
+            FloatingToolbarDefaults.VibrantFloatingActionButton(onClick = onFinish) {
+                Icon(imageVector = Icons.Default.Check, contentDescription = stringResource(R.string.workout_finish))
             }
+        },
+        colors = FloatingToolbarDefaults.vibrantFloatingToolbarColors(),
+    ) {
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.size(48.dp)) {
+            CircularWavyProgressIndicator(
+                progress = { progress },
+                trackColor = LocalContentColor.current.copy(alpha = 0.2f),
+                modifier = Modifier.size(44.dp),
+            )
+            Icon(
+                painter = painterResource(R.drawable.ic_timer),
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+            )
+        }
+        Text(
+            // Rounded up, so it reads 0:01 during the last second, not 0:00.
+            text = formatDuration((remainingMs + 999) / 1_000),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(horizontal = 8.dp),
+        )
+        TextButton(
+            onClick = { onAdjust(step) },
+            colors = ButtonDefaults.textButtonColors(contentColor = LocalContentColor.current),
+        ) {
+            Text(text = stringResource(R.string.rest_increase, step))
+        }
+        IconButton(onClick = onSkip) {
+            Icon(
+                painter = painterResource(R.drawable.ic_skip_next),
+                contentDescription = stringResource(R.string.rest_skip_description),
+            )
         }
     }
 }
@@ -327,6 +360,19 @@ private fun WorkoutDialogHost(
 @Preview(showBackground = true)
 @Composable
 private fun WorkoutScreenPreview() {
+    WorkoutScreenSample(restTimer = null)
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun WorkoutScreenRestingPreview() {
+    WorkoutScreenSample(
+        restTimer = RestTimer(endsAtMillis = System.currentTimeMillis() + 62_000, totalSeconds = 90),
+    )
+}
+
+@Composable
+private fun WorkoutScreenSample(restTimer: RestTimer?) {
     AppTheme {
         WorkoutScreen(
             uiState = WorkoutUiState(
@@ -351,7 +397,7 @@ private fun WorkoutScreenPreview() {
                     ),
                 ),
                 previousSets = mapOf(1 to listOf(LoggedSet(reps = 8, weightKg = 77.5, isCompleted = true))),
-                restTimer = RestTimer(endsAtMillis = System.currentTimeMillis() + 62_000, totalSeconds = 90),
+                restTimer = restTimer,
                 isLoading = false,
             ),
             onBack = {},
@@ -362,6 +408,8 @@ private fun WorkoutScreenPreview() {
             onConfirmAddExercises = {},
             onRemoveExercise = {},
             onAddSet = {},
+            onOpenSetEditor = { _, _ -> },
+            onCloseSetEditor = {},
             onDeleteSet = { _, _ -> },
             onRepsChange = { _, _, _ -> },
             onWeightChange = { _, _, _ -> },
