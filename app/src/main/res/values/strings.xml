@@ -167,6 +167,8 @@
     <string name="exercise_dialog_title_new">New exercise</string>
     <string name="exercise_dialog_title_edit">Edit exercise</string>
     <string name="exercise_name_taken">An exercise with this name already exists.</string>
+    <string name="exercise_category">Category</string>
+    <string name="exercise_tracking_type">Tracked as</string>
     <string name="exercise_delete_title">Delete “%1$s”?</string>
     <string name="exercise_delete_message">It will be removed from the exercise list.</string>
     <string name="exercise_in_use_title">Can’t delete “%1$s”</string>
