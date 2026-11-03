@@ -2,6 +2,7 @@ package com.jacopo.mygymtracker.ui.format
 
 import android.text.format.DateFormat
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.Category
@@ -47,6 +48,22 @@ fun shortDateFormatter(): DateTimeFormatter {
 @Composable
 fun WeightUnit.formatVolume(volumeKg: Double): String =
     stringResource(R.string.weight_with_unit, fromKg(volumeKg).roundToLong().toString(), label())
+
+/** A set with its unit, e.g. `80 kg × 8`, `+10 kg × 8`, `12 reps` or `1:30`. */
+@Composable
+fun formatSet(
+    trackingType: TrackingType,
+    weightUnit: WeightUnit,
+    reps: Int,
+    weightKg: Double,
+    durationSeconds: Int,
+): String = when {
+    trackingType == TrackingType.DURATION -> formatDuration(durationSeconds.toLong())
+    trackingType == TrackingType.REPS && weightKg > 0.0 ->
+        stringResource(R.string.set_summary_added, weightUnit.format(weightKg), weightUnit.label(), reps)
+    trackingType == TrackingType.REPS -> pluralStringResource(R.plurals.reps_count, reps, reps)
+    else -> stringResource(R.string.set_summary, weightUnit.format(weightKg), weightUnit.label(), reps)
+}
 
 @Composable
 fun WeightUnit.label(): String = stringResource(

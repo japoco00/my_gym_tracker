@@ -78,8 +78,6 @@
     <string name="history_duration">Duration</string>
     <string name="history_sets">Sets</string>
     <string name="history_volume">Volume</string>
-    <string name="history_set">%1$s %2$s × %3$d</string>
-    <string name="history_set_added">+%1$s %2$s × %3$d</string>
     <string name="history_delete_title">Delete this workout?</string>
     <string name="history_delete_message">It will be removed from your history and progress.</string>
     <string name="history_edit_title">Edit workout</string>
@@ -135,6 +133,8 @@
     <string name="set_added_weight">Added (%1$s)</string>
     <string name="set_added_weight_short">+%1$s</string>
     <string name="set_time">Time</string>
+    <string name="set_summary">%1$s %2$s × %3$d</string>
+    <string name="set_summary_added">+%1$s %2$s × %3$d</string>
     <string name="action_add_set">Add set</string>
 
     <!-- Exercise catalog -->
