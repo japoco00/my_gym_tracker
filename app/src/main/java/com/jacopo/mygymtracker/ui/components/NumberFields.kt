@@ -36,7 +36,6 @@ fun RepsField(
     reps: Int,
     onRepsChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    showStepper: Boolean = false,
 ) {
     NumberField(
         value = reps.toDouble(),
@@ -44,7 +43,7 @@ fun RepsField(
         format = { it.roundToInt().toString() },
         parse = { text -> text.trim().toIntOrNull()?.takeIf { it >= 0 }?.toDouble() },
         keyboardType = KeyboardType.Number,
-        step = if (showStepper) 1.0 else null,
+        step = 1.0,
         modifier = modifier,
     )
 }
@@ -56,7 +55,6 @@ fun WeightField(
     unit: WeightUnit,
     onWeightKgChange: (Double) -> Unit,
     modifier: Modifier = Modifier,
-    showStepper: Boolean = false,
 ) {
     NumberField(
         value = unit.fromKg(weightKg),
@@ -64,7 +62,7 @@ fun WeightField(
         format = ::formatWeight,
         parse = ::parseWeight,
         keyboardType = KeyboardType.Decimal,
-        step = if (showStepper) unit.step else null,
+        step = unit.step,
         modifier = modifier,
     )
 }
@@ -75,7 +73,6 @@ fun DurationField(
     seconds: Int,
     onSecondsChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    showStepper: Boolean = false,
 ) {
     NumberField(
         value = seconds.toDouble(),
@@ -83,7 +80,7 @@ fun DurationField(
         format = { formatDuration(it.toLong()) },
         parse = ::parseDuration,
         keyboardType = KeyboardType.Number,
-        step = if (showStepper) DURATION_STEP_SECONDS else null,
+        step = DURATION_STEP_SECONDS,
         modifier = modifier,
     )
 }
@@ -100,7 +97,7 @@ private fun parseDuration(text: String): Double? {
 /**
  * Keeps the typed text locally, so partial input like `22.` or an empty field is not
  * overwritten while typing. Only valid numbers are reported. The text is replaced when
- * [value] changes from outside (e.g. a stepper) and tidied up when focus leaves.
+ * [value] changes from outside (e.g. the ±[step] buttons) and tidied up when focus leaves.
  */
 @Composable
 private fun NumberField(
@@ -109,7 +106,7 @@ private fun NumberField(
     format: (Double) -> String,
     parse: (String) -> Double?,
     keyboardType: KeyboardType,
-    step: Double?,
+    step: Double,
     modifier: Modifier = Modifier,
 ) {
     var text by remember { mutableStateOf(format(value)) }
@@ -119,10 +116,8 @@ private fun NumberField(
     }
 
     Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
-        if (step != null) {
-            StepButton(label = "−${formatWeight(step)}") {
-                onValueChange((value - step).coerceAtLeast(0.0))
-            }
+        StepButton(label = "−${formatWeight(step)}") {
+            onValueChange((value - step).coerceAtLeast(0.0))
         }
         TextField(
             value = text,
@@ -137,9 +132,7 @@ private fun NumberField(
                 .weight(1f)
                 .onFocusChanged { if (!it.isFocused) text = format(value) },
         )
-        if (step != null) {
-            StepButton(label = "+${formatWeight(step)}") { onValueChange(value + step) }
-        }
+        StepButton(label = "+${formatWeight(step)}") { onValueChange(value + step) }
     }
 }
 

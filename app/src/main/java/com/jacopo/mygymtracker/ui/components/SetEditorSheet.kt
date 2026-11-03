@@ -135,15 +135,15 @@ private fun SetEditorContent(
         Spacer(modifier = Modifier.size(8.dp))
         when (trackingType) {
             TrackingType.DURATION -> LabeledField(stringResource(R.string.set_time)) {
-                DurationField(seconds = durationSeconds, onSecondsChange = onDurationChange, showStepper = true)
+                DurationField(seconds = durationSeconds, onSecondsChange = onDurationChange)
             }
             TrackingType.WEIGHT_REPS, TrackingType.REPS -> {
                 val weightLabel = if (trackingType == TrackingType.REPS) R.string.set_added_weight else R.string.set_weight
                 LabeledField(stringResource(weightLabel, weightUnit.label())) {
-                    WeightField(weightKg = weightKg, unit = weightUnit, onWeightKgChange = onWeightChange, showStepper = true)
+                    WeightField(weightKg = weightKg, unit = weightUnit, onWeightKgChange = onWeightChange)
                 }
                 LabeledField(stringResource(R.string.set_reps)) {
-                    RepsField(reps = reps, onRepsChange = onRepsChange, showStepper = true)
+                    RepsField(reps = reps, onRepsChange = onRepsChange)
                 }
             }
         }
