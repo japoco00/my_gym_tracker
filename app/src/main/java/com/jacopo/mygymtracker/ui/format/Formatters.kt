@@ -1,6 +1,7 @@
 package com.jacopo.mygymtracker.ui.format
 
 import android.text.format.DateFormat
+import android.text.format.DateUtils
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -36,6 +37,14 @@ fun formatDateTime(instant: Instant): String =
 /** Date in the device's locale and time zone, e.g. `Jul 14, 2025`. */
 fun formatDate(instant: Instant): String =
     DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(instant.atZone(ZoneId.systemDefault()))
+
+/** `Today`, `Yesterday`, `3 days ago`, then a short date from one week on. */
+fun formatRelativeDay(instant: Instant): String =
+    DateUtils.getRelativeTimeSpanString(
+        instant.toEpochMilli(),
+        System.currentTimeMillis(),
+        DateUtils.DAY_IN_MILLIS,
+    ).toString()
 
 /** Day and abbreviated month in the device's locale and time zone, e.g. `Jul 14` or `14 Jul`. */
 fun shortDateFormatter(): DateTimeFormatter {

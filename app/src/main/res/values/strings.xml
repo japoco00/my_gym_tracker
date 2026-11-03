@@ -31,12 +31,24 @@
     <string name="routines_title">Routines</string>
     <string name="routines_empty">No routines yet. Create your first one!</string>
     <string name="routines_create">New routine</string>
+    <string name="routines_section">Your routines</string>
+    <plurals name="routines_count">
+        <item quantity="one">%d routine</item>
+        <item quantity="other">%d routines</item>
+    </plurals>
+    <string name="routines_last_workout">Last: %1$s · %2$s</string>
+    <string name="routines_active_progress">%1$s · %2$s</string>
+    <string name="routines_next_exercise">Next: %1$s</string>
     <string name="routine_deleted">Deleted “%1$s”</string>
-    <string name="routine_exercise_sets">%1$s: %2$d × %3$s</string>
-    <string name="routine_exercise_no_sets">%1$s: no sets</string>
+    <plurals name="routine_exercise_count">
+        <item quantity="one">%d exercise</item>
+        <item quantity="other">%d exercises</item>
+    </plurals>
+    <string name="routine_no_exercises">No exercises yet</string>
+    <string name="routine_start">Start %1$s</string>
+    <string name="routine_resume">Resume %1$s</string>
 
     <!-- Workout -->
-    <string name="workout_start">Start</string>
     <string name="workout_resume">Resume</string>
     <string name="workout_in_progress">Workout in progress</string>
     <string name="workout_conflict_message">“%1$s” is still in progress. Resume it, or discard it and start “%2$s”.</string>
