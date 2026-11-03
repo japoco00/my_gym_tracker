@@ -92,6 +92,13 @@ com.jacopo.mygymtracker
 - **Stateless Screens**: `*Screen` composables accept `uiState`, event callbacks, and `modifier: Modifier = Modifier`, never a ViewModel instance.
 - **Strings**: All user-visible text lives in `res/values/strings.xml`, read with `stringResource` / `pluralStringResource`. Formatting of dates, durations and weights goes through `ui/format/`.
 - **Scaffolds**: Each screen owns its `Scaffold` and top bar, built with the shared `ui/components/AppHeader` (big collapsing title, `Pill` facts, rounded `surfaceContainer` block). `MyGymTrackerApp` shows the bottom `ShortNavigationBar` only on tab roots (`TopLevelDestination`), so detail screens are full screen.
+- **Shared building blocks** (`ui/components/`): every screen follows the workout screen's Material 3 Expressive style. Reuse these instead of writing a feature-local variant:
+  - `AppHeader`: a `String` title, or a composable `(expanded) -> Unit` title for custom content such as the routine editor's editable name. Expanded titles use `Typography.headerTitle`.
+  - `Pill` for header facts, `SectionLabel` for list section titles, `ShapeBadge` for a short value + label inside a `MaterialShapes` shape in `AppHeader`'s actions (stays visible when collapsed).
+  - `SetRow` + `SetNumber`: the one set row for workouts, history and routines; tapping an editable row opens `SetEditorSheet`.
+  - `SetEditorSheet`: the only set editor (`RepsField` / `WeightField` / `DurationField` with steppers). Passing `isCompleted = null` gives plan mode (routines: no completion toggle, no previous values).
+  - `ExerciseEditorSheet` creates or edits a catalog exercise. Pass `isNameTaken` so duplicate names can't be saved.
+  - `AddExercisesSheet` picks catalog exercises; `DestructiveOverflowMenu` holds a single destructive action; `SwipeToDeleteContainer` wraps swipe-to-delete rows.
 - **Previews**: Include private `@Preview` composables wrapped in `AppTheme` with realistic sample data.
 
 ---
