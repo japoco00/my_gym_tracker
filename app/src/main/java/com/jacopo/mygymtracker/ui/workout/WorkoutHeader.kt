@@ -84,7 +84,7 @@ fun WorkoutHeader(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = if (expanded) {
-                        MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.SemiBold)
+                        MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.SemiBold)
                     } else {
                         LocalTextStyle.current
                     },
