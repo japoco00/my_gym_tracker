@@ -9,6 +9,7 @@ import com.jacopo.mygymtracker.data.InMemoryPreferencesDataStore
 import com.jacopo.mygymtracker.data.createTestDatabase
 import com.jacopo.mygymtracker.data.local.AppDatabase
 import com.jacopo.mygymtracker.data.newExercise
+import com.jacopo.mygymtracker.data.repository.ExerciseRepository
 import com.jacopo.mygymtracker.data.repository.RoutineRepository
 import com.jacopo.mygymtracker.data.repository.SettingsRepository
 import com.jacopo.mygymtracker.data.repository.WorkoutRepository
@@ -22,11 +23,13 @@ import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.time.Instant
 
 @RunWith(AndroidJUnit4::class)
 class WorkoutDetailViewModelTest {
@@ -96,14 +99,46 @@ class WorkoutDetailViewModelTest {
         assertEquals(before, workouts.getWorkout(sessionId))
     }
 
+    @Test
+    fun prSetIndexes_markTheSetThatBeatsEarlierWorkouts() = runTest {
+        finishedWorkout(startedAt = Instant.EPOCH)
+        val sessionId = finishedWorkout(startedAt = Instant.EPOCH.plusSeconds(86_400))
+        val viewModel = editingViewModel(sessionId)
+        assertEquals(listOf(null), viewModel.uiState.value.prSetIndexes)
+        val squat = viewModel.uiState.value.editedExercises!!.single()
+
+        viewModel.updateSetWeight(squat.key, squat.sets.last().key, 105.0)
+        viewModel.saveEdits()
+
+        assertEquals(listOf(1), viewModel.uiState.first { !it.isEditing }.prSetIndexes)
+    }
+
+    @Test
+    fun addExercises_appendsNewOnesAndSkipsDuplicates() = runTest {
+        val sessionId = finishedWorkout()
+        val viewModel = editingViewModel(sessionId)
+        val squat = viewModel.uiState.value.editedExercises!!.single().exercise
+        val bench = ExerciseRepository(database, database.exerciseDao()).let { repository ->
+            repository.saveExercise(newExercise("Bench"))
+            repository.observeCatalog().first().single { it.name == "Bench" }
+        }
+
+        viewModel.addExercises(listOf(squat, bench))
+
+        val edited = viewModel.uiState.first { it.editedExercises!!.size == 2 }.editedExercises!!
+        assertEquals(listOf("Squat", "Bench"), edited.map { it.exercise.name })
+        assertEquals(1, edited.last().sets.size)
+        assertNull(viewModel.uiState.value.editingSet)
+    }
+
     /** A finished workout with two completed squat sets of 5 x 100 kg. */
-    private suspend fun finishedWorkout(): Int {
+    private suspend fun finishedWorkout(startedAt: Instant = Instant.now()): Int {
         val routines = RoutineRepository(database, database.routineDao(), database.exerciseDao())
         val routineId = routines.saveRoutine(
             routineOf("Push", newExercise("Squat") to listOf(PlannedSet(5, 100.0), PlannedSet(5, 100.0))),
         )
-        val sessionId = workouts.startWorkout(routines.getRoutine(routineId)!!)!!
-        workouts.finishWorkout(workouts.getWorkout(sessionId)!!.withAllSetsCompleted())
+        val sessionId = workouts.startWorkout(routines.getRoutine(routineId)!!, startedAt)!!
+        workouts.finishWorkout(workouts.getWorkout(sessionId)!!.withAllSetsCompleted(), startedAt.plusSeconds(3_600))
         return sessionId
     }
 
@@ -114,6 +149,7 @@ class WorkoutDetailViewModelTest {
                 WorkoutDetailViewModel(
                     sessionId = sessionId,
                     workoutRepository = workouts,
+                    exerciseRepository = ExerciseRepository(database, database.exerciseDao()),
                     settingsRepository = SettingsRepository(InMemoryPreferencesDataStore()),
                 )
             }

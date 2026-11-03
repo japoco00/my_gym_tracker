@@ -1,49 +1,60 @@
 package com.jacopo.mygymtracker.ui.history
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.LoggedSet
-import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.domain.model.WorkoutExercise
 import com.jacopo.mygymtracker.domain.model.WorkoutSession
-import com.jacopo.mygymtracker.ui.format.formatDateTime
+import com.jacopo.mygymtracker.ui.components.AddExercisesSheet
+import com.jacopo.mygymtracker.ui.components.AppHeader
+import com.jacopo.mygymtracker.ui.components.DestructiveOverflowMenu
+import com.jacopo.mygymtracker.ui.components.Pill
+import com.jacopo.mygymtracker.ui.components.SetEditorSheet
+import com.jacopo.mygymtracker.ui.components.ShapeBadge
+import com.jacopo.mygymtracker.ui.format.formatDate
 import com.jacopo.mygymtracker.ui.format.formatDuration
-import com.jacopo.mygymtracker.ui.format.formatSet
 import com.jacopo.mygymtracker.ui.format.formatVolume
 import com.jacopo.mygymtracker.ui.theme.AppTheme
 import java.time.Instant
@@ -60,7 +71,12 @@ fun WorkoutDetailScreen(
     onConfirmDelete: () -> Unit,
     onDismissDeleteDialog: () -> Unit,
     onExerciseClick: (exerciseId: Int) -> Unit,
+    onOpenAddExercises: () -> Unit,
+    onDismissAddExercises: () -> Unit,
+    onConfirmAddExercises: (List<Exercise>) -> Unit,
     onAddSet: (exerciseKey: String) -> Unit,
+    onOpenSetEditor: (exerciseKey: String, setKey: String) -> Unit,
+    onCloseSetEditor: () -> Unit,
     onDeleteSet: (exerciseKey: String, setKey: String) -> Unit,
     onRepsChange: (exerciseKey: String, setKey: String, Int) -> Unit,
     onWeightChange: (exerciseKey: String, setKey: String, Double) -> Unit,
@@ -83,175 +99,193 @@ fun WorkoutDetailScreen(
         )
     }
 
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = if (uiState.isEditing) {
-                            stringResource(R.string.history_edit_title)
-                        } else {
-                            uiState.workout?.routineName.orEmpty()
-                        },
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                },
-                navigationIcon = {
-                    if (uiState.isEditing) {
-                        IconButton(onClick = onCancelEdit) {
-                            Icon(imageVector = Icons.Default.Close, contentDescription = stringResource(R.string.action_cancel))
-                        }
-                    } else {
-                        IconButton(onClick = onBack) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.action_back),
-                            )
-                        }
-                    }
-                },
-                actions = {
-                    if (uiState.isEditing) {
-                        TextButton(onClick = onSaveEdits, enabled = uiState.canSave) {
-                            Text(stringResource(R.string.action_save))
-                        }
-                    } else {
-                        IconButton(onClick = onEdit, enabled = uiState.workout != null) {
-                            Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(R.string.action_edit))
-                        }
-                        IconButton(onClick = onDelete, enabled = uiState.workout != null) {
-                            Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete))
-                        }
-                    }
-                },
-            )
+            uiState.workout?.let { workout ->
+                WorkoutDetailHeader(
+                    workout = workout,
+                    uiState = uiState,
+                    scrollBehavior = scrollBehavior,
+                    onBack = onBack,
+                    onEdit = onEdit,
+                    onCancelEdit = onCancelEdit,
+                    onSaveEdits = onSaveEdits,
+                    onDelete = onDelete,
+                )
+            }
         },
-        modifier = modifier,
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
     ) { innerPadding ->
         val workout = uiState.workout ?: return@Scaffold
         val editedExercises = uiState.editedExercises
         LazyColumn(
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(bottom = 16.dp),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
         ) {
-            item {
-                WorkoutStats(
-                    startedAt = workout.startedAt,
-                    durationSeconds = uiState.durationSeconds,
-                    setCount = uiState.setCount,
-                    volume = uiState.weightUnit.formatVolume(uiState.volumeKg),
-                )
-            }
             if (editedExercises == null) {
-                items(workout.exercises) { exercise ->
-                    ExerciseSetsCard(
+                itemsIndexed(workout.exercises) { index, exercise ->
+                    LoggedExerciseSection(
                         exercise = exercise,
+                        prSetIndex = uiState.prSetIndexes.getOrNull(index),
                         weightUnit = uiState.weightUnit,
-                        onClick = { onExerciseClick(checkNotNull(exercise.exercise.id)) },
+                        onClick = exercise.exercise.id?.let { exerciseId -> { onExerciseClick(exerciseId) } },
                     )
                 }
             } else {
                 if (!uiState.canSave) {
-                    item {
+                    item(key = "needs-set") {
                         Text(
                             text = stringResource(R.string.history_edit_needs_set),
                             color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(start = 20.dp, top = 16.dp, end = 20.dp),
                         )
                     }
                 }
-                items(editedExercises, key = { it.key }) { exercise ->
-                    EditableExerciseCard(
+                items(items = editedExercises, key = { it.key }) { exercise ->
+                    val exerciseKey = exercise.key
+                    EditableExerciseSection(
                         exercise = exercise,
                         weightUnit = uiState.weightUnit,
-                        onAddSet = { onAddSet(exercise.key) },
-                        onDeleteSet = { setKey -> onDeleteSet(exercise.key, setKey) },
-                        onRepsChange = { setKey, reps -> onRepsChange(exercise.key, setKey, reps) },
-                        onWeightChange = { setKey, weight -> onWeightChange(exercise.key, setKey, weight) },
-                        onDurationChange = { setKey, seconds -> onDurationChange(exercise.key, setKey, seconds) },
+                        onAddSet = { onAddSet(exerciseKey) },
+                        onOpenSet = { setKey -> onOpenSetEditor(exerciseKey, setKey) },
+                        onDeleteSet = { setKey -> onDeleteSet(exerciseKey, setKey) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .animateItem(),
                     )
+                }
+                item(key = "add-exercises") {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                    ) {
+                        FilledTonalButton(onClick = onOpenAddExercises, shapes = ButtonDefaults.shapes()) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = null,
+                                modifier = Modifier.size(ButtonDefaults.IconSize),
+                            )
+                            Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
+                            Text(text = stringResource(R.string.workout_add_exercises))
+                        }
+                    }
                 }
             }
         }
     }
-}
 
-@Composable
-private fun WorkoutStats(
-    startedAt: Instant,
-    durationSeconds: Long,
-    setCount: Int,
-    volume: String,
-) {
-    Column {
-        Text(
-            text = formatDateTime(startedAt),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+    uiState.editingSet?.let { editing ->
+        val exercise = uiState.editedExercises?.find { it.key == editing.exerciseKey } ?: return@let
+        val index = exercise.sets.indexOfFirst { it.key == editing.setKey }.takeIf { it >= 0 } ?: return@let
+        val exerciseKey = exercise.key
+        val setKey = editing.setKey
+        val set = exercise.sets[index]
+        SetEditorSheet(
+            exerciseName = exercise.exercise.name,
+            number = index + 1,
+            trackingType = exercise.exercise.trackingType,
+            weightUnit = uiState.weightUnit,
+            reps = set.reps,
+            weightKg = set.weightKg,
+            durationSeconds = set.durationSeconds,
+            onRepsChange = { onRepsChange(exerciseKey, setKey, it) },
+            onWeightChange = { onWeightChange(exerciseKey, setKey, it) },
+            onDurationChange = { onDurationChange(exerciseKey, setKey, it) },
+            onDelete = { onDeleteSet(exerciseKey, setKey) },
+            onDismiss = onCloseSetEditor,
         )
-        Row(modifier = Modifier.padding(top = 12.dp)) {
-            Stat(stringResource(R.string.history_duration), formatDuration(durationSeconds), Modifier.weight(1f))
-            Stat(stringResource(R.string.history_sets), setCount.toString(), Modifier.weight(1f))
-            Stat(stringResource(R.string.history_volume), volume, Modifier.weight(1f))
-        }
+    }
+
+    if (uiState.isAddExercisesSheetOpen) {
+        AddExercisesSheet(
+            catalogExercises = uiState.catalogExercises,
+            onDismiss = onDismissAddExercises,
+            onConfirm = onConfirmAddExercises,
+        )
     }
 }
 
+/**
+ * The routine's name over date, duration and volume pills, with a sets badge. Viewing offers
+ * Edit and Delete; editing swaps them for Close and Save.
+ */
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun Stat(label: String, value: String, modifier: Modifier = Modifier) {
-    Column(modifier = modifier) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Text(text = value, style = MaterialTheme.typography.titleLarge)
-    }
-}
-
-@Composable
-private fun ExerciseSetsCard(
-    exercise: WorkoutExercise,
-    weightUnit: WeightUnit,
-    onClick: () -> Unit,
+private fun WorkoutDetailHeader(
+    workout: WorkoutSession,
+    uiState: WorkoutDetailUiState,
+    scrollBehavior: TopAppBarScrollBehavior,
+    onBack: () -> Unit,
+    onEdit: () -> Unit,
+    onCancelEdit: () -> Unit,
+    onSaveEdits: () -> Unit,
+    onDelete: () -> Unit,
 ) {
-    OutlinedCard(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = exercise.exercise.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.weight(1f),
-                )
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            exercise.sets.forEachIndexed { index, set ->
-                Row(modifier = Modifier.padding(top = 8.dp)) {
-                    Text(
-                        text = (index + 1).toString(),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.width(32.dp),
-                    )
-                    Text(
-                        formatSet(
-                            trackingType = exercise.exercise.trackingType,
-                            weightUnit = weightUnit,
-                            reps = set.reps,
-                            weightKg = set.weightKg,
-                            durationSeconds = set.durationSeconds,
-                        ),
+    val date = formatDate(workout.startedAt)
+    AppHeader(
+        title = workout.routineName,
+        scrollBehavior = scrollBehavior,
+        navigationIcon = {
+            if (uiState.isEditing) {
+                IconButton(onClick = onCancelEdit) {
+                    Icon(imageVector = Icons.Default.Close, contentDescription = stringResource(R.string.action_cancel))
+                }
+            } else {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.action_back),
                     )
                 }
             }
-        }
-    }
+        },
+        actions = {
+            ShapeBadge(
+                shape = MaterialShapes.SoftBurst,
+                value = uiState.setCount.toString(),
+                label = stringResource(R.string.workout_sets_badge),
+                contentDescription = pluralStringResource(R.plurals.history_set_count, uiState.setCount, uiState.setCount),
+            )
+            if (uiState.isEditing) {
+                Button(
+                    onClick = onSaveEdits,
+                    enabled = uiState.canSave,
+                    shapes = ButtonDefaults.shapes(),
+                    modifier = Modifier.padding(start = 8.dp, end = 8.dp),
+                ) {
+                    Icon(imageVector = Icons.Default.Check, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
+                    Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
+                    Text(text = stringResource(R.string.action_save))
+                }
+            } else {
+                IconButton(onClick = onEdit) {
+                    Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(R.string.action_edit))
+                }
+                DestructiveOverflowMenu(action = stringResource(R.string.history_delete), onAction = onDelete)
+            }
+        },
+        pills = {
+            Pill {
+                Icon(painter = painterResource(R.drawable.ic_history), contentDescription = null, modifier = Modifier.size(18.dp))
+                Text(text = date)
+            }
+            Pill {
+                Icon(painter = painterResource(R.drawable.ic_timer), contentDescription = null, modifier = Modifier.size(18.dp))
+                Text(text = formatDuration(uiState.durationSeconds))
+            }
+            if (uiState.volumeKg > 0) {
+                Pill { Text(text = uiState.weightUnit.formatVolume(uiState.volumeKg)) }
+            }
+        },
+        collapsedSubtitle = {
+            Text(text = if (uiState.isEditing) stringResource(R.string.history_edit_title) else date)
+        },
+    )
 }
 
 @Preview(showBackground = true)
@@ -272,11 +306,12 @@ private fun WorkoutDetailScreenPreview() {
                             exercise = Exercise(id = 1, name = "Bench Press", category = Category.CHEST),
                             sets = listOf(
                                 LoggedSet(reps = 8, weightKg = 80.0, isCompleted = true),
-                                LoggedSet(reps = 7, weightKg = 80.0, isCompleted = true),
+                                LoggedSet(reps = 7, weightKg = 82.5, isCompleted = true),
                             ),
                         ),
                     ),
                 ),
+                prSetIndexes = listOf(1),
             ),
             onBack = {},
             onEdit = {},
@@ -286,7 +321,12 @@ private fun WorkoutDetailScreenPreview() {
             onConfirmDelete = {},
             onDismissDeleteDialog = {},
             onExerciseClick = {},
+            onOpenAddExercises = {},
+            onDismissAddExercises = {},
+            onConfirmAddExercises = {},
             onAddSet = {},
+            onOpenSetEditor = { _, _ -> },
+            onCloseSetEditor = {},
             onDeleteSet = { _, _ -> },
             onRepsChange = { _, _, _ -> },
             onWeightChange = { _, _, _ -> },

@@ -57,7 +57,6 @@
     <string name="workout_discard">Discard workout</string>
     <string name="workout_add_exercises">Add exercises</string>
     <string name="workout_remove_exercise">Remove exercise</string>
-    <string name="workout_set">Set</string>
     <string name="workout_set_done">Set %1$d done</string>
     <plurals name="workout_sets_progress">
         <item quantity="one">%1$d of %2$d set</item>
@@ -103,13 +102,13 @@
         <item quantity="one">%d set</item>
         <item quantity="other">%d sets</item>
     </plurals>
-    <string name="history_duration">Duration</string>
-    <string name="history_sets">Sets</string>
-    <string name="history_volume">Volume</string>
+    <string name="history_delete">Delete workout</string>
     <string name="history_delete_title">Delete this workout?</string>
     <string name="history_delete_message">It will be removed from your history and progress.</string>
     <string name="history_edit_title">Edit workout</string>
     <string name="history_edit_needs_set">Keep at least one set, or delete the workout instead.</string>
+    <string name="history_pr">PR</string>
+    <string name="history_pr_description">Personal record</string>
 
     <!-- Progress -->
     <string name="progress_empty">No finished workouts with this exercise yet.</string>
