@@ -1,14 +1,16 @@
 # MyGymTracker - AI Agent Guidelines
 
 ## 1. Project Overview & Tech Stack
-- **Platform**: Android (Min SDK 26, Compile/Target SDK 36, JVM 17)
-- **Language**: Kotlin
-- **UI Toolkit**: Jetpack Compose with Material 3; charts with Vico (`compose-m3`)
+- **Platform**: Android (Min SDK 26, Compile SDK 37, Target SDK 36, JVM 17)
+- **Language**: Kotlin 2.4 via AGP 9 built-in Kotlin (no `kotlin-android` plugin)
+- **UI Toolkit**: Jetpack Compose with Material 3 (Expressive APIs); charts with Vico (`compose-m3`)
 - **Architecture**: Clean layered MVVM (`domain`, `data`, `di`, feature-organized `ui`) with Manual Dependency Injection
 - **Persistence**: Room (SQLite) for routines and workouts; Preferences DataStore for user settings
 - **Navigation**: Jetpack Navigation Compose with Kotlin Serialization (`kotlinx.serialization`) type-safe routes
 - **Concurrency**: Kotlin Coroutines & `Flow` / `StateFlow`
-- **Versions**: `gradle/libs.versions.toml` is the single source. Vico tracks recent Compose releases (it drove the BOM bump to 2025.10.01): upgrade Vico and the Compose BOM together.
+- **Versions**: `gradle/libs.versions.toml` is the single source.
+  - `material3` is pinned above the Compose BOM (1.5 beta) for the Expressive components; it requires Compile SDK 37. Drop the pin once the BOM ships a material3 with those APIs.
+  - Vico tracks recent Compose and Kotlin releases: upgrade Vico, the Compose BOM and Kotlin together, keeping the BOM at least as new as the one Vico requires.
 
 ---
 
