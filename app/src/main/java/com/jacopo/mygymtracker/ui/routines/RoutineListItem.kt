@@ -24,6 +24,9 @@ import com.jacopo.mygymtracker.domain.model.Routine
 import com.jacopo.mygymtracker.domain.model.RoutineExercise
 import com.jacopo.mygymtracker.ui.theme.AppTheme
 
+/** Shared-bounds key linking a routine's row to its editor, so the row grows into the screen. */
+fun routineContainerKey(routineId: Int): Any = "routine-$routineId"
+
 /**
  * One row of the routines group.
  *

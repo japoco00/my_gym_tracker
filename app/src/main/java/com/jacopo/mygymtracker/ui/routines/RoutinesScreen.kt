@@ -63,6 +63,7 @@ import com.jacopo.mygymtracker.ui.components.Pill
 import com.jacopo.mygymtracker.ui.components.SectionLabel
 import com.jacopo.mygymtracker.ui.components.SwipeToDeleteContainer
 import com.jacopo.mygymtracker.ui.components.rememberElapsedTime
+import com.jacopo.mygymtracker.ui.components.sharedContainer
 import com.jacopo.mygymtracker.ui.format.formatRelativeDay
 import com.jacopo.mygymtracker.ui.theme.AppTheme
 import java.time.Duration
@@ -171,6 +172,7 @@ fun RoutinesScreen(
                     // Clipped so the red swipe background follows the row's rounded corners.
                     modifier = Modifier
                         .animateItem()
+                        .sharedContainer(routineContainerKey(checkNotNull(routine.id)), shapes.shape)
                         .clip(shapes.shape),
                 ) {
                     RoutineListItem(
