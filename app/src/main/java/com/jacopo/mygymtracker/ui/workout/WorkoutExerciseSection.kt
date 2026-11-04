@@ -1,15 +1,13 @@
 package com.jacopo.mygymtracker.ui.workout
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
@@ -21,13 +19,22 @@ import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.toShape
+import androidx.compose.material3.toPath
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -35,6 +42,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.lerp
+import androidx.graphics.shapes.Morph
 import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
@@ -43,7 +52,6 @@ import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.ui.components.DestructiveOverflowMenu
 import com.jacopo.mygymtracker.ui.components.SetRow
 import com.jacopo.mygymtracker.ui.components.SwipeToDeleteContainer
-import com.jacopo.mygymtracker.ui.components.popScale
 import com.jacopo.mygymtracker.ui.format.formatSet
 import com.jacopo.mygymtracker.ui.theme.AppTheme
 
@@ -130,44 +138,63 @@ fun WorkoutExerciseSection(
     }
 }
 
-/** An empty ring, or a filled cookie with a tick once the set is done; it pops on every change. */
+/**
+ * A ring that morphs into a filled, turning cookie with a tick once the set is done,
+ * with a haptic tick each way.
+ */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun SetCheck(number: Int, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    val scale by popScale(value = checked, from = 0.6f)
+    val progress by animateFloatAsState(
+        targetValue = if (checked) 1f else 0f,
+        animationSpec = MaterialTheme.motionScheme.fastSpatialSpec(),
+        label = "setCheck",
+    )
+    val morph = remember { Morph(MaterialShapes.Circle, MaterialShapes.Cookie9Sided) }
+    val fillColor = MaterialTheme.colorScheme.primary
+    val ringColor = MaterialTheme.colorScheme.outline
+    val haptics = LocalHapticFeedback.current
     val description = stringResource(R.string.workout_set_done, number)
     IconToggleButton(
         checked = checked,
-        onCheckedChange = onCheckedChange,
+        onCheckedChange = { completed ->
+            haptics.performHapticFeedback(if (completed) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff)
+            onCheckedChange(completed)
+        },
         modifier = Modifier.semantics { contentDescription = description },
     ) {
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .size(40.dp)
-                .graphicsLayer {
-                    scaleX = scale
-                    scaleY = scale
+                .drawWithCache {
+                    // The spring overshoots: the shape uses the clamped value, size and turn the raw one.
+                    val t = progress.coerceIn(0f, 1f)
+                    val side = size.minDimension * lerp(0.8f, 1f, progress)
+                    val path = morph.toPath(t) // normalized to a 1 x 1 square
+                    val ring = Stroke(width = 2.dp.toPx() / side)
+                    onDrawBehind {
+                        rotate(40f * progress) {
+                            translate(center.x - side / 2, center.y - side / 2) {
+                                scale(side, pivot = Offset.Zero) {
+                                    drawPath(path, fillColor, alpha = t)
+                                    drawPath(path, ringColor, alpha = 1f - t, style = ring)
+                                }
+                            }
+                        }
+                    }
                 },
         ) {
-            if (checked) {
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .background(MaterialTheme.colorScheme.primary, MaterialShapes.Cookie9Sided.toShape()),
-                )
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .border(width = 2.dp, color = MaterialTheme.colorScheme.outline, shape = CircleShape),
-                )
-            }
+            Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.graphicsLayer {
+                    alpha = progress.coerceIn(0f, 1f)
+                    scaleX = progress
+                    scaleY = progress
+                },
+            )
         }
     }
 }
