@@ -13,26 +13,42 @@ import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.ui.components.EditingSet
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
+private const val SAVE_DELAY_MS = 500L
+
+/**
+ * Edits are saved shortly after they happen, so leaving the screen needs no Save button
+ * and keeps predictive back working.
+ *
+ * @param untitledName the localized name for a routine left without one.
+ */
 class RoutineDetailViewModel(
     private val routineId: Int?,
+    private val untitledName: String,
     private val routineRepository: RoutineRepository,
     private val exerciseRepository: ExerciseRepository,
     private val settingsRepository: SettingsRepository,
+    private val applicationScope: CoroutineScope,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RoutineDetailUiState())
     val uiState: StateFlow<RoutineDetailUiState> = _uiState.asStateFlow()
 
+    private val saveLock = Mutex()
     private var saveJob: Job? = null
+    private var hasUnsavedEdits = false
 
     init {
         loadInitialRoutine()
@@ -66,11 +82,11 @@ class RoutineDetailViewModel(
     }
 
     fun updateRoutineName(name: String) {
-        _uiState.update { it.copy(name = name) }
+        editRoutine { it.copy(name = name) }
     }
 
     fun updateRoutineNote(note: String) {
-        _uiState.update { it.copy(note = note.ifBlank { null }) }
+        editRoutine { it.copy(note = note.ifBlank { null }) }
     }
 
     fun openAddExercisesSheet() {
@@ -92,16 +108,17 @@ class RoutineDetailViewModel(
     /** Adds an exercise that isn't in the catalog yet; saving the routine adds it there. */
     fun addNewExercise(name: String, category: Category, trackingType: TrackingType) {
         val exercise = Exercise(name = name.trim(), category = category, trackingType = trackingType)
-        _uiState.update { state ->
+        editRoutine { state ->
             state.copy(exercises = state.exercises + exercise.toUiState(), isNewExerciseSheetOpen = false)
         }
     }
 
     fun addCatalogExercises(selected: List<Exercise>) {
-        _uiState.update { state ->
-            val existingCatalogIds = state.exercises.mapNotNull { it.exerciseId }.toSet()
+        editRoutine { state ->
+            // By name: an exercise typed here has no id, but autosave already put it in the catalog.
+            val existingNames = state.exercises.map { it.name.lowercase() }.toSet()
             val toAdd = selected
-                .filter { it.id == null || it.id !in existingCatalogIds }
+                .filter { it.name.lowercase() !in existingNames }
                 .map { it.toUiState() }
             state.copy(
                 exercises = state.exercises + toAdd,
@@ -111,7 +128,7 @@ class RoutineDetailViewModel(
     }
 
     fun removeExercise(exerciseKey: String) {
-        _uiState.update { state ->
+        editRoutine { state ->
             state.copy(
                 exercises = state.exercises.filterNot { it.key == exerciseKey },
                 editingSet = state.editingSet?.takeIf { it.exerciseKey != exerciseKey },
@@ -158,31 +175,49 @@ class RoutineDetailViewModel(
         updateSet(exerciseKey, setKey) { it.copy(durationSeconds = seconds.coerceAtLeast(0)) }
     }
 
-    /**
-     * Saves the routine, then closes the editor. An empty new routine is not saved at all.
-     * [untitledName] is the localized name for a routine left without one.
-     */
-    fun saveRoutine(untitledName: String) {
-        // A second back press while saving must not insert the new routine twice.
-        if (saveJob != null || _uiState.value.isClosed) return
-        val routine = _uiState.value.takeUnless { it.isLoading }?.toDomainOrNull(untitledName)
-        if (routine == null) {
-            _uiState.update { it.copy(isClosed = true) }
-            return
-        }
+    /** viewModelScope is already cancelled here, so pending edits are saved in the app scope. */
+    override fun onCleared() {
+        if (hasUnsavedEdits) applicationScope.launch { save() }
+    }
+
+    /** Applies a change to the routine and schedules saving it. */
+    private inline fun editRoutine(crossinline transform: (RoutineDetailUiState) -> RoutineDetailUiState) {
+        _uiState.update { transform(it) }
+        scheduleSave()
+    }
+
+    private fun scheduleSave() {
+        hasUnsavedEdits = true
+        saveJob?.cancel()
         saveJob = viewModelScope.launch {
-            withContext(NonCancellable) {
-                routineRepository.saveRoutine(routine)
-            }
-            _uiState.update { it.copy(isClosed = true) }
+            delay(SAVE_DELAY_MS)
+            withContext(NonCancellable) { save() }
+            // Not reached if a newer edit cancelled this job meanwhile: that edit is still unsaved.
+            hasUnsavedEdits = false
         }
+    }
+
+    /**
+     * Writes the current state. A new routine left blank is not kept: it's never inserted,
+     * or deleted if an earlier save already did. The lock keeps saves in order, so the
+     * id of a freshly inserted routine is known before the next save, which then updates it.
+     */
+    private suspend fun save() = saveLock.withLock {
+        val state = _uiState.value
+        val savedId = if (routineId == null && state.isBlank) {
+            state.id?.let { routineRepository.deleteRoutine(it) }
+            null
+        } else {
+            routineRepository.saveRoutine(state.toDomain(untitledName))
+        }
+        _uiState.update { it.copy(id = savedId) }
     }
 
     private inline fun updateExercise(
         exerciseKey: String,
         crossinline transform: (RoutineExerciseUiState) -> RoutineExerciseUiState,
     ) {
-        _uiState.update { state ->
+        editRoutine { state ->
             state.copy(
                 exercises = state.exercises.map { exercise ->
                     if (exercise.key == exerciseKey) transform(exercise) else exercise
@@ -206,14 +241,16 @@ class RoutineDetailViewModel(
     }
 
     companion object {
-        fun factory(routineId: Int?): ViewModelProvider.Factory = viewModelFactory {
+        fun factory(routineId: Int?, untitledName: String): ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val container = appContainer()
                 RoutineDetailViewModel(
                     routineId = routineId,
+                    untitledName = untitledName,
                     routineRepository = container.routineRepository,
                     exerciseRepository = container.exerciseRepository,
                     settingsRepository = container.settingsRepository,
+                    applicationScope = container.applicationScope,
                 )
             }
         }

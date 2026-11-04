@@ -1,6 +1,5 @@
 package com.jacopo.mygymtracker.ui.routines
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -58,7 +57,7 @@ import com.jacopo.mygymtracker.ui.components.SetEditorSheet
 import com.jacopo.mygymtracker.ui.components.headerTitle
 import com.jacopo.mygymtracker.ui.theme.AppTheme
 
-/** Creates or edits a routine. Back saves it, so there is no Save button. */
+/** Creates or edits a routine. Edits save as you go, so there is no Save button. */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun RoutineDetailScreen(
@@ -82,8 +81,6 @@ fun RoutineDetailScreen(
     onDurationChange: (exerciseKey: String, setKey: String, seconds: Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    BackHandler(onBack = onBack)
-
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
         topBar = {

@@ -1,6 +1,5 @@
 package com.jacopo.mygymtracker.ui.navigation
 
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -23,18 +22,13 @@ fun NavGraphBuilder.routineDetailDestination(
     composable<RoutineDetailRoute> { backStackEntry ->
         val route = backStackEntry.toRoute<RoutineDetailRoute>()
         val viewModel: RoutineDetailViewModel = viewModel(
-            factory = RoutineDetailViewModel.factory(route.routineId),
+            factory = RoutineDetailViewModel.factory(route.routineId, stringResource(R.string.routine_untitled)),
         )
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-        val untitledName = stringResource(R.string.routine_untitled)
-
-        LaunchedEffect(uiState.isClosed) {
-            if (uiState.isClosed) onNavigateBack()
-        }
 
         RoutineDetailScreen(
             uiState = uiState,
-            onBack = { viewModel.saveRoutine(untitledName) },
+            onBack = onNavigateBack,
             onNameChange = viewModel::updateRoutineName,
             onNoteChange = viewModel::updateRoutineNote,
             onOpenAddExercises = viewModel::openAddExercisesSheet,

@@ -13,9 +13,11 @@ import com.jacopo.mygymtracker.data.repository.RoutineRepository
 import com.jacopo.mygymtracker.data.repository.SettingsRepository
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
+import com.jacopo.mygymtracker.domain.model.Routine
 import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.ui.MainDispatcherRule
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -51,23 +53,50 @@ class RoutineDetailViewModelTest {
     }
 
     @Test
-    fun addNewExercise_isSavedWithTheRoutineAndJoinsTheCatalog() = runTest {
+    fun edits_areSavedAutomatically() = runTest {
         val viewModel = loadedViewModel()
         viewModel.updateRoutineName("Legs")
+        awaitRoutines { it.isNotEmpty() }
         viewModel.openNewExerciseSheet()
 
         viewModel.addNewExercise(" Pistol Squat ", Category.LEGS, TrackingType.REPS)
-        viewModel.saveRoutine(untitledName = "Untitled")
-        viewModel.uiState.first { it.isClosed }
 
+        // single(): the second save updates the routine inserted by the first.
+        val saved = awaitRoutines { routines -> routines.any { it.exercises.isNotEmpty() } }.single()
         assertFalse(viewModel.uiState.value.isNewExerciseSheetOpen)
-        val saved = routines.observeRoutines().first().single()
         val exercise = saved.exercises.single()
         assertEquals("Legs", saved.name)
         assertEquals("Pistol Squat", exercise.exercise.name)
         assertEquals(TrackingType.REPS, exercise.exercise.trackingType)
         assertEquals(3, exercise.sets.size)
-        assertEquals(listOf("Pistol Squat"), exercises.observeCatalog().first().map { it.name })
+        val catalog = exercises.observeCatalog().first()
+        assertEquals(listOf("Pistol Squat"), catalog.map { it.name })
+
+        // Picking it again from the catalog doesn't add it twice.
+        viewModel.addCatalogExercises(catalog)
+        assertEquals(1, viewModel.uiState.value.exercises.size)
+    }
+
+    @Test
+    fun closingScreen_savesPendingEdits() = runTest {
+        val viewModel = loadedViewModel()
+        viewModel.updateRoutineName("Legs")
+
+        // Before the save delay is over, so only onCleared can save the edit.
+        viewModels.clear()
+
+        assertEquals("Legs", awaitRoutines { it.isNotEmpty() }.single().name)
+    }
+
+    @Test
+    fun newRoutine_clearedBackToBlank_isDeleted() = runTest {
+        val viewModel = loadedViewModel()
+        viewModel.updateRoutineName("Legs")
+        awaitRoutines { it.isNotEmpty() }
+
+        viewModel.updateRoutineName(" ")
+
+        awaitRoutines { it.isEmpty() }
     }
 
     @Test
@@ -82,14 +111,16 @@ class RoutineDetailViewModelTest {
         assertFalse(state.isNameTaken("Squat"))
     }
 
-    private suspend fun loadedViewModel(): RoutineDetailViewModel {
+    private suspend fun TestScope.loadedViewModel(): RoutineDetailViewModel {
         val factory = viewModelFactory {
             initializer {
                 RoutineDetailViewModel(
                     routineId = null,
+                    untitledName = "Untitled",
                     routineRepository = routines,
                     exerciseRepository = exercises,
                     settingsRepository = SettingsRepository(InMemoryPreferencesDataStore()),
+                    applicationScope = backgroundScope,
                 )
             }
         }
@@ -97,4 +128,8 @@ class RoutineDetailViewModelTest {
         viewModel.uiState.first { !it.isLoading }
         return viewModel
     }
+
+    /** Room writes on its own threads, so wait for the database to show the expected routines. */
+    private suspend fun awaitRoutines(predicate: (List<Routine>) -> Boolean): List<Routine> =
+        routines.observeRoutines().first(predicate)
 }

@@ -12,8 +12,8 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
+ * @property id null until a new routine is first saved.
  * @property editingSet the set open in the editor sheet, or null.
- * @property isClosed saving is done (or there was nothing to save), so the editor can close.
  */
 data class RoutineDetailUiState(
     val id: Int? = null,
@@ -26,9 +26,11 @@ data class RoutineDetailUiState(
     val editingSet: EditingSet? = null,
     val weightUnit: WeightUnit = WeightUnit.KG,
     val isLoading: Boolean = true,
-    val isClosed: Boolean = false,
 ) {
     val setCount: Int get() = exercises.sumOf { it.sets.size }
+
+    /** No name and no exercises: a new routine like this is not worth keeping. */
+    val isBlank: Boolean get() = name.isBlank() && exercises.isEmpty()
 
     /**
      * A new exercise can't reuse a catalog name, or one already typed here:
@@ -96,20 +98,13 @@ fun Exercise.toUiState(): RoutineExerciseUiState = RoutineExerciseUiState(
     sets = List(3) { PlannedSetUiState() },
 )
 
-/**
- * The routine to save, or `null` when a new routine was left completely empty
- * (no name, no exercises) and there is nothing worth keeping.
- * A routine left without a name is saved as [untitledName].
- */
-fun RoutineDetailUiState.toDomainOrNull(untitledName: String): Routine? {
-    if (id == null && name.isBlank() && exercises.isEmpty()) return null
-    return Routine(
-        id = id,
-        name = name.trim().ifEmpty { untitledName },
-        note = note?.trim()?.takeIf { it.isNotEmpty() },
-        exercises = exercises.map { it.toDomain() },
-    )
-}
+/** The routine to save; one left without a name is saved as [untitledName]. */
+fun RoutineDetailUiState.toDomain(untitledName: String): Routine = Routine(
+    id = id,
+    name = name.trim().ifEmpty { untitledName },
+    note = note?.trim()?.takeIf { it.isNotEmpty() },
+    exercises = exercises.map { it.toDomain() },
+)
 
 private fun RoutineExerciseUiState.toDomain(): RoutineExercise = RoutineExercise(
     exercise = Exercise(
