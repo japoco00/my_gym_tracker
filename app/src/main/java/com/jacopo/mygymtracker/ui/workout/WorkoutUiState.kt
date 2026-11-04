@@ -5,6 +5,7 @@ import com.jacopo.mygymtracker.domain.model.LoggedSet
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.domain.model.WorkoutExercise
 import com.jacopo.mygymtracker.domain.model.WorkoutSession
+import com.jacopo.mygymtracker.domain.progress.prSetIndex
 import com.jacopo.mygymtracker.resttimer.RestTimer
 import com.jacopo.mygymtracker.ui.components.EditingSet
 import java.time.Instant
@@ -13,6 +14,7 @@ import kotlin.uuid.Uuid
 
 /**
  * @property previousSets sets performed last time, by catalog exercise id, shown as a reference.
+ * @property earlierSets sets of every finished workout before this one, by catalog exercise id: the records to beat.
  * @property restTimer the running rest between sets, or null.
  * @property editingSet the set open in the editor sheet, or null.
  * @property exit set once the screen should close, saying why.
@@ -23,6 +25,7 @@ data class WorkoutUiState(
     val startedAt: Instant = Instant.EPOCH,
     val exercises: List<WorkoutExerciseUiState> = emptyList(),
     val previousSets: Map<Int, List<LoggedSet>> = emptyMap(),
+    val earlierSets: Map<Int, List<LoggedSet>> = emptyMap(),
     val catalogExercises: List<Exercise> = emptyList(),
     val weightUnit: WeightUnit = WeightUnit.KG,
     val restTimer: RestTimer? = null,
@@ -38,6 +41,13 @@ data class WorkoutUiState(
     /** Ticked sets only, so it matches the volume History shows once the workout is saved. */
     val completedVolumeKg: Double = exercises.sumOf { exercise ->
         exercise.sets.filter { it.isCompleted }.sumOf { it.reps * it.weightKg }
+    }
+
+    /** Keys of the ticked sets that are personal records, at most one per exercise, as History will star them. */
+    val prSetKeys: Set<String> = exercises.mapNotNullTo(HashSet()) { exercise ->
+        val ticked = exercise.sets.filter { it.isCompleted }
+        val earlier = earlierSets[exercise.exercise.id].orEmpty()
+        prSetIndex(ticked.map { it.toLoggedSet() }, earlier, exercise.exercise.trackingType)?.let { ticked[it].key }
     }
 }
 
@@ -84,12 +94,14 @@ sealed interface WorkoutDialog {
 fun WorkoutUiState.withWorkout(
     workout: WorkoutSession,
     previousSets: Map<Int, List<LoggedSet>>,
+    earlierSets: Map<Int, List<LoggedSet>>,
 ): WorkoutUiState = copy(
     routineId = workout.routineId,
     routineName = workout.routineName,
     startedAt = workout.startedAt,
     exercises = workout.exercises.map { it.toUiState() },
     previousSets = previousSets,
+    earlierSets = earlierSets,
     isLoading = false,
 )
 
@@ -111,18 +123,15 @@ fun WorkoutUiState.toDomain(sessionId: Int): WorkoutSession = WorkoutSession(
     routineName = routineName,
     startedAt = startedAt,
     exercises = exercises.map { exercise ->
-        WorkoutExercise(
-            exercise = exercise.exercise,
-            sets = exercise.sets.map {
-                LoggedSet(
-                    reps = it.reps,
-                    weightKg = it.weightKg,
-                    durationSeconds = it.durationSeconds,
-                    isCompleted = it.isCompleted,
-                )
-            },
-        )
+        WorkoutExercise(exercise = exercise.exercise, sets = exercise.sets.map { it.toLoggedSet() })
     },
+)
+
+private fun WorkoutSetUiState.toLoggedSet(): LoggedSet = LoggedSet(
+    reps = reps,
+    weightKg = weightKg,
+    durationSeconds = durationSeconds,
+    isCompleted = isCompleted,
 )
 
 // endregion

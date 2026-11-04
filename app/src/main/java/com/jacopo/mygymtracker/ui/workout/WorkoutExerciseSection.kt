@@ -1,7 +1,16 @@
 package com.jacopo.mygymtracker.ui.workout
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,9 +30,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.toPath
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -50,10 +62,15 @@ import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.LoggedSet
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.ui.components.DestructiveOverflowMenu
+import com.jacopo.mygymtracker.ui.components.PrTag
 import com.jacopo.mygymtracker.ui.components.SetRow
 import com.jacopo.mygymtracker.ui.components.SwipeToDeleteContainer
 import com.jacopo.mygymtracker.ui.format.formatSet
 import com.jacopo.mygymtracker.ui.theme.AppTheme
+import kotlinx.coroutines.delay
+
+/** Gap between the tick's haptic and the record's, so they read as two beats. */
+private const val PR_HAPTIC_DELAY_MS = 150L
 
 /**
  * One exercise of the workout as a checklist: a line per set with last time's values.
@@ -64,6 +81,7 @@ import com.jacopo.mygymtracker.ui.theme.AppTheme
 fun WorkoutExerciseSection(
     exercise: WorkoutExerciseUiState,
     previousSets: List<LoggedSet>,
+    prSetKeys: Set<String>,
     weightUnit: WeightUnit,
     onRemove: () -> Unit,
     onAddSet: () -> Unit,
@@ -116,6 +134,7 @@ fun WorkoutExerciseSection(
                         isHighlighted = index == nextIndex,
                         isDimmed = set.isCompleted,
                     ) {
+                        LivePrTag(visible = set.key in prSetKeys)
                         if (previous != null) {
                             Text(
                                 text = stringResource(
@@ -135,6 +154,36 @@ fun WorkoutExerciseSection(
             Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
             Text(text = stringResource(R.string.action_add_set))
         }
+    }
+}
+
+/**
+ * The PR tag of a set, popping in with a spinning star and a confirm haptic when ticking the set
+ * makes it a record. Already shown when the screen opens, it stays still and silent.
+ */
+@Composable
+private fun LivePrTag(visible: Boolean) {
+    val haptics = LocalHapticFeedback.current
+    var wasVisible by remember { mutableStateOf(visible) }
+    LaunchedEffect(visible) {
+        if (visible && !wasVisible) {
+            delay(PR_HAPTIC_DELAY_MS) // lets the tick's own haptic finish first
+            haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+        }
+        wasVisible = visible
+    }
+    AnimatedVisibility(
+        visible = visible,
+        enter = scaleIn(spring(Spring.DampingRatioMediumBouncy)) + fadeIn(),
+        exit = scaleOut() + fadeOut(),
+    ) {
+        val spin by transition.animateFloat(transitionSpec = { spring(stiffness = Spring.StiffnessLow) }) { state ->
+            if (state == EnterExitState.Visible) 0f else -360f
+        }
+        PrTag(
+            modifier = Modifier.padding(end = 8.dp),
+            starModifier = Modifier.graphicsLayer { rotationZ = spin },
+        )
     }
 }
 
@@ -202,17 +251,19 @@ private fun SetCheck(number: Int, checked: Boolean, onCheckedChange: (Boolean) -
 @Preview(showBackground = true)
 @Composable
 private fun WorkoutExerciseSectionPreview() {
+    val record = WorkoutSetUiState(reps = 8, weightKg = 80.0, isCompleted = true)
     AppTheme {
         WorkoutExerciseSection(
             exercise = WorkoutExerciseUiState(
                 exercise = Exercise(id = 1, name = "Bench Press", category = Category.CHEST),
                 sets = listOf(
-                    WorkoutSetUiState(reps = 8, weightKg = 80.0, isCompleted = true),
+                    record,
                     WorkoutSetUiState(reps = 8, weightKg = 80.0),
                     WorkoutSetUiState(reps = 8, weightKg = 80.0),
                 ),
             ),
             previousSets = listOf(LoggedSet(reps = 8, weightKg = 77.5, isCompleted = true)),
+            prSetKeys = setOf(record.key),
             weightUnit = WeightUnit.KG,
             onRemove = {},
             onAddSet = {},

@@ -69,10 +69,10 @@ class WorkoutViewModel(
                 _uiState.update { it.copy(isLoading = false, exit = WorkoutExit.CLOSED) }
                 return@launch
             }
-            val previousSets = workoutRepository.getLastPerformance(
-                workout.exercises.mapNotNull { it.exercise.id },
-            )
-            _uiState.update { it.withWorkout(workout, previousSets) }
+            val exerciseIds = workout.exercises.mapNotNull { it.exercise.id }
+            val previousSets = workoutRepository.getLastPerformance(exerciseIds)
+            val earlierSets = workoutRepository.getEarlierSets(exerciseIds, before = workout.startedAt)
+            _uiState.update { it.withWorkout(workout, previousSets, earlierSets) }
         }
     }
 
@@ -114,6 +114,7 @@ class WorkoutViewModel(
         if (ids.isEmpty()) return
         viewModelScope.launch {
             val previousSets = workoutRepository.getLastPerformance(ids)
+            val earlierSets = workoutRepository.getEarlierSets(ids, before = _uiState.value.startedAt)
             editWorkout { state ->
                 val newExercises = selected
                     .filter { it.id in ids && it.id !in presentExerciseIds(state) }
@@ -129,6 +130,7 @@ class WorkoutViewModel(
                 state.copy(
                     exercises = state.exercises + newExercises,
                     previousSets = state.previousSets + previousSets,
+                    earlierSets = state.earlierSets + earlierSets,
                 )
             }
         }

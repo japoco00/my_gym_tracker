@@ -17,6 +17,7 @@ import com.jacopo.mygymtracker.data.routineOf
 import com.jacopo.mygymtracker.data.withAllSetsCompleted
 import com.jacopo.mygymtracker.domain.model.LoggedSet
 import com.jacopo.mygymtracker.domain.model.PlannedSet
+import com.jacopo.mygymtracker.domain.model.Routine
 import com.jacopo.mygymtracker.resttimer.RestTimerController
 import com.jacopo.mygymtracker.ui.MainDispatcherRule
 import com.jacopo.mygymtracker.ui.components.EditingSet
@@ -33,6 +34,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.time.Instant
 
 @RunWith(AndroidJUnit4::class)
 class WorkoutViewModelTest {
@@ -195,12 +197,37 @@ class WorkoutViewModelTest {
         assertEquals(500.0, state.completedVolumeKg, 0.0)
     }
 
+    @Test
+    fun completingSet_aboveEarlierBest_marksItAsPr() = runTest {
+        val push = pushRoutine()
+        val earlierId = workouts.startWorkout(push, now = Instant.EPOCH)!!
+        workouts.finishWorkout(
+            workouts.getWorkout(earlierId)!!.withAllSetsCompleted(),
+            now = Instant.EPOCH.plusSeconds(3600),
+        )
+        val viewModel = loadedViewModel(workouts.startWorkout(push)!!)
+        val squat = viewModel.uiState.value.exercises.single()
+        val firstSet = squat.sets.first()
+
+        viewModel.completeFirstSet() // 5 x 100 kg only ties the earlier best
+        assertEquals(emptySet<String>(), viewModel.uiState.value.prSetKeys)
+
+        viewModel.updateSetWeight(squat.key, firstSet.key, 105.0)
+        assertEquals(setOf(firstSet.key), viewModel.uiState.value.prSetKeys)
+
+        viewModel.setCompleted(squat.key, firstSet.key, completed = false)
+        assertEquals(emptySet<String>(), viewModel.uiState.value.prSetKeys)
+    }
+
     /** Starts a workout from a "Push" routine planning two squat sets of 5 x 100 kg. */
-    private suspend fun startWorkout(): Int {
+    private suspend fun startWorkout(): Int = workouts.startWorkout(pushRoutine())!!
+
+    /** Saves a "Push" routine planning two squat sets of 5 x 100 kg. */
+    private suspend fun pushRoutine(): Routine {
         val routineId = routines.saveRoutine(
             routineOf("Push", newExercise("Squat") to listOf(PlannedSet(5, 100.0), PlannedSet(5, 100.0))),
         )
-        return workouts.startWorkout(routines.getRoutine(routineId)!!)!!
+        return routines.getRoutine(routineId)!!
     }
 
     @OptIn(ExperimentalCoroutinesApi::class) // testScheduler.currentTime

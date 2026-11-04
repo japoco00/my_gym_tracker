@@ -20,7 +20,6 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -175,11 +174,10 @@ class WorkoutDetailViewModel(
 
     /** Per exercise of [workout], the set that beat everything done before this workout, if any. */
     private suspend fun prSetIndexes(workout: WorkoutSession): List<Int?> {
-        val earlierSets = workout.exercises.mapNotNull { it.exercise.id }.distinct().associateWith { exerciseId ->
-            workoutRepository.observeExerciseHistory(exerciseId).first()
-                .filter { it.performedAt < workout.startedAt }
-                .flatMap { it.sets }
-        }
+        val earlierSets = workoutRepository.getEarlierSets(
+            workout.exercises.mapNotNull { it.exercise.id },
+            before = workout.startedAt,
+        )
         return workout.exercises.map { exercise ->
             prSetIndex(exercise.sets, earlierSets[exercise.exercise.id].orEmpty(), exercise.exercise.trackingType)
         }

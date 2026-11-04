@@ -2,7 +2,6 @@ package com.jacopo.mygymtracker.ui.history
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -25,8 +23,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -36,6 +32,7 @@ import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.LoggedSet
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.domain.model.WorkoutExercise
+import com.jacopo.mygymtracker.ui.components.PrTag
 import com.jacopo.mygymtracker.ui.components.SetNumber
 import com.jacopo.mygymtracker.ui.components.SetRow
 import com.jacopo.mygymtracker.ui.components.SwipeToDeleteContainer
@@ -128,30 +125,6 @@ private fun ExerciseTitle(name: String, setCount: Int, onClick: (() -> Unit)?) {
                 modifier = Modifier.padding(12.dp),
             )
         }
-    }
-}
-
-/** "★ PR", read aloud as "Personal record". */
-@Composable
-private fun PrTag() {
-    val description = stringResource(R.string.history_pr_description)
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier.clearAndSetSemantics { contentDescription = description },
-    ) {
-        Icon(
-            imageVector = Icons.Default.Star,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(16.dp),
-        )
-        Text(
-            text = stringResource(R.string.history_pr),
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.primary,
-        )
     }
 }
 

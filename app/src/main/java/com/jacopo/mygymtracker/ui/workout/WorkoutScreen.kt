@@ -123,6 +123,7 @@ fun WorkoutScreen(
                     completedSets = uiState.completedSets,
                     totalSets = uiState.totalSets,
                     completedVolumeKg = uiState.completedVolumeKg,
+                    prCount = uiState.prSetKeys.size,
                     weightUnit = uiState.weightUnit,
                     scrollBehavior = scrollBehavior,
                     onBack = onBack,
@@ -154,6 +155,7 @@ fun WorkoutScreen(
                 WorkoutExerciseSection(
                     exercise = exercise,
                     previousSets = exercise.exercise.id?.let { uiState.previousSets[it] }.orEmpty(),
+                    prSetKeys = uiState.prSetKeys,
                     weightUnit = uiState.weightUnit,
                     onRemove = { onRemoveExercise(exerciseKey) },
                     onAddSet = { onAddSet(exerciseKey) },

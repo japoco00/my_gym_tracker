@@ -1,16 +1,25 @@
 package com.jacopo.mygymtracker.ui.workout
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialShapes
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -36,7 +45,7 @@ import com.jacopo.mygymtracker.ui.theme.AppTheme
 import java.time.Instant
 
 /**
- * The workout's title, time, volume and set progress. The big title and the pills collapse
+ * The workout's title, time, volume, records and set progress. The big title and the pills collapse
  * into a regular top bar on scroll; the sets badge and the wavy progress bar stay visible.
  * Its colour runs behind the status bar.
  */
@@ -48,6 +57,7 @@ fun WorkoutHeader(
     completedSets: Int,
     totalSets: Int,
     completedVolumeKg: Double,
+    prCount: Int,
     weightUnit: WeightUnit,
     scrollBehavior: TopAppBarScrollBehavior,
     onBack: () -> Unit,
@@ -80,6 +90,23 @@ fun WorkoutHeader(
                 Text(text = rememberElapsedTime(startedAt))
             }
             Pill { Text(text = weightUnit.formatVolume(completedVolumeKg)) }
+            AnimatedVisibility(
+                visible = prCount > 0,
+                enter = scaleIn(spring(Spring.DampingRatioMediumBouncy)) + fadeIn(),
+                exit = scaleOut() + fadeOut(),
+            ) {
+                Pill {
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    // At least 1, so the pill doesn't read "0 PRs" while it fades out.
+                    val shown = prCount.coerceAtLeast(1)
+                    Text(text = pluralStringResource(R.plurals.workout_pr_count, shown, shown))
+                }
+            }
         },
         collapsedSubtitle = { Text(text = rememberElapsedTime(startedAt)) },
     ) {
@@ -120,6 +147,7 @@ private fun WorkoutHeaderPreview() {
             completedSets = 3,
             totalSets = 8,
             completedVolumeKg = 1_920.0,
+            prCount = 1,
             weightUnit = WeightUnit.KG,
             scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(),
             onBack = {},

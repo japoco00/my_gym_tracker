@@ -17,6 +17,7 @@ import com.jacopo.mygymtracker.domain.model.WorkoutSummary
 import com.jacopo.mygymtracker.domain.model.toWorkoutSession
 import com.jacopo.mygymtracker.domain.model.withCompletedSetsOnly
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.time.Instant
 
@@ -112,6 +113,14 @@ class WorkoutRepository(
     /** Emits the completed sets of an exercise, grouped per finished workout, oldest first. */
     fun observeExerciseHistory(exerciseId: Int): Flow<List<ExerciseHistoryEntry>> =
         workoutDao.observeExerciseHistory(exerciseId).map { it.toExerciseHistory() }
+
+    /** The completed sets of each exercise from finished workouts performed before [before]: the records to beat. */
+    suspend fun getEarlierSets(exerciseIds: Collection<Int>, before: Instant): Map<Int, List<LoggedSet>> =
+        exerciseIds.distinct().associateWith { exerciseId ->
+            observeExerciseHistory(exerciseId).first()
+                .filter { it.performedAt < before }
+                .flatMap { it.sets }
+        }
 
     /** Rebuilds the exercises and sets of a session; list order becomes `position`. */
     private suspend fun writeExercises(sessionId: Int, exercises: List<WorkoutExercise>) {

@@ -20,6 +20,8 @@
     <string name="weight_with_unit">%1$s %2$s</string>
     <string name="rest_decrease">−%1$d s</string>
     <string name="rest_increase">+%1$d s</string>
+    <string name="pr">PR</string>
+    <string name="pr_description">Personal record</string>
 
     <!-- Navigation -->
     <string name="nav_routines">Routines</string>
@@ -62,6 +64,10 @@
         <item quantity="other">%1$d of %2$d sets</item>
     </plurals>
     <string name="workout_sets_badge">sets</string>
+    <plurals name="workout_pr_count">
+        <item quantity="one">%d PR</item>
+        <item quantity="other">%d PRs</item>
+    </plurals>
     <string name="workout_set_last">last %1$s</string>
     <string name="workout_complete_set">Complete set</string>
     <string name="workout_uncomplete_set">Mark as not done</string>
@@ -106,8 +112,6 @@
     <string name="history_delete_message">It will be removed from your history and progress.</string>
     <string name="history_edit_title">Edit workout</string>
     <string name="history_edit_needs_set">Keep at least one set, or delete the workout instead.</string>
-    <string name="history_pr">PR</string>
-    <string name="history_pr_description">Personal record</string>
 
     <!-- Progress -->
     <string name="progress_empty">No finished workouts with this exercise yet.</string>
