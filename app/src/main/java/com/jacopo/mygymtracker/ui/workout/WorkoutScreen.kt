@@ -1,10 +1,17 @@
 package com.jacopo.mygymtracker.ui.workout
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,7 +27,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingToolbarDefaults
 import androidx.compose.material3.HorizontalFloatingToolbar
@@ -33,10 +39,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -60,6 +71,9 @@ import java.time.Instant
 
 /** Keeps the last row scrollable above the floating Finish button / rest toolbar. */
 private val FloatingControlsClearance = 96.dp
+
+/** The rest number pulses on each of these final seconds. */
+private const val FINAL_COUNTDOWN_SECONDS = 3L
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -117,18 +131,15 @@ fun WorkoutScreen(
             }
         },
         floatingActionButton = {
-            val timer = uiState.restTimer
-            when {
-                uiState.isLoading -> Unit
-                timer != null -> RestToolbar(timer = timer, onAdjust = onAdjustRest, onSkip = onSkipRest, onFinish = onFinish)
-                else -> ExtendedFloatingActionButton(
-                    text = { Text(text = stringResource(R.string.workout_finish)) },
-                    icon = { Icon(imageVector = Icons.Default.Check, contentDescription = null) },
-                    onClick = onFinish,
+            if (!uiState.isLoading) {
+                FloatingControls(
+                    restTimer = uiState.restTimer,
+                    onAdjustRest = onAdjustRest,
+                    onSkipRest = onSkipRest,
+                    onFinish = onFinish,
                 )
             }
         },
-        floatingActionButtonPosition = if (uiState.restTimer != null) FabPosition.Center else FabPosition.End,
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
     ) { innerPadding ->
         if (uiState.isLoading) return@Scaffold
@@ -209,16 +220,56 @@ fun WorkoutScreen(
     }
 }
 
+/** The Finish FAB. While resting it shrinks to its icon and the rest toolbar unfolds out of its left side. */
+@Composable
+private fun FloatingControls(
+    restTimer: RestTimer?,
+    onAdjustRest: (deltaSeconds: Int) -> Unit,
+    onSkipRest: () -> Unit,
+    onFinish: () -> Unit,
+) {
+    val motionScheme = MaterialTheme.motionScheme
+    // Keeps the last timer on screen while the toolbar folds away.
+    var lastTimer by remember { mutableStateOf(restTimer) }
+    if (restTimer != null) lastTimer = restTimer
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        AnimatedVisibility(
+            visible = restTimer != null,
+            enter = expandHorizontally(motionScheme.defaultSpatialSpec(), expandFrom = Alignment.End) +
+                fadeIn(motionScheme.defaultEffectsSpec()),
+            exit = shrinkHorizontally(motionScheme.fastSpatialSpec(), shrinkTowards = Alignment.End) +
+                fadeOut(motionScheme.fastEffectsSpec()),
+        ) {
+            lastTimer?.let {
+                RestToolbar(
+                    timer = it,
+                    onAdjust = onAdjustRest,
+                    onSkip = onSkipRest,
+                    modifier = Modifier.padding(end = 8.dp),
+                )
+            }
+        }
+        val finish = stringResource(R.string.workout_finish)
+        ExtendedFloatingActionButton(
+            text = { Text(text = finish) },
+            // The label folds away while resting, so the icon has to speak for itself.
+            icon = { Icon(imageVector = Icons.Default.Check, contentDescription = finish.takeIf { restTimer != null }) },
+            onClick = onFinish,
+            expanded = restTimer == null,
+        )
+    }
+}
+
 /**
- * Remaining rest in a wavy ring, with +15 s, skip, and Finish riding along as the toolbar's FAB.
- * Ticks on whole seconds; the ring glides between ticks.
+ * Remaining rest in a wavy ring, with +15 s and skip. Ticks on whole seconds; the ring glides between
+ * ticks and the number pulses through the last three.
  */
 @Composable
 private fun RestToolbar(
     timer: RestTimer,
     onAdjust: (deltaSeconds: Int) -> Unit,
     onSkip: () -> Unit,
-    onFinish: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val remainingMs by produceState(initialValue = timer.remainingMillis(System.currentTimeMillis()), timer) {
         while (value > 0) {
@@ -230,15 +281,21 @@ private fun RestToolbar(
         targetValue = remainingMs / (timer.totalSeconds * 1_000f),
         animationSpec = tween(durationMillis = 1_000, easing = LinearEasing),
     )
+    // Rounded up, so it reads 0:01 during the last second, not 0:00.
+    val remainingSeconds = (remainingMs + 999) / 1_000
+    val pulse = remember { Animatable(1f) }
+    val pulseSpec = MaterialTheme.motionScheme.fastSpatialSpec<Float>()
+    LaunchedEffect(remainingSeconds) {
+        if (remainingSeconds in 1..FINAL_COUNTDOWN_SECONDS) {
+            pulse.snapTo(1.15f)
+            pulse.animateTo(1f, pulseSpec)
+        }
+    }
     val step = UserSettings.REST_STEP_SECONDS
     HorizontalFloatingToolbar(
         expanded = true,
-        floatingActionButton = {
-            FloatingToolbarDefaults.VibrantFloatingActionButton(onClick = onFinish) {
-                Icon(imageVector = Icons.Default.Check, contentDescription = stringResource(R.string.workout_finish))
-            }
-        },
         colors = FloatingToolbarDefaults.vibrantFloatingToolbarColors(),
+        modifier = modifier,
     ) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.size(48.dp)) {
             CircularWavyProgressIndicator(
@@ -253,11 +310,15 @@ private fun RestToolbar(
             )
         }
         Text(
-            // Rounded up, so it reads 0:01 during the last second, not 0:00.
-            text = formatDuration((remainingMs + 999) / 1_000),
+            text = formatDuration(remainingSeconds),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(horizontal = 8.dp),
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .graphicsLayer {
+                    scaleX = pulse.value
+                    scaleY = pulse.value
+                },
         )
         TextButton(
             onClick = { onAdjust(step) },
