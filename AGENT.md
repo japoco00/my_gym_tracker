@@ -94,11 +94,14 @@ com.jacopo.mygymtracker
 - **Scaffolds**: Each screen owns its `Scaffold` and top bar, built with the shared `ui/components/AppHeader` (big collapsing title, `Pill` facts, rounded `surfaceContainer` block). `MyGymTrackerApp` shows the bottom `ShortNavigationBar` only on tab roots (`TopLevelDestination`), so detail screens are full screen.
 - **Shared building blocks** (`ui/components/`): every screen follows the workout screen's Material 3 Expressive style. Reuse these instead of writing a feature-local variant:
   - `AppHeader`: a `String` title, or a composable `(expanded) -> Unit` title for custom content such as the routine editor's editable name. Expanded titles use `Typography.headerTitle`.
-  - `Pill` for header facts, `SectionLabel` for list section titles, `ShapeBadge` for a short value + label inside a `MaterialShapes` shape in `AppHeader`'s actions (stays visible when collapsed).
+  - `Pill` for header facts, `SectionLabel` for list section titles, `ShapeBadge` for a short value + label inside a `MaterialShapes` shape in `AppHeader`'s actions (stays visible when collapsed). Animate only the shape through its `shapeModifier`.
+  - `PrTag`: the personal-record star tag, shared by the live workout and history.
   - `SetRow` + `SetNumber`: the one set row for workouts, history and routines; tapping an editable row opens `SetEditorSheet`.
   - `SetEditorSheet`: the only set editor (`RepsField` / `WeightField` / `DurationField` with steppers). Passing `isCompleted = null` gives plan mode (routines: no completion toggle, no previous values).
   - `ExerciseEditorSheet` creates or edits a catalog exercise. Pass `isNameTaken` so duplicate names can't be saved.
   - `AddExercisesSheet` picks catalog exercises; `DestructiveOverflowMenu` holds a single destructive action; `SwipeToDeleteContainer` wraps swipe-to-delete rows.
+- **Editors save as you go**: the routine editor has no Save button. Its ViewModel debounces each edit into a save and flushes pending edits in `onCleared` on the app scope, so Back (and predictive back) never loses work.
+- **Motion**: Take specs from `MaterialTheme.motionScheme` (`*SpatialSpec` for position/size, `*EffectsSpec` for alpha/color) instead of hand-written tweens; a hand-timed sequence like the finish celebration is the exception. Pair state changes with `LocalHapticFeedback` using the M3 types (`ToggleOn`/`ToggleOff`, `Confirm`, `GestureThresholdActivate`), and fire them from the user's action, not from restored state.
 - **Previews**: Include private `@Preview` composables wrapped in `AppTheme` with realistic sample data.
 
 ---
@@ -111,6 +114,8 @@ com.jacopo.mygymtracker
   - `NavController.navigateTo<Feature>(...)`.
 - **Tabs**: Switch tabs only through `navigateToTopLevelDestination`, which keeps one copy per tab and saves/restores each tab's back stack.
 - **Closing screens**: Close a screen with `popBackStack<Route>(inclusive = true)`, so a double Back or a close racing with Back can't pop the screen below. This relies on **acyclic routes**: at most one entry per route type on the back stack. Keep links pointing forward (e.g. Workout detail → Progress); a link back to an earlier route type needs a different close strategy first.
+- **Transitions**: `AppNavHost` owns the defaults: pushes slide horizontally with a fade, tab switches only fade. A destination overrides them through `composable<Route>(enterTransition = …)`; return `null` to fall back to the defaults.
+- **Shared bounds**: `AppNavHost` wraps the `NavHost` in `SharedTransitionLayout` and provides `LocalSharedTransitionScope`. A destination taking part provides `LocalNavAnimatedVisibilityScope` and only fades, while both ends apply `Modifier.sharedContainer(key)` with the same key (a saved routine's row grows into its editor). Both locals live in `ui/components/`, so screens never import `ui/navigation`; without them the modifier does nothing, which keeps previews working.
 
 ---
 
