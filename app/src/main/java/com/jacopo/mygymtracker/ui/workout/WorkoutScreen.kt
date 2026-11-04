@@ -11,10 +11,10 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -131,6 +131,7 @@ fun WorkoutScreen(
                 )
             }
         },
+        floatingActionButtonPosition = androidx.compose.material3.FabPosition.Center,
         floatingActionButton = {
             if (!uiState.isLoading) {
                 FloatingControls(
@@ -138,6 +139,7 @@ fun WorkoutScreen(
                     onAdjustRest = onAdjustRest,
                     onSkipRest = onSkipRest,
                     onFinish = onFinish,
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
         },
@@ -229,25 +231,30 @@ private fun FloatingControls(
     onAdjustRest: (deltaSeconds: Int) -> Unit,
     onSkipRest: () -> Unit,
     onFinish: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val motionScheme = MaterialTheme.motionScheme
     // Keeps the last timer on screen while the toolbar folds away.
     var lastTimer by remember { mutableStateOf(restTimer) }
     if (restTimer != null) lastTimer = restTimer
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(64.dp),
+    ) {
         AnimatedVisibility(
             visible = restTimer != null,
             enter = expandHorizontally(motionScheme.defaultSpatialSpec(), expandFrom = Alignment.End) +
                 fadeIn(motionScheme.defaultEffectsSpec()),
             exit = shrinkHorizontally(motionScheme.fastSpatialSpec(), shrinkTowards = Alignment.End) +
                 fadeOut(motionScheme.fastEffectsSpec()),
+            modifier = Modifier.align(Alignment.Center)
         ) {
             lastTimer?.let {
                 RestToolbar(
                     timer = it,
                     onAdjust = onAdjustRest,
                     onSkip = onSkipRest,
-                    modifier = Modifier.padding(end = 8.dp),
                 )
             }
         }
@@ -258,6 +265,7 @@ private fun FloatingControls(
             icon = { Icon(imageVector = Icons.Default.Check, contentDescription = finish.takeIf { restTimer != null }) },
             onClick = onFinish,
             expanded = restTimer == null,
+            modifier = Modifier.align(Alignment.CenterEnd)
         )
     }
 }
@@ -299,7 +307,7 @@ private fun RestToolbar(
         colors = FloatingToolbarDefaults.vibrantFloatingToolbarColors(),
         modifier = modifier,
     ) {
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.size(48.dp)) {
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.size(48.dp).align(Alignment.CenterVertically)) {
             CircularWavyProgressIndicator(
                 progress = { progress },
                 trackColor = LocalContentColor.current.copy(alpha = 0.2f),
@@ -317,6 +325,7 @@ private fun RestToolbar(
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier
                 .padding(horizontal = 8.dp)
+                .align(Alignment.CenterVertically)
                 .graphicsLayer {
                     scaleX = pulse.value
                     scaleY = pulse.value
@@ -325,10 +334,14 @@ private fun RestToolbar(
         TextButton(
             onClick = { onAdjust(step) },
             colors = ButtonDefaults.textButtonColors(contentColor = LocalContentColor.current),
+            modifier = Modifier.align(Alignment.CenterVertically),
         ) {
             Text(text = stringResource(R.string.rest_increase, step))
         }
-        IconButton(onClick = onSkip) {
+        IconButton(
+            onClick = onSkip,
+            modifier = Modifier.align(Alignment.CenterVertically),
+        ) {
             Icon(
                 painter = painterResource(R.drawable.ic_skip_next),
                 contentDescription = stringResource(R.string.rest_skip_description),
