@@ -98,9 +98,12 @@ fun NavController.navigateToWorkout(sessionId: Int) {
     navigate(route = WorkoutRoute(sessionId = sessionId)) { launchSingleTop = true }
 }
 
-/** Replaces the workout screen with its summary, so Back returns to where the workout was started. */
+/**
+ * Replaces the workout screen with its summary, celebrating the finish, so Back returns to where
+ * the workout was started.
+ */
 fun NavController.openFinishedWorkout(sessionId: Int) {
-    navigate(route = WorkoutDetailRoute(sessionId = sessionId)) {
+    navigate(route = WorkoutDetailRoute(sessionId = sessionId, celebrate = true)) {
         popUpTo<WorkoutRoute> { inclusive = true }
         launchSingleTop = true
     }

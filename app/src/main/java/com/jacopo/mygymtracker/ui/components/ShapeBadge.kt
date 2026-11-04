@@ -26,6 +26,7 @@ import com.jacopo.mygymtracker.ui.theme.AppTheme
  * burst. Screens put it in [AppHeader]'s actions, so it stays visible when the header collapses.
  *
  * @param contentDescription read instead of the texts when they don't read well aloud, like "3/8".
+ * @param shapeModifier applies to the shape only, e.g. to spin it behind the texts.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -36,6 +37,7 @@ fun ShapeBadge(
     modifier: Modifier = Modifier,
     size: Dp = 56.dp,
     contentDescription: String? = null,
+    shapeModifier: Modifier = Modifier,
 ) {
     val semantics = if (contentDescription != null) {
         Modifier.clearAndSetSemantics { this.contentDescription = contentDescription }
@@ -46,9 +48,14 @@ fun ShapeBadge(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .size(size)
-            .background(MaterialTheme.colorScheme.primaryContainer, shape.toShape())
             .then(semantics),
     ) {
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .then(shapeModifier)
+                .background(MaterialTheme.colorScheme.primaryContainer, shape.toShape()),
+        )
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = value,

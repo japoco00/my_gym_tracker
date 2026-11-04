@@ -1,6 +1,12 @@
 package com.jacopo.mygymtracker.ui.history
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -33,8 +39,16 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -57,7 +71,21 @@ import com.jacopo.mygymtracker.ui.format.formatDate
 import com.jacopo.mygymtracker.ui.format.formatDuration
 import com.jacopo.mygymtracker.ui.format.formatVolume
 import com.jacopo.mygymtracker.ui.theme.AppTheme
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.time.Instant
+import kotlin.math.roundToInt
+
+/** Lets the screen slide mostly in before the celebration starts. */
+private const val CELEBRATION_DELAY_MS = 300L
+private const val COUNT_UP_MS = 900
+private const val PILL_DELAY_MS = 150L
+private const val PILL_STAGGER_MS = 70L
+private const val PILL_RISE_MS = 300
+
+/** Material's emphasized decelerate curve: fast out of the gate, long settle. */
+private val EmphasizedDecelerate = CubicBezierEasing(0.05f, 0.7f, 0.1f, 1f)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,6 +110,7 @@ fun WorkoutDetailScreen(
     onWeightChange: (exerciseKey: String, setKey: String, Double) -> Unit,
     onDurationChange: (exerciseKey: String, setKey: String, seconds: Int) -> Unit,
     modifier: Modifier = Modifier,
+    celebrate: Boolean = false,
 ) {
     BackHandler(enabled = uiState.isEditing, onBack = onCancelEdit)
 
@@ -106,6 +135,7 @@ fun WorkoutDetailScreen(
                 WorkoutDetailHeader(
                     workout = workout,
                     uiState = uiState,
+                    celebrate = celebrate,
                     scrollBehavior = scrollBehavior,
                     onBack = onBack,
                     onEdit = onEdit,
@@ -212,13 +242,14 @@ fun WorkoutDetailScreen(
 
 /**
  * The routine's name over date, duration and volume pills, with a sets badge. Viewing offers
- * Edit and Delete; editing swaps them for Close and Save.
+ * Edit and Delete; editing swaps them for Close and Save. With [celebrate], plays [Celebration].
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun WorkoutDetailHeader(
     workout: WorkoutSession,
     uiState: WorkoutDetailUiState,
+    celebrate: Boolean,
     scrollBehavior: TopAppBarScrollBehavior,
     onBack: () -> Unit,
     onEdit: () -> Unit,
@@ -227,6 +258,8 @@ private fun WorkoutDetailHeader(
     onDelete: () -> Unit,
 ) {
     val date = formatDate(workout.startedAt)
+    val celebration = rememberCelebration(celebrate)
+    val countUp = celebration.countUp.value
     AppHeader(
         title = workout.routineName,
         scrollBehavior = scrollBehavior,
@@ -247,9 +280,14 @@ private fun WorkoutDetailHeader(
         actions = {
             ShapeBadge(
                 shape = MaterialShapes.SoftBurst,
-                value = uiState.setCount.toString(),
+                value = (uiState.setCount * countUp).roundToInt().toString(),
                 label = stringResource(R.string.workout_sets_badge),
                 contentDescription = pluralStringResource(R.plurals.history_set_count, uiState.setCount, uiState.setCount),
+                modifier = Modifier.graphicsLayer {
+                    scaleX = celebration.badgeScale.value
+                    scaleY = celebration.badgeScale.value
+                },
+                shapeModifier = Modifier.graphicsLayer { rotationZ = celebration.shapeRotation.value },
             )
             if (uiState.isEditing) {
                 Button(
@@ -270,22 +308,71 @@ private fun WorkoutDetailHeader(
             }
         },
         pills = {
-            Pill {
+            Pill(modifier = Modifier.risingIn(celebration.pills[0])) {
                 Icon(painter = painterResource(R.drawable.ic_history), contentDescription = null, modifier = Modifier.size(18.dp))
                 Text(text = date)
             }
-            Pill {
+            Pill(modifier = Modifier.risingIn(celebration.pills[1])) {
                 Icon(painter = painterResource(R.drawable.ic_timer), contentDescription = null, modifier = Modifier.size(18.dp))
-                Text(text = formatDuration(uiState.durationSeconds))
+                Text(text = formatDuration((uiState.durationSeconds * countUp).toLong()))
             }
             if (uiState.volumeKg > 0) {
-                Pill { Text(text = uiState.weightUnit.formatVolume(uiState.volumeKg)) }
+                Pill(modifier = Modifier.risingIn(celebration.pills[2])) {
+                    Text(text = uiState.weightUnit.formatVolume(uiState.volumeKg * countUp))
+                }
             }
         },
         collapsedSubtitle = {
             Text(text = if (uiState.isEditing) stringResource(R.string.history_edit_title) else date)
         },
     )
+}
+
+/**
+ * The finish celebration: the sets badge pops in spinning, the pills rise in one by one and the
+ * numbers count up from zero. Everything starts at its end when there's nothing to play.
+ */
+@Stable
+private class Celebration(played: Boolean) {
+    val badgeScale = Animatable(if (played) 1f else 0f)
+    val shapeRotation = Animatable(if (played) 0f else -120f)
+    val countUp = Animatable(if (played) 1f else 0f)
+    val pills = List(3) { Animatable(if (played) 1f else 0f) }
+
+    suspend fun play() = coroutineScope {
+        launch { badgeScale.animateTo(1f, spring(Spring.DampingRatioMediumBouncy)) }
+        launch { shapeRotation.animateTo(0f, spring(stiffness = Spring.StiffnessLow)) }
+        launch { countUp.animateTo(1f, tween(COUNT_UP_MS, easing = EmphasizedDecelerate)) }
+        pills.forEachIndexed { index, pill ->
+            launch {
+                delay(PILL_DELAY_MS + PILL_STAGGER_MS * index)
+                pill.animateTo(1f, tween(PILL_RISE_MS, easing = LinearOutSlowInEasing))
+            }
+        }
+    }
+}
+
+/**
+ * Plays the [Celebration] once, when [celebrate] and the screen is mostly in. Saved, so rotating
+ * or coming back from another screen doesn't replay it.
+ */
+@Composable
+private fun rememberCelebration(celebrate: Boolean): Celebration {
+    var played by rememberSaveable { mutableStateOf(!celebrate) }
+    val celebration = remember { Celebration(played) }
+    LaunchedEffect(Unit) {
+        if (played) return@LaunchedEffect
+        played = true
+        delay(CELEBRATION_DELAY_MS)
+        celebration.play()
+    }
+    return celebration
+}
+
+/** Fades in while rising its last 8 dp, as [progress] goes from 0 to 1. */
+private fun Modifier.risingIn(progress: Animatable<Float, *>): Modifier = graphicsLayer {
+    alpha = progress.value
+    translationY = (1f - progress.value) * 8.dp.toPx()
 }
 
 @Preview(showBackground = true)

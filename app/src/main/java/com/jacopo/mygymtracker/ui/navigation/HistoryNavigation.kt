@@ -17,8 +17,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data object HistoryRoute
 
+/** @property celebrate plays the finish celebration: set right after finishing, not from History. */
 @Serializable
-data class WorkoutDetailRoute(val sessionId: Int)
+data class WorkoutDetailRoute(val sessionId: Int, val celebrate: Boolean = false)
 
 fun NavGraphBuilder.historyDestination(
     onOpenWorkoutDetail: (sessionId: Int) -> Unit,
@@ -67,6 +68,7 @@ fun NavGraphBuilder.workoutDetailDestination(
             onRepsChange = viewModel::updateSetReps,
             onWeightChange = viewModel::updateSetWeight,
             onDurationChange = viewModel::updateSetDuration,
+            celebrate = route.celebrate,
         )
     }
 }
