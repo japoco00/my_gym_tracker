@@ -171,8 +171,11 @@
     <string name="set_weight">Weight (%1$s)</string>
     <string name="set_added_weight">Added (%1$s)</string>
     <string name="set_time">Time</string>
-    <string name="set_editor_title">%1$s · Set %2$d</string>
-    <string name="set_editor_last_time">Last time: %1$s</string>
+    <string name="set_editor_title">Set %1$d</string>
+    <string name="set_editor_use_last">Use last time · %1$s</string>
+    <string name="set_editor_same_as_last">Same as last time · %1$s</string>
+    <string name="set_decrease">Decrease %1$s</string>
+    <string name="set_increase">Increase %1$s</string>
     <string name="set_delete">Delete set</string>
     <string name="set_summary">%1$s %2$s × %3$d</string>
     <string name="set_summary_added">+%1$s %2$s × %3$d</string>

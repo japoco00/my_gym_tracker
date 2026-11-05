@@ -5,26 +5,36 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.R
@@ -40,10 +50,10 @@ import kotlinx.coroutines.launch
 data class EditingSet(val exerciseKey: String, val setKey: String)
 
 /**
- * Edits one set with big stepper fields. Values are saved as they change; the buttons
+ * Edits one set with big stepper cards. Values are saved as they change; the buttons
  * slide the sheet away first and then act, so it never vanishes mid-animation.
  *
- * @param previous the same set last time, shown as a reference.
+ * @param previous the same set last time; a chip copies its values in.
  * @param isCompleted whether a live workout's set is ticked; the main button toggles it.
  * Null for sets that can't be ticked (a plan, a finished workout): the main button just closes.
  */
@@ -100,6 +110,7 @@ fun SetEditorSheet(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun SetEditorContent(
     exerciseName: String,
@@ -119,69 +130,141 @@ private fun SetEditorContent(
 ) {
     Column(modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 24.dp)) {
         Text(
-            text = stringResource(R.string.set_editor_title, exerciseName, number),
-            style = MaterialTheme.typography.titleLarge,
+            text = exerciseName,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary,
+        )
+        Text(
+            text = stringResource(R.string.set_editor_title, number),
+            style = MaterialTheme.typography.headlineLarge,
+            fontWeight = FontWeight.SemiBold,
         )
         if (previous != null) {
-            Text(
-                text = stringResource(
-                    R.string.set_editor_last_time,
-                    formatSet(trackingType, weightUnit, previous.reps, previous.weightKg, previous.durationSeconds),
-                ),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            UseLastTimeChip(
+                last = formatSet(trackingType, weightUnit, previous.reps, previous.weightKg, previous.durationSeconds),
+                current = formatSet(trackingType, weightUnit, reps, weightKg, durationSeconds),
+                onClick = {
+                    if (trackingType == TrackingType.DURATION) {
+                        onDurationChange(previous.durationSeconds)
+                    } else {
+                        onWeightChange(previous.weightKg)
+                        onRepsChange(previous.reps)
+                    }
+                },
             )
         }
-        Spacer(modifier = Modifier.size(8.dp))
-        when (trackingType) {
-            TrackingType.DURATION -> LabeledField(stringResource(R.string.set_time)) {
-                DurationField(seconds = durationSeconds, onSecondsChange = onDurationChange)
-            }
-            TrackingType.WEIGHT_REPS, TrackingType.REPS -> {
-                val weightLabel = if (trackingType == TrackingType.REPS) R.string.set_added_weight else R.string.set_weight
-                LabeledField(stringResource(weightLabel, weightUnit.label())) {
-                    WeightField(weightKg = weightKg, unit = weightUnit, onWeightKgChange = onWeightChange)
-                }
-                LabeledField(stringResource(R.string.set_reps)) {
-                    RepsField(reps = reps, onRepsChange = onRepsChange)
+        Column(
+            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+            modifier = Modifier.padding(top = 16.dp),
+        ) {
+            when (trackingType) {
+                TrackingType.DURATION -> DurationField(
+                    seconds = durationSeconds,
+                    onSecondsChange = onDurationChange,
+                    label = stringResource(R.string.set_time),
+                    shape = ListItemDefaults.segmentedShapes(index = 0, count = 1).shape,
+                )
+                TrackingType.WEIGHT_REPS, TrackingType.REPS -> {
+                    val weightLabel = if (trackingType == TrackingType.REPS) R.string.set_added_weight else R.string.set_weight
+                    WeightField(
+                        weightKg = weightKg,
+                        unit = weightUnit,
+                        onWeightKgChange = onWeightChange,
+                        label = stringResource(weightLabel, weightUnit.label()),
+                        shape = ListItemDefaults.segmentedShapes(index = 0, count = 2).shape,
+                    )
+                    RepsField(
+                        reps = reps,
+                        onRepsChange = onRepsChange,
+                        label = stringResource(R.string.set_reps),
+                        shape = ListItemDefaults.segmentedShapes(index = 1, count = 2).shape,
+                    )
                 }
             }
         }
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp),
         ) {
-            TextButton(
+            FilledTonalIconButton(
                 onClick = onDelete,
-                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                shapes = IconButtonDefaults.shapes(IconButtonDefaults.mediumRoundShape, IconButtonDefaults.mediumPressedShape),
+                colors = IconButtonDefaults.filledTonalIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                ),
+                modifier = Modifier.size(IconButtonDefaults.mediumContainerSize()),
             ) {
-                Icon(imageVector = Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
-                Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
-                Text(text = stringResource(R.string.set_delete))
+                Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(R.string.set_delete))
             }
-            if (isCompleted == true) {
-                TextButton(onClick = onPrimary) { Text(text = stringResource(R.string.workout_uncomplete_set)) }
-            } else {
-                val label = if (isCompleted == null) R.string.action_done else R.string.workout_complete_set
-                Button(onClick = onPrimary, shapes = ButtonDefaults.shapes()) { Text(text = stringResource(label)) }
-            }
+            PrimaryButton(isCompleted = isCompleted, onClick = onPrimary, modifier = Modifier.weight(1f))
         }
     }
 }
 
+/** Copies last time's values in; disabled, with a tick, once they already match. */
 @Composable
-private fun LabeledField(label: String, field: @Composable () -> Unit) {
-    Column(modifier = Modifier.padding(vertical = 8.dp)) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 4.dp),
-        )
-        field()
+private fun UseLastTimeChip(last: String, current: String, onClick: () -> Unit) {
+    val isSame = last == current
+    AssistChip(
+        onClick = onClick,
+        enabled = !isSame,
+        label = {
+            Text(text = stringResource(if (isSame) R.string.set_editor_same_as_last else R.string.set_editor_use_last, last))
+        },
+        leadingIcon = {
+            val iconModifier = Modifier.size(AssistChipDefaults.IconSize)
+            if (isSame) {
+                Icon(imageVector = Icons.Default.Check, contentDescription = null, modifier = iconModifier)
+            } else {
+                Icon(painter = painterResource(R.drawable.ic_history), contentDescription = null, modifier = iconModifier)
+            }
+        },
+        // Disabled means "already applied", not "unavailable": keep it readable.
+        colors = AssistChipDefaults.assistChipColors(
+            disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            disabledLeadingIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        ),
+        modifier = Modifier.padding(top = 8.dp),
+    )
+}
+
+/** "Complete set" / "Mark as not done" in a live workout, "Done" where sets can't be ticked. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun PrimaryButton(isCompleted: Boolean?, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val height = ButtonDefaults.MediumContainerHeight
+    val buttonModifier = modifier.height(height)
+    if (isCompleted == true) {
+        FilledTonalButton(
+            onClick = onClick,
+            shapes = ButtonDefaults.shapesFor(height),
+            contentPadding = ButtonDefaults.contentPaddingFor(height),
+            modifier = buttonModifier,
+        ) {
+            Text(text = stringResource(R.string.workout_uncomplete_set), style = ButtonDefaults.textStyleFor(height))
+        }
+    } else {
+        Button(
+            onClick = onClick,
+            shapes = ButtonDefaults.shapesFor(height),
+            contentPadding = ButtonDefaults.contentPaddingFor(height),
+            modifier = buttonModifier,
+        ) {
+            Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = null,
+                modifier = Modifier.size(ButtonDefaults.iconSizeFor(height)),
+            )
+            Spacer(modifier = Modifier.size(ButtonDefaults.iconSpacingFor(height)))
+            Text(
+                text = stringResource(if (isCompleted == null) R.string.action_done else R.string.workout_complete_set),
+                style = ButtonDefaults.textStyleFor(height),
+            )
+        }
     }
 }
 
