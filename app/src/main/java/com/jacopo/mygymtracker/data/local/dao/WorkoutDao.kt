@@ -51,6 +51,14 @@ interface WorkoutDao {
     @Query("SELECT * FROM workout_sessions WHERE sessionId = :sessionId")
     suspend fun getWithExercises(sessionId: Int): WorkoutSessionWithExercises?
 
+    @Transaction
+    @Query("SELECT * FROM workout_sessions WHERE finishedAtEpochMs IS NOT NULL ORDER BY startedAtEpochMs")
+    suspend fun getFinishedWithExercises(): List<WorkoutSessionWithExercises>
+
+    /** Removes every workout, in progress or finished. Exercises and sets cascade. */
+    @Query("DELETE FROM workout_sessions")
+    suspend fun deleteAll()
+
     @Query(
         """
         SELECT s.sessionId, s.routineName, s.startedAtEpochMs, s.finishedAtEpochMs,

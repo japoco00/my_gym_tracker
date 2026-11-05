@@ -37,6 +37,14 @@ interface RoutineDao {
     fun observeAllWithExercises(): Flow<List<RoutineWithExercises>>
 
     @Transaction
+    @Query("SELECT * FROM routines ORDER BY routineId")
+    suspend fun getAllWithExercises(): List<RoutineWithExercises>
+
+    /** Links and sets cascade; workouts keep their name snapshot. */
+    @Query("DELETE FROM routines")
+    suspend fun deleteAll()
+
+    @Transaction
     @Query("SELECT * FROM routines WHERE routineId = :routineId")
     suspend fun getWithExercises(routineId: Int): RoutineWithExercises?
 }

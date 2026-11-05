@@ -34,6 +34,13 @@ interface ExerciseDao {
     @Query("SELECT * FROM exercises ORDER BY name")
     fun observeAll(): Flow<List<ExerciseEntity>>
 
+    @Query("SELECT * FROM exercises ORDER BY name")
+    suspend fun getAll(): List<ExerciseEntity>
+
+    /** Fails while a routine or workout still references an exercise. */
+    @Query("DELETE FROM exercises")
+    suspend fun deleteAll()
+
     @Query("SELECT * FROM exercises WHERE exerciseId = :exerciseId")
     fun observeById(exerciseId: Int): Flow<ExerciseEntity?>
 }

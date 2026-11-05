@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.jacopo.mygymtracker.MyApplication
 import com.jacopo.mygymtracker.data.local.AppDatabase
+import com.jacopo.mygymtracker.data.repository.BackupRepository
 import com.jacopo.mygymtracker.data.repository.ExerciseRepository
 import com.jacopo.mygymtracker.data.repository.RoutineRepository
 import com.jacopo.mygymtracker.data.repository.SettingsRepository
@@ -52,6 +53,17 @@ class AppContainer(context: Context) {
     val settingsRepository: SettingsRepository by lazy {
         SettingsRepository(
             PreferenceDataStoreFactory.create { context.preferencesDataStoreFile("settings") },
+        )
+    }
+
+    val backupRepository: BackupRepository by lazy {
+        BackupRepository(
+            database = database,
+            exerciseDao = database.exerciseDao(),
+            routineDao = database.routineDao(),
+            workoutDao = database.workoutDao(),
+            settingsRepository = settingsRepository,
+            contentResolver = context.contentResolver,
         )
     }
 

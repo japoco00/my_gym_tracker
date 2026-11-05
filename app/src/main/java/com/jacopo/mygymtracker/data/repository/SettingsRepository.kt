@@ -55,6 +55,23 @@ class SettingsRepository(
         }
     }
 
+    /**
+     * Replaces every setting at once, as when restoring a backup.
+     * Plates outside a unit's [WeightUnit.plateOptions] are dropped; a unit without plates gets the defaults.
+     */
+    suspend fun replaceAll(settings: UserSettings) {
+        dataStore.edit { preferences ->
+            preferences[WEIGHT_UNIT] = settings.weightUnit.name
+            preferences[REST_SECONDS] = settings.restSeconds.coerceAtLeast(UserSettings.REST_STEP_SECONDS)
+            WeightUnit.entries.forEach { unit ->
+                preferences[platesKey(unit)] = (settings.plates[unit] ?: unit.defaultPlates)
+                    .filter { it in unit.plateOptions }
+                    .map { it.toString() }
+                    .toSet()
+            }
+        }
+    }
+
     private companion object {
         val WEIGHT_UNIT = stringPreferencesKey("weight_unit")
         val REST_SECONDS = intPreferencesKey("rest_seconds")
