@@ -70,6 +70,7 @@ fun SettingsScreen(
     onWeightUnitChange: (WeightUnit) -> Unit,
     onRestSecondsChange: (deltaSeconds: Int) -> Unit,
     onAutoStartRestChange: (Boolean) -> Unit,
+    onKeepScreenOnChange: (Boolean) -> Unit,
     onPlateToggle: (Double) -> Unit,
     onThemeModeChange: (ThemeMode) -> Unit,
     onDynamicColorChange: (Boolean) -> Unit,
@@ -131,12 +132,12 @@ fun SettingsScreen(
 
             SectionLabel(text = stringResource(R.string.settings_workout), modifier = Modifier.padding(top = 16.dp))
             SegmentedListItem(
-                shapes = ListItemDefaults.segmentedShapes(index = 0, count = 3),
+                shapes = ListItemDefaults.segmentedShapes(index = 0, count = 4),
                 supportingContent = { Text(text = stringResource(R.string.settings_rest_time_description)) },
             ) {
                 Text(text = stringResource(R.string.settings_rest_time))
             }
-            SegmentedListItem(shapes = ListItemDefaults.segmentedShapes(index = 1, count = 3)) {
+            SegmentedListItem(shapes = ListItemDefaults.segmentedShapes(index = 1, count = 4)) {
                 RestStepper(restSeconds = settings.restSeconds, onChange = onRestSecondsChange)
             }
             SwitchItem(
@@ -144,7 +145,14 @@ fun SettingsScreen(
                 onCheckedChange = onAutoStartRestChange,
                 title = stringResource(R.string.settings_auto_start_rest),
                 description = stringResource(R.string.settings_auto_start_rest_description),
-                shapes = ListItemDefaults.segmentedShapes(index = 2, count = 3),
+                shapes = ListItemDefaults.segmentedShapes(index = 2, count = 4),
+            )
+            SwitchItem(
+                checked = settings.keepScreenOn,
+                onCheckedChange = onKeepScreenOnChange,
+                title = stringResource(R.string.settings_keep_screen_on),
+                description = stringResource(R.string.settings_keep_screen_on_description),
+                shapes = ListItemDefaults.segmentedShapes(index = 3, count = 4),
             )
 
             SectionLabel(text = stringResource(R.string.settings_plates), modifier = Modifier.padding(top = 16.dp))
@@ -360,6 +368,7 @@ private fun SettingsScreenPreview() {
             onRestSecondsChange = {},
             onPlateToggle = {},
             onAutoStartRestChange = {},
+            onKeepScreenOnChange = {},
             onThemeModeChange = {},
             onDynamicColorChange = {},
             onExportBackup = {},

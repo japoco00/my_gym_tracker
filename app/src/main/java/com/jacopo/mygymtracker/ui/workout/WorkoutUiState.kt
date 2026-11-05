@@ -21,6 +21,7 @@ import kotlin.uuid.Uuid
  * @property editingRestKey the key of the exercise whose rest is being edited, or null.
  * @property plates the plates owned in [weightUnit], for the set editor of barbell exercises.
  * @property autoStartRest whether ticking a set starts the rest; if not, each exercise offers a start button.
+ * @property keepScreenOn whether the screen stays awake while the workout is open.
  * @property exit set once the screen should close, saying why.
  */
 data class WorkoutUiState(
@@ -35,6 +36,7 @@ data class WorkoutUiState(
     val defaultRestSeconds: Int = UserSettings.DEFAULT_REST_SECONDS,
     val plates: List<Double> = WeightUnit.KG.defaultPlates,
     val autoStartRest: Boolean = true,
+    val keepScreenOn: Boolean = true,
     val restTimer: RestTimer? = null,
     val dialog: WorkoutDialog? = null,
     val isAddExercisesSheetOpen: Boolean = false,

@@ -83,6 +83,10 @@ class SettingsViewModel(
         viewModelScope.launch { settingsRepository.setAutoStartRest(enabled) }
     }
 
+    fun setKeepScreenOn(enabled: Boolean) {
+        viewModelScope.launch { settingsRepository.setKeepScreenOn(enabled) }
+    }
+
     fun setThemeMode(mode: ThemeMode) {
         viewModelScope.launch { settingsRepository.setThemeMode(mode) }
     }

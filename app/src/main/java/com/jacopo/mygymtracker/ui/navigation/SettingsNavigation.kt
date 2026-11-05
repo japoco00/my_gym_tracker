@@ -37,6 +37,7 @@ fun NavGraphBuilder.settingsDestination() {
             onRestSecondsChange = viewModel::changeRestSeconds,
             onPlateToggle = viewModel::togglePlate,
             onAutoStartRestChange = viewModel::setAutoStartRest,
+            onKeepScreenOnChange = viewModel::setKeepScreenOn,
             onThemeModeChange = viewModel::setThemeMode,
             onDynamicColorChange = viewModel::setDynamicColor,
             onExportBackup = { exportLauncher.launch("my-gym-tracker-${LocalDate.now()}.json") },

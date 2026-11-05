@@ -90,6 +90,7 @@ class WorkoutViewModel(
                         defaultRestSeconds = settings.restSeconds,
                         plates = settings.currentPlates,
                         autoStartRest = settings.autoStartRest,
+                        keepScreenOn = settings.keepScreenOn,
                     )
                 }
             }
