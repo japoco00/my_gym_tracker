@@ -2,6 +2,7 @@ package com.jacopo.mygymtracker.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +15,7 @@ import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -37,6 +39,7 @@ import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.UserSettings
 import com.jacopo.mygymtracker.domain.model.UserSettings.Companion.REST_STEP_SECONDS
 import com.jacopo.mygymtracker.domain.model.WeightUnit
+import com.jacopo.mygymtracker.domain.model.formatWeight
 import com.jacopo.mygymtracker.ui.components.AppHeader
 import com.jacopo.mygymtracker.ui.components.SectionLabel
 import com.jacopo.mygymtracker.ui.format.formatDuration
@@ -49,6 +52,7 @@ fun SettingsScreen(
     settings: UserSettings?,
     onWeightUnitChange: (WeightUnit) -> Unit,
     onRestSecondsChange: (deltaSeconds: Int) -> Unit,
+    onPlateToggle: (Double) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -91,6 +95,35 @@ fun SettingsScreen(
             SegmentedListItem(shapes = ListItemDefaults.segmentedShapes(index = 1, count = 2)) {
                 RestStepper(restSeconds = settings.restSeconds, onChange = onRestSecondsChange)
             }
+
+            SectionLabel(text = stringResource(R.string.settings_plates), modifier = Modifier.padding(top = 16.dp))
+            SegmentedListItem(
+                shapes = ListItemDefaults.segmentedShapes(index = 0, count = 2),
+                supportingContent = { Text(text = stringResource(R.string.settings_plates_description)) },
+            ) {
+                Text(text = stringResource(R.string.settings_plates_owned, settings.weightUnit.label()))
+            }
+            SegmentedListItem(shapes = ListItemDefaults.segmentedShapes(index = 1, count = 2)) {
+                PlateChips(
+                    options = settings.weightUnit.plateOptions,
+                    owned = settings.currentPlates,
+                    onToggle = onPlateToggle,
+                )
+            }
+        }
+    }
+}
+
+/** One chip per plate size, selected when owned. */
+@Composable
+private fun PlateChips(options: List<Double>, owned: List<Double>, onToggle: (Double) -> Unit) {
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        options.forEach { plate ->
+            FilterChip(
+                selected = plate in owned,
+                onClick = { onToggle(plate) },
+                label = { Text(text = formatWeight(plate)) },
+            )
         }
     }
 }
@@ -168,6 +201,7 @@ private fun SettingsScreenPreview() {
             settings = UserSettings(),
             onWeightUnitChange = {},
             onRestSecondsChange = {},
+            onPlateToggle = {},
         )
     }
 }

@@ -31,4 +31,22 @@ class SettingsRepositoryTest {
 
         assertEquals(UserSettings.REST_STEP_SECONDS, repository.observeSettings().first().restSeconds)
     }
+
+    @Test
+    fun togglePlate_changesOnlyThatUnitAndKeepsHeaviestFirst() = runTest {
+        repository.togglePlate(WeightUnit.KG, 25.0)
+        repository.togglePlate(WeightUnit.KG, 0.5)
+
+        val plates = repository.observeSettings().first().plates
+        assertEquals(listOf(20.0, 15.0, 10.0, 5.0, 2.5, 1.25, 0.5), plates[WeightUnit.KG])
+        assertEquals(WeightUnit.LB.defaultPlates, plates[WeightUnit.LB])
+    }
+
+    @Test
+    fun togglePlate_canRemoveEveryPlate() = runTest {
+        WeightUnit.LB.defaultPlates.forEach { repository.togglePlate(WeightUnit.LB, it) }
+
+        val settings = repository.observeSettings().first().copy(weightUnit = WeightUnit.LB)
+        assertEquals(emptyList<Double>(), settings.currentPlates)
+    }
 }

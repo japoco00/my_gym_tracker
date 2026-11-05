@@ -21,6 +21,7 @@ fun NavGraphBuilder.settingsDestination() {
             settings = settings,
             onWeightUnitChange = viewModel::setWeightUnit,
             onRestSecondsChange = viewModel::changeRestSeconds,
+            onPlateToggle = viewModel::togglePlate,
         )
     }
 }

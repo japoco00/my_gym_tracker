@@ -234,4 +234,7 @@
     <string name="settings_weight_unit_description">Used on every screen</string>
     <string name="settings_rest_time">Default rest time</string>
     <string name="settings_rest_time_description">The rest timer starts with this duration when you complete a set.</string>
+    <string name="settings_plates">Plates</string>
+    <string name="settings_plates_owned">Your plates (%1$s)</string>
+    <string name="settings_plates_description">Barbell exercises show which of these to load on each side.</string>
 </resources>

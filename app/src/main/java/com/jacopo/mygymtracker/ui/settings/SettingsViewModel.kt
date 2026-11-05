@@ -35,6 +35,12 @@ class SettingsViewModel(
         viewModelScope.launch { settingsRepository.setRestSeconds(current.restSeconds + deltaSeconds) }
     }
 
+    /** Adds or removes [plate] among the plates owned in the current unit. */
+    fun togglePlate(plate: Double) {
+        val current = settings.value ?: return
+        viewModelScope.launch { settingsRepository.togglePlate(current.weightUnit, plate) }
+    }
+
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
