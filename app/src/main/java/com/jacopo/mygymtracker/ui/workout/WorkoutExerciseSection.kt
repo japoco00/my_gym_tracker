@@ -21,9 +21,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
@@ -78,6 +80,8 @@ private const val PR_HAPTIC_DELAY_MS = 150L
  * One exercise of the workout as a checklist: a line per set with last time's values.
  * Tick a set when it's done, tap it to edit it, swipe it to delete it.
  * The next set to do is highlighted.
+ *
+ * @param onStartRest starts this exercise's rest by hand; null hides the button, as the rest starts on its own.
  */
 @Composable
 fun WorkoutExerciseSection(
@@ -89,6 +93,7 @@ fun WorkoutExerciseSection(
     onRemove: () -> Unit,
     onAddSet: () -> Unit,
     onEditRest: () -> Unit,
+    onStartRest: (() -> Unit)?,
     onOpenSet: (setKey: String) -> Unit,
     onDeleteSet: (setKey: String) -> Unit,
     onCompletedChange: (setKey: String, completed: Boolean) -> Unit,
@@ -166,6 +171,11 @@ fun WorkoutExerciseSection(
             }
             Spacer(modifier = Modifier.weight(1f))
             RestChip(restSeconds = exercise.restSeconds, defaultSeconds = defaultRestSeconds, onClick = onEditRest)
+            if (onStartRest != null) {
+                IconButton(onClick = onStartRest) {
+                    Icon(imageVector = Icons.Default.PlayArrow, contentDescription = stringResource(R.string.rest_start_description))
+                }
+            }
         }
     }
 }
@@ -282,6 +292,7 @@ private fun WorkoutExerciseSectionPreview() {
             onRemove = {},
             onAddSet = {},
             onEditRest = {},
+            onStartRest = null,
             onOpenSet = {},
             onDeleteSet = {},
             onCompletedChange = { _, _ -> },

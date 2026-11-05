@@ -162,6 +162,7 @@
     <string name="rest_over_text">Time for your next set.</string>
     <string name="rest_skip">Skip</string>
     <string name="rest_skip_description">Skip rest</string>
+    <string name="rest_start_description">Start rest</string>
 
     <!-- Routine editor -->
     <string name="routine_untitled">Untitled routine</string>
@@ -241,6 +242,8 @@
     <string name="settings_weight_unit_description">Used on every screen</string>
     <string name="settings_rest_time">Default rest time</string>
     <string name="settings_rest_time_description">The rest timer starts with this duration when you complete a set.</string>
+    <string name="settings_auto_start_rest">Start rest automatically</string>
+    <string name="settings_auto_start_rest_description">When you complete a set. Otherwise, start it from each exercise.</string>
     <string name="settings_plates">Plates</string>
     <string name="settings_plates_owned">Your plates (%1$s)</string>
     <string name="settings_plates_description">Barbell exercises show which of these to load on each side.</string>

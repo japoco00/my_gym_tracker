@@ -89,6 +89,7 @@ class WorkoutViewModel(
                         weightUnit = settings.weightUnit,
                         defaultRestSeconds = settings.restSeconds,
                         plates = settings.currentPlates,
+                        autoStartRest = settings.autoStartRest,
                     )
                 }
             }
@@ -211,10 +212,14 @@ class WorkoutViewModel(
         updateSet(exerciseKey, setKey) { it.copy(durationSeconds = seconds.coerceAtLeast(0)) }
     }
 
-    /** Ticking a set off starts the rest before the next one: the exercise's own, or the default. */
+    /** Ticking a set off starts the rest before the next one, unless auto-start is off in the settings. */
     fun setCompleted(exerciseKey: String, setKey: String, completed: Boolean) {
         updateSet(exerciseKey, setKey) { it.copy(isCompleted = completed) }
-        if (!completed) return
+        if (completed && _uiState.value.autoStartRest) startRest(exerciseKey)
+    }
+
+    /** Starts the rest of an exercise: its own, or the default. */
+    fun startRest(exerciseKey: String) {
         val state = _uiState.value
         val exercise = state.exercises.find { it.key == exerciseKey } ?: return
         restTimer.start(exercise.restSeconds ?: state.defaultRestSeconds)

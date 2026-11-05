@@ -69,6 +69,7 @@ fun SettingsScreen(
     @StringRes backupMessage: Int?,
     onWeightUnitChange: (WeightUnit) -> Unit,
     onRestSecondsChange: (deltaSeconds: Int) -> Unit,
+    onAutoStartRestChange: (Boolean) -> Unit,
     onPlateToggle: (Double) -> Unit,
     onThemeModeChange: (ThemeMode) -> Unit,
     onDynamicColorChange: (Boolean) -> Unit,
@@ -130,14 +131,21 @@ fun SettingsScreen(
 
             SectionLabel(text = stringResource(R.string.settings_workout), modifier = Modifier.padding(top = 16.dp))
             SegmentedListItem(
-                shapes = ListItemDefaults.segmentedShapes(index = 0, count = 2),
+                shapes = ListItemDefaults.segmentedShapes(index = 0, count = 3),
                 supportingContent = { Text(text = stringResource(R.string.settings_rest_time_description)) },
             ) {
                 Text(text = stringResource(R.string.settings_rest_time))
             }
-            SegmentedListItem(shapes = ListItemDefaults.segmentedShapes(index = 1, count = 2)) {
+            SegmentedListItem(shapes = ListItemDefaults.segmentedShapes(index = 1, count = 3)) {
                 RestStepper(restSeconds = settings.restSeconds, onChange = onRestSecondsChange)
             }
+            SwitchItem(
+                checked = settings.autoStartRest,
+                onCheckedChange = onAutoStartRestChange,
+                title = stringResource(R.string.settings_auto_start_rest),
+                description = stringResource(R.string.settings_auto_start_rest_description),
+                shapes = ListItemDefaults.segmentedShapes(index = 2, count = 3),
+            )
 
             SectionLabel(text = stringResource(R.string.settings_plates), modifier = Modifier.padding(top = 16.dp))
             SegmentedListItem(
@@ -351,6 +359,7 @@ private fun SettingsScreenPreview() {
             onWeightUnitChange = {},
             onRestSecondsChange = {},
             onPlateToggle = {},
+            onAutoStartRestChange = {},
             onThemeModeChange = {},
             onDynamicColorChange = {},
             onExportBackup = {},

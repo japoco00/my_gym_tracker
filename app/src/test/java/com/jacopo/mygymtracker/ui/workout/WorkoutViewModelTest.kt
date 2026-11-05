@@ -51,6 +51,7 @@ class WorkoutViewModelTest {
     private lateinit var database: AppDatabase
     private lateinit var routines: RoutineRepository
     private lateinit var workouts: WorkoutRepository
+    private val settings = SettingsRepository(InMemoryPreferencesDataStore())
 
     /** Clearing it plays the screen going away: cancels `viewModelScope`, then calls `onCleared`. */
     private val viewModels = ViewModelStore()
@@ -246,6 +247,24 @@ class WorkoutViewModelTest {
     }
 
     @Test
+    fun autoStartOff_restStartsOnlyByHand() = runTest {
+        settings.setAutoStartRest(false)
+        val viewModel = loadedViewModel(startWorkout())
+        viewModel.uiState.first { !it.autoStartRest }
+        val squat = viewModel.uiState.value.exercises.single()
+
+        viewModel.setCompleted(squat.key, squat.sets.first().key, completed = true)
+        assertNull(viewModel.uiState.value.restTimer)
+
+        viewModel.startRest(squat.key)
+        assertEquals(UserSettings.DEFAULT_REST_SECONDS, viewModel.uiState.value.restTimer?.totalSeconds)
+
+        viewModel.setRest(squat.key, 180)
+        viewModel.startRest(squat.key)
+        assertEquals(180, viewModel.uiState.value.restTimer?.totalSeconds)
+    }
+
+    @Test
     fun setRest_isSavedAsDraft() = runTest {
         val viewModel = loadedViewModel(startWorkout())
         val squat = viewModel.uiState.value.exercises.single()
@@ -278,7 +297,7 @@ class WorkoutViewModelTest {
                     workoutRepository = workouts,
                     routineRepository = routines,
                     exerciseRepository = ExerciseRepository(database, database.exerciseDao()),
-                    settingsRepository = SettingsRepository(InMemoryPreferencesDataStore()),
+                    settingsRepository = settings,
                     restTimer = RestTimerController(backgroundScope, clock = { testScheduler.currentTime }),
                     applicationScope = backgroundScope,
                 ).also { viewModel -> viewModelJobs += viewModel.viewModelScope.coroutineContext.job }

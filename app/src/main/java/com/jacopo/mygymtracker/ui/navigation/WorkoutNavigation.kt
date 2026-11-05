@@ -57,6 +57,7 @@ fun NavGraphBuilder.workoutDestination(
             onRemoveExercise = viewModel::requestRemoveExercise,
             onAddSet = viewModel::addSet,
             onOpenRestEditor = viewModel::openRestEditor,
+            onStartRest = viewModel::startRest,
             onCloseRestEditor = viewModel::closeRestEditor,
             onRestChange = viewModel::setRest,
             onOpenSetEditor = viewModel::openSetEditor,

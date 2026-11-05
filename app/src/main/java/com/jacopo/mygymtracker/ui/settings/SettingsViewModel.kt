@@ -79,6 +79,10 @@ class SettingsViewModel(
         viewModelScope.launch { settingsRepository.togglePlate(current.weightUnit, plate) }
     }
 
+    fun setAutoStartRest(enabled: Boolean) {
+        viewModelScope.launch { settingsRepository.setAutoStartRest(enabled) }
+    }
+
     fun setThemeMode(mode: ThemeMode) {
         viewModelScope.launch { settingsRepository.setThemeMode(mode) }
     }
