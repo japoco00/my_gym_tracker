@@ -1,5 +1,6 @@
 package com.jacopo.mygymtracker.ui.settings
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -20,10 +22,20 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedListItem
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -50,12 +62,29 @@ import com.jacopo.mygymtracker.ui.theme.AppTheme
 @Composable
 fun SettingsScreen(
     settings: UserSettings?,
+    @StringRes backupMessage: Int?,
     onWeightUnitChange: (WeightUnit) -> Unit,
     onRestSecondsChange: (deltaSeconds: Int) -> Unit,
     onPlateToggle: (Double) -> Unit,
+    onExportBackup: () -> Unit,
+    onImportBackup: () -> Unit,
+    onBackupMessageShown: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val snackbarHostState = remember { SnackbarHostState() }
+    var confirmImport by rememberSaveable { mutableStateOf(false) }
+    BackupMessageSnackbar(message = backupMessage, snackbarHostState = snackbarHostState, onShown = onBackupMessageShown)
+    if (confirmImport) {
+        ConfirmImportDialog(
+            onConfirm = {
+                confirmImport = false
+                onImportBackup()
+            },
+            onDismiss = { confirmImport = false },
+        )
+    }
+
     Scaffold(
         topBar = {
             // No pills, so the expanded header only needs room for the title.
@@ -65,6 +94,7 @@ fun SettingsScreen(
                 expandedHeight = 136.dp,
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
     ) { innerPadding ->
         if (settings == null) return@Scaffold
@@ -110,7 +140,58 @@ fun SettingsScreen(
                     onToggle = onPlateToggle,
                 )
             }
+
+            SectionLabel(text = stringResource(R.string.settings_backup), modifier = Modifier.padding(top = 16.dp))
+            SegmentedListItem(
+                onClick = onExportBackup,
+                shapes = ListItemDefaults.segmentedShapes(index = 0, count = 2),
+                supportingContent = { Text(text = stringResource(R.string.settings_backup_export_description)) },
+            ) {
+                Text(text = stringResource(R.string.settings_backup_export))
+            }
+            SegmentedListItem(
+                onClick = { confirmImport = true },
+                shapes = ListItemDefaults.segmentedShapes(index = 1, count = 2),
+                supportingContent = { Text(text = stringResource(R.string.settings_backup_import_description)) },
+            ) {
+                Text(text = stringResource(R.string.settings_backup_import))
+            }
         }
+    }
+}
+
+/** Import wipes everything, so it asks before the file picker opens. */
+@Composable
+private fun ConfirmImportDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = stringResource(R.string.backup_import_confirm_title)) },
+        text = { Text(text = stringResource(R.string.backup_import_confirm_message)) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) { Text(text = stringResource(R.string.backup_import_confirm)) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(text = stringResource(R.string.action_cancel)) }
+        },
+    )
+}
+
+/**
+ * Shows [message], then calls [onShown] so the same message can show again next time.
+ * A different message arriving meanwhile replaces the current snackbar.
+ */
+@Composable
+private fun BackupMessageSnackbar(
+    @StringRes message: Int?,
+    snackbarHostState: SnackbarHostState,
+    onShown: () -> Unit,
+) {
+    val text = message?.let { stringResource(it) }
+    val currentOnShown by rememberUpdatedState(onShown)
+    LaunchedEffect(message) {
+        text ?: return@LaunchedEffect
+        snackbarHostState.showSnackbar(text)
+        currentOnShown()
     }
 }
 
@@ -199,9 +280,13 @@ private fun SettingsScreenPreview() {
     AppTheme {
         SettingsScreen(
             settings = UserSettings(),
+            backupMessage = null,
             onWeightUnitChange = {},
             onRestSecondsChange = {},
             onPlateToggle = {},
+            onExportBackup = {},
+            onImportBackup = {},
+            onBackupMessageShown = {},
         )
     }
 }

@@ -244,4 +244,17 @@
     <string name="settings_plates">Plates</string>
     <string name="settings_plates_owned">Your plates (%1$s)</string>
     <string name="settings_plates_description">Barbell exercises show which of these to load on each side.</string>
+    <string name="settings_backup">Backup</string>
+    <string name="settings_backup_export">Export backup</string>
+    <string name="settings_backup_export_description">Save your exercises, routines, finished workouts and settings to a file.</string>
+    <string name="settings_backup_import">Import backup</string>
+    <string name="settings_backup_import_description">Restore a backup file, replacing everything in the app.</string>
+    <string name="backup_import_confirm_title">Replace everything?</string>
+    <string name="backup_import_confirm_message">Your exercises, routines, workout history and settings will be replaced by the ones in the backup. This can\'t be undone.</string>
+    <string name="backup_import_confirm">Choose file</string>
+    <string name="backup_exported">Backup saved</string>
+    <string name="backup_export_failed">Couldn\'t save the backup</string>
+    <string name="backup_imported">Backup restored</string>
+    <string name="backup_invalid_file">Not a backup from this app, or from a newer version of it</string>
+    <string name="backup_workout_in_progress">Finish or discard the workout in progress first</string>
 </resources>
