@@ -69,7 +69,11 @@ class RoutineDetailViewModel(
         viewModelScope.launch {
             settingsRepository.observeSettings().collect { settings ->
                 _uiState.update {
-                    it.copy(weightUnit = settings.weightUnit, defaultRestSeconds = settings.restSeconds)
+                    it.copy(
+                        weightUnit = settings.weightUnit,
+                        defaultRestSeconds = settings.restSeconds,
+                        plates = settings.currentPlates,
+                    )
                 }
             }
         }
@@ -108,8 +112,8 @@ class RoutineDetailViewModel(
     }
 
     /** Adds an exercise that isn't in the catalog yet; saving the routine adds it there. */
-    fun addNewExercise(name: String, category: Category, trackingType: TrackingType) {
-        val exercise = Exercise(name = name.trim(), category = category, trackingType = trackingType)
+    fun addNewExercise(name: String, category: Category, trackingType: TrackingType, isBarbell: Boolean) {
+        val exercise = Exercise(name = name.trim(), category = category, trackingType = trackingType, isBarbell = isBarbell)
         editRoutine { state ->
             state.copy(exercises = state.exercises + exercise.toUiState(), isNewExerciseSheetOpen = false)
         }

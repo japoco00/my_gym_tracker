@@ -16,6 +16,7 @@ import kotlin.uuid.Uuid
  * @property id null until a new routine is first saved.
  * @property editingSet the set open in the editor sheet, or null.
  * @property editingRestKey the key of the exercise whose rest is being edited, or null.
+ * @property plates the plates owned in [weightUnit], for the set editor of barbell exercises.
  */
 data class RoutineDetailUiState(
     val id: Int? = null,
@@ -29,6 +30,7 @@ data class RoutineDetailUiState(
     val editingRestKey: String? = null,
     val weightUnit: WeightUnit = WeightUnit.KG,
     val defaultRestSeconds: Int = UserSettings.DEFAULT_REST_SECONDS,
+    val plates: List<Double> = WeightUnit.KG.defaultPlates,
     val isLoading: Boolean = true,
 ) {
     val setCount: Int get() = exercises.sumOf { it.sets.size }

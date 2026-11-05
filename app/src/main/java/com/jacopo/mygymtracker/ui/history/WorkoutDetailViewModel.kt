@@ -50,7 +50,7 @@ class WorkoutDetailViewModel(
         }
         viewModelScope.launch {
             settingsRepository.observeSettings().collect { settings ->
-                _uiState.update { it.copy(weightUnit = settings.weightUnit) }
+                _uiState.update { it.copy(weightUnit = settings.weightUnit, plates = settings.currentPlates) }
             }
         }
     }

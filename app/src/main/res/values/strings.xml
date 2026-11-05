@@ -181,6 +181,11 @@
     <string name="set_decrease">Decrease %1$s</string>
     <string name="set_increase">Increase %1$s</string>
     <string name="set_delete">Delete set</string>
+    <!-- Plates to load on each side of the bar, e.g. "Per side: 25 · 10 · 2.5". -->
+    <string name="plates_per_side">Per side: %1$s</string>
+    <!-- e.g. "Per side: 25 · 10, 0.5 kg short": the owned plates can't make up 0.5 kg per side. -->
+    <string name="plates_per_side_short">Per side: %1$s, %2$s %3$s short</string>
+    <string name="plates_none">no plates</string>
     <string name="set_summary">%1$s %2$s × %3$d</string>
     <string name="set_summary_added">+%1$s %2$s × %3$d</string>
     <string name="action_add_set">Add set</string>
@@ -200,6 +205,8 @@
     <string name="exercise_name_taken">An exercise with this name already exists.</string>
     <string name="exercise_category">Category</string>
     <string name="exercise_tracking_type">Tracked as</string>
+    <string name="exercise_barbell">Barbell</string>
+    <string name="exercise_barbell_description">Show the plates to load on each side</string>
     <string name="exercise_delete_title">Delete “%1$s”?</string>
     <string name="exercise_delete_message">It will be removed from the exercise list.</string>
     <string name="exercise_in_use_title">Can’t delete “%1$s”</string>

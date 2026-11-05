@@ -84,10 +84,10 @@ class ExercisesViewModel(
     fun dismissDialog() = showDialog(null)
 
     /** Closes the editor at once, and re-opens it with [name] flagged if the repository refuses a duplicate. */
-    fun saveExercise(name: String, category: Category, trackingType: TrackingType) {
+    fun saveExercise(name: String, category: Category, trackingType: TrackingType, isBarbell: Boolean) {
         val edit = _uiState.value.dialog as? ExerciseDialog.Edit ?: return
-        val exercise = edit.exercise?.copy(name = name, category = category, trackingType = trackingType)
-            ?: Exercise(name = name, category = category, trackingType = trackingType)
+        val exercise = edit.exercise?.copy(name = name, category = category, trackingType = trackingType, isBarbell = isBarbell)
+            ?: Exercise(name = name, category = category, trackingType = trackingType, isBarbell = isBarbell)
         showDialog(null)
         viewModelScope.launch {
             if (!exerciseRepository.saveExercise(exercise)) showDialog(edit.copy(rejectedName = name.trim()))

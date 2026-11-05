@@ -19,6 +19,7 @@ import kotlin.uuid.Uuid
  * @property restTimer the running rest between sets, or null.
  * @property editingSet the set open in the editor sheet, or null.
  * @property editingRestKey the key of the exercise whose rest is being edited, or null.
+ * @property plates the plates owned in [weightUnit], for the set editor of barbell exercises.
  * @property exit set once the screen should close, saying why.
  */
 data class WorkoutUiState(
@@ -31,6 +32,7 @@ data class WorkoutUiState(
     val catalogExercises: List<Exercise> = emptyList(),
     val weightUnit: WeightUnit = WeightUnit.KG,
     val defaultRestSeconds: Int = UserSettings.DEFAULT_REST_SECONDS,
+    val plates: List<Double> = WeightUnit.KG.defaultPlates,
     val restTimer: RestTimer? = null,
     val dialog: WorkoutDialog? = null,
     val isAddExercisesSheetOpen: Boolean = false,

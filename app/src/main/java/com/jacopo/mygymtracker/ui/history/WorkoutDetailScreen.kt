@@ -228,6 +228,7 @@ fun WorkoutDetailScreen(
             onDurationChange = { onDurationChange(exerciseKey, setKey, it) },
             onDelete = { onDeleteSet(exerciseKey, setKey) },
             onDismiss = onCloseSetEditor,
+            plates = uiState.plates.takeIf { exercise.exercise.isBarbell },
         )
     }
 

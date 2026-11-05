@@ -16,6 +16,7 @@ import kotlin.uuid.Uuid
  * @property prSetIndexes per exercise of [workout], the set that was a personal record, if any.
  * @property editedExercises the unsaved changes while editing, `null` otherwise.
  * @property editingSet the edited set open in the editor sheet, or null.
+ * @property plates the plates owned in [weightUnit], for the set editor of barbell exercises.
  * @property isClosed the workout was deleted or doesn't exist: leave the screen.
  */
 data class WorkoutDetailUiState(
@@ -26,6 +27,7 @@ data class WorkoutDetailUiState(
     val isAddExercisesSheetOpen: Boolean = false,
     val catalogExercises: List<Exercise> = emptyList(),
     val weightUnit: WeightUnit = WeightUnit.KG,
+    val plates: List<Double> = WeightUnit.KG.defaultPlates,
     val isDeleteDialogOpen: Boolean = false,
     val isClosed: Boolean = false,
 ) {

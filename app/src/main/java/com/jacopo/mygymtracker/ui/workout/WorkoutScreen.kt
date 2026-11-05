@@ -218,6 +218,7 @@ fun WorkoutScreen(
             previous = exercise.exercise.id?.let { uiState.previousSets[it]?.getOrNull(index) },
             isCompleted = set.isCompleted,
             onCompletedChange = { onSetCompletedChange(exerciseKey, setKey, it) },
+            plates = uiState.plates.takeIf { exercise.exercise.isBarbell },
         )
     }
 

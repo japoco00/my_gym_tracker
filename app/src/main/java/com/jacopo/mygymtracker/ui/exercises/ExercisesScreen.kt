@@ -81,7 +81,7 @@ fun ExercisesScreen(
     onEditExercise: (Exercise) -> Unit,
     onCreateExercise: () -> Unit,
     onDeleteExercise: (Exercise) -> Unit,
-    onSaveExercise: (name: String, category: Category, trackingType: TrackingType) -> Unit,
+    onSaveExercise: (name: String, category: Category, trackingType: TrackingType, isBarbell: Boolean) -> Unit,
     onConfirmDelete: (Exercise) -> Unit,
     onDismissDialog: () -> Unit,
     modifier: Modifier = Modifier,
@@ -292,7 +292,7 @@ private fun ExerciseMenu(onEdit: () -> Unit, onDelete: () -> Unit) {
 @Composable
 private fun ExerciseDialogHost(
     uiState: ExercisesUiState,
-    onSaveExercise: (name: String, category: Category, trackingType: TrackingType) -> Unit,
+    onSaveExercise: (name: String, category: Category, trackingType: TrackingType, isBarbell: Boolean) -> Unit,
     onConfirmDelete: (Exercise) -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -354,7 +354,7 @@ private fun ExercisesScreenPreview() {
             onEditExercise = {},
             onCreateExercise = {},
             onDeleteExercise = {},
-            onSaveExercise = { _, _, _ -> },
+            onSaveExercise = { _, _, _, _ -> },
             onConfirmDelete = {},
             onDismissDialog = {},
         )

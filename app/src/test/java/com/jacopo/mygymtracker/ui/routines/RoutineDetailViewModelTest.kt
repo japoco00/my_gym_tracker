@@ -70,7 +70,7 @@ class RoutineDetailViewModelTest {
         awaitRoutines { it.isNotEmpty() }
         viewModel.openNewExerciseSheet()
 
-        viewModel.addNewExercise(" Pistol Squat ", Category.LEGS, TrackingType.REPS)
+        viewModel.addNewExercise(" Pistol Squat ", Category.LEGS, TrackingType.REPS, isBarbell = false)
 
         // single(): the second save updates the routine inserted by the first.
         val saved = awaitRoutines { routines -> routines.any { it.exercises.isNotEmpty() } }.single()
@@ -113,12 +113,13 @@ class RoutineDetailViewModelTest {
     @Test
     fun setRest_isSavedPerExerciseAndClearsBackToDefault() = runTest {
         val viewModel = loadedViewModel()
-        viewModel.addNewExercise("Squat", Category.LEGS, TrackingType.WEIGHT_REPS)
+        viewModel.addNewExercise("Squat", Category.LEGS, TrackingType.WEIGHT_REPS, isBarbell = true)
         val squat = viewModel.uiState.value.exercises.single()
 
         viewModel.setRest(squat.key, 180)
         val saved = awaitRoutines { routines -> routines.any { routine -> routine.exercises.any { it.restSeconds != null } } }
         assertEquals(180, saved.single().exercises.single().restSeconds)
+        assertTrue(saved.single().exercises.single().exercise.isBarbell)
 
         viewModel.setRest(squat.key, null)
         awaitRoutines { it.single().exercises.single().restSeconds == null }

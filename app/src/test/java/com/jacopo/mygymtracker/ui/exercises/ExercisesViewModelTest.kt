@@ -52,7 +52,7 @@ class ExercisesViewModelTest {
         val viewModel = loadedViewModel()
         viewModel.openNewExercise()
 
-        viewModel.saveExercise(" bench press", Category.CHEST, TrackingType.WEIGHT_REPS)
+        viewModel.saveExercise(" bench press", Category.CHEST, TrackingType.WEIGHT_REPS, isBarbell = true)
 
         val dialog = viewModel.uiState.first { it.dialog != null }.dialog
         assertEquals(ExerciseDialog.Edit(exercise = null, rejectedName = "bench press"), dialog)

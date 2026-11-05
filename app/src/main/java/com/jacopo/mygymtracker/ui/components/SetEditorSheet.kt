@@ -41,6 +41,8 @@ import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.LoggedSet
 import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.domain.model.WeightUnit
+import com.jacopo.mygymtracker.domain.model.formatWeight
+import com.jacopo.mygymtracker.domain.plates.platesPerSide
 import com.jacopo.mygymtracker.ui.format.formatSet
 import com.jacopo.mygymtracker.ui.format.label
 import com.jacopo.mygymtracker.ui.theme.AppTheme
@@ -56,6 +58,7 @@ data class EditingSet(val exerciseKey: String, val setKey: String)
  * @param previous the same set last time; a chip copies its values in.
  * @param isCompleted whether a live workout's set is ticked; the main button toggles it.
  * Null for sets that can't be ticked (a plan, a finished workout): the main button just closes.
+ * @param plates the plates owned, in [weightUnit], to show what to load per side; null for non-barbell exercises.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,6 +78,7 @@ fun SetEditorSheet(
     previous: LoggedSet? = null,
     isCompleted: Boolean? = null,
     onCompletedChange: (Boolean) -> Unit = {},
+    plates: List<Double>? = null,
 ) {
     val sheetState = rememberBottomSheetState(
         initialValue = SheetValue.Hidden,
@@ -96,6 +100,7 @@ fun SetEditorSheet(
             durationSeconds = durationSeconds,
             previous = previous,
             isCompleted = isCompleted,
+            plates = plates,
             onRepsChange = onRepsChange,
             onWeightChange = onWeightChange,
             onDurationChange = onDurationChange,
@@ -122,6 +127,7 @@ private fun SetEditorContent(
     durationSeconds: Int,
     previous: LoggedSet?,
     isCompleted: Boolean?,
+    plates: List<Double>?,
     onRepsChange: (Int) -> Unit,
     onWeightChange: (Double) -> Unit,
     onDurationChange: (seconds: Int) -> Unit,
@@ -182,6 +188,9 @@ private fun SetEditorContent(
                 }
             }
         }
+        if (plates != null && trackingType == TrackingType.WEIGHT_REPS && weightKg > 0) {
+            PlatesPerSide(weightKg = weightKg, unit = weightUnit, plates = plates)
+        }
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -203,6 +212,24 @@ private fun SetEditorContent(
             PrimaryButton(isCompleted = isCompleted, onClick = onPrimary, modifier = Modifier.weight(1f))
         }
     }
+}
+
+/** "Per side: 25 · 10 · 2.5", plus what the owned [plates] can't make up, if anything. */
+@Composable
+private fun PlatesPerSide(weightKg: Double, unit: WeightUnit, plates: List<Double>) {
+    val breakdown = platesPerSide(unit.fromKg(weightKg), plates)
+    val loaded = breakdown.plates.joinToString(" · ") { formatWeight(it) }
+        .ifEmpty { stringResource(R.string.plates_none) }
+    Text(
+        text = if (breakdown.remainder == 0.0) {
+            stringResource(R.string.plates_per_side, loaded)
+        } else {
+            stringResource(R.string.plates_per_side_short, loaded, formatWeight(breakdown.remainder), unit.label())
+        },
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(start = 16.dp, top = 8.dp),
+    )
 }
 
 /** Copies last time's values in; disabled, with a tick, once they already match. */
@@ -283,6 +310,7 @@ private fun SetEditorContentPreview() {
                 durationSeconds = 0,
                 previous = LoggedSet(reps = 8, weightKg = 77.5, isCompleted = true),
                 isCompleted = false,
+                plates = WeightUnit.KG.defaultPlates,
                 onRepsChange = {},
                 onWeightChange = {},
                 onDurationChange = {},
