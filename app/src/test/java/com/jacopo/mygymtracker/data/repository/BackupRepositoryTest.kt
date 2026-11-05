@@ -13,11 +13,16 @@ import com.jacopo.mygymtracker.data.withAllSetsCompleted
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.PlannedSet
+import com.jacopo.mygymtracker.domain.model.ThemeMode
 import com.jacopo.mygymtracker.domain.model.TrackingType
+import com.jacopo.mygymtracker.domain.model.UserSettings
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -49,6 +54,29 @@ class BackupRepositoryTest {
         assertEquals(ImportResult.IMPORTED, restored.backup.importJson(exported))
 
         assertEquals(exported, restored.backup.exportJson())
+        // A setting the export forgets would match in both files, so compare the settings themselves too.
+        assertEquals(app.settings.observeSettings().first(), restored.settings.observeSettings().first())
+    }
+
+    @Test
+    fun aVersion1File_importsWithDefaultsForLaterSettings() = runTest {
+        app.fill()
+        val exported = Json.parseToJsonElement(app.backup.exportJson()).jsonObject
+        val v1Keys = setOf("weightUnit", "restSeconds", "plates")
+        val v1Settings = JsonObject(exported.getValue("settings").jsonObject.filterKeys { it in v1Keys })
+        val v1 = JsonObject(exported + mapOf("formatVersion" to JsonPrimitive(1), "settings" to v1Settings))
+
+        val restored = TestApp()
+        assertEquals(ImportResult.IMPORTED, restored.backup.importJson(v1.toString()))
+
+        val defaults = UserSettings()
+        val expected = app.settings.observeSettings().first().copy(
+            themeMode = defaults.themeMode,
+            dynamicColor = defaults.dynamicColor,
+            autoStartRest = defaults.autoStartRest,
+            keepScreenOn = defaults.keepScreenOn,
+        )
+        assertEquals(expected, restored.settings.observeSettings().first())
     }
 
     @Test
@@ -110,6 +138,10 @@ class BackupRepositoryTest {
             settings.setWeightUnit(WeightUnit.LB)
             settings.setRestSeconds(120)
             settings.togglePlate(WeightUnit.KG, 25.0)
+            settings.setThemeMode(ThemeMode.DARK)
+            settings.setDynamicColor(false)
+            settings.setAutoStartRest(false)
+            settings.setKeepScreenOn(false)
             val squat = Exercise(name = "Squat", category = Category.LEGS, note = "High bar", isBarbell = true)
             val plank = newExercise("Plank", Category.CORE).copy(trackingType = TrackingType.DURATION)
             val routine = routineOf(

@@ -16,9 +16,25 @@ import com.jacopo.mygymtracker.domain.model.WorkoutExercise
 import com.jacopo.mygymtracker.domain.model.WorkoutSession
 import java.time.Instant
 
-fun UserSettings.toBackup() = BackupSettings(weightUnit = weightUnit, restSeconds = restSeconds, plates = plates)
+fun UserSettings.toBackup() = BackupSettings(
+    weightUnit = weightUnit,
+    restSeconds = restSeconds,
+    plates = plates,
+    themeMode = themeMode,
+    dynamicColor = dynamicColor,
+    autoStartRest = autoStartRest,
+    keepScreenOn = keepScreenOn,
+)
 
-fun BackupSettings.toDomain() = UserSettings(weightUnit = weightUnit, restSeconds = restSeconds, plates = plates)
+fun BackupSettings.toDomain() = UserSettings(
+    weightUnit = weightUnit,
+    restSeconds = restSeconds,
+    plates = plates,
+    themeMode = themeMode,
+    dynamicColor = dynamicColor,
+    autoStartRest = autoStartRest,
+    keepScreenOn = keepScreenOn,
+)
 
 fun Exercise.toBackup() = BackupExercise(
     name = name,

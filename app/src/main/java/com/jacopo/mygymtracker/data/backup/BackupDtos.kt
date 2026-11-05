@@ -1,7 +1,9 @@
 package com.jacopo.mygymtracker.data.backup
 
 import com.jacopo.mygymtracker.domain.model.Category
+import com.jacopo.mygymtracker.domain.model.ThemeMode
 import com.jacopo.mygymtracker.domain.model.TrackingType
+import com.jacopo.mygymtracker.domain.model.UserSettings
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import kotlinx.serialization.Serializable
 
@@ -21,15 +23,21 @@ data class BackupFile(
     val workouts: List<BackupWorkout>,
 ) {
     companion object {
-        const val CURRENT_FORMAT_VERSION = 1
+        /** 2 added the theme, dynamic colour, rest auto-start and keep-screen-on settings. */
+        const val CURRENT_FORMAT_VERSION = 2
     }
 }
 
+/** The fields added after version 1 default to the [UserSettings] defaults, so a version 1 file still imports. */
 @Serializable
 data class BackupSettings(
     val weightUnit: WeightUnit,
     val restSeconds: Int,
     val plates: Map<WeightUnit, List<Double>>,
+    val themeMode: ThemeMode = ThemeMode.SYSTEM,
+    val dynamicColor: Boolean = true,
+    val autoStartRest: Boolean = true,
+    val keepScreenOn: Boolean = true,
 )
 
 @Serializable

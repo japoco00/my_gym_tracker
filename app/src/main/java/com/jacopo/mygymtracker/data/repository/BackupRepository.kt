@@ -103,7 +103,11 @@ class BackupRepository(
     }
 
     private companion object {
-        val json = Json { prettyPrint = true }
+        // Defaults are written too, so the file states every value instead of relying on the app's defaults.
+        val json = Json {
+            prettyPrint = true
+            encodeDefaults = true
+        }
     }
 }
 
