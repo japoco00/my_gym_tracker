@@ -3,10 +3,12 @@ package com.jacopo.mygymtracker.ui.navigation
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import com.jacopo.mygymtracker.resttimer.RestTimerNotifications
 import com.jacopo.mygymtracker.ui.settings.SettingsScreen
 import com.jacopo.mygymtracker.ui.settings.SettingsViewModel
 import kotlinx.serialization.Serializable
@@ -29,6 +31,7 @@ fun NavGraphBuilder.settingsDestination() {
         val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
             it?.let(viewModel::importBackup)
         }
+        val context = LocalContext.current
 
         SettingsScreen(
             settings = settings,
@@ -38,6 +41,7 @@ fun NavGraphBuilder.settingsDestination() {
             onPlateToggle = viewModel::togglePlate,
             onAutoStartRestChange = viewModel::setAutoStartRest,
             onKeepScreenOnChange = viewModel::setKeepScreenOn,
+            onOpenRestAlertSettings = { context.startActivity(RestTimerNotifications.restOverSettingsIntent(context)) },
             onThemeModeChange = viewModel::setThemeMode,
             onDynamicColorChange = viewModel::setDynamicColor,
             onExportBackup = { exportLauncher.launch("my-gym-tracker-${LocalDate.now()}.json") },

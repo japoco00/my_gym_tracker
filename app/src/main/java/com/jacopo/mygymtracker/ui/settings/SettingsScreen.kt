@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonGroupDefaults
@@ -19,6 +21,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.ListItemShapes
 import androidx.compose.material3.MaterialTheme
@@ -71,6 +74,7 @@ fun SettingsScreen(
     onRestSecondsChange: (deltaSeconds: Int) -> Unit,
     onAutoStartRestChange: (Boolean) -> Unit,
     onKeepScreenOnChange: (Boolean) -> Unit,
+    onOpenRestAlertSettings: () -> Unit,
     onPlateToggle: (Double) -> Unit,
     onThemeModeChange: (ThemeMode) -> Unit,
     onDynamicColorChange: (Boolean) -> Unit,
@@ -132,12 +136,12 @@ fun SettingsScreen(
 
             SectionLabel(text = stringResource(R.string.settings_workout), modifier = Modifier.padding(top = 16.dp))
             SegmentedListItem(
-                shapes = ListItemDefaults.segmentedShapes(index = 0, count = 4),
+                shapes = ListItemDefaults.segmentedShapes(index = 0, count = 5),
                 supportingContent = { Text(text = stringResource(R.string.settings_rest_time_description)) },
             ) {
                 Text(text = stringResource(R.string.settings_rest_time))
             }
-            SegmentedListItem(shapes = ListItemDefaults.segmentedShapes(index = 1, count = 4)) {
+            SegmentedListItem(shapes = ListItemDefaults.segmentedShapes(index = 1, count = 5)) {
                 RestStepper(restSeconds = settings.restSeconds, onChange = onRestSecondsChange)
             }
             SwitchItem(
@@ -145,15 +149,23 @@ fun SettingsScreen(
                 onCheckedChange = onAutoStartRestChange,
                 title = stringResource(R.string.settings_auto_start_rest),
                 description = stringResource(R.string.settings_auto_start_rest_description),
-                shapes = ListItemDefaults.segmentedShapes(index = 2, count = 4),
+                shapes = ListItemDefaults.segmentedShapes(index = 2, count = 5),
             )
             SwitchItem(
                 checked = settings.keepScreenOn,
                 onCheckedChange = onKeepScreenOnChange,
                 title = stringResource(R.string.settings_keep_screen_on),
                 description = stringResource(R.string.settings_keep_screen_on_description),
-                shapes = ListItemDefaults.segmentedShapes(index = 3, count = 4),
+                shapes = ListItemDefaults.segmentedShapes(index = 3, count = 5),
             )
+            SegmentedListItem(
+                onClick = onOpenRestAlertSettings,
+                shapes = ListItemDefaults.segmentedShapes(index = 4, count = 5),
+                supportingContent = { Text(text = stringResource(R.string.settings_rest_alert_description)) },
+                trailingContent = { Icon(imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+            ) {
+                Text(text = stringResource(R.string.settings_rest_alert))
+            }
 
             SectionLabel(text = stringResource(R.string.settings_plates), modifier = Modifier.padding(top = 16.dp))
             SegmentedListItem(
@@ -369,6 +381,7 @@ private fun SettingsScreenPreview() {
             onPlateToggle = {},
             onAutoStartRestChange = {},
             onKeepScreenOnChange = {},
+            onOpenRestAlertSettings = {},
             onThemeModeChange = {},
             onDynamicColorChange = {},
             onExportBackup = {},

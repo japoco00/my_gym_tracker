@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.provider.Settings
 import androidx.core.app.NotificationCompat
 import androidx.core.content.getSystemService
 import com.jacopo.mygymtracker.MainActivity
@@ -36,6 +37,12 @@ object RestTimerNotifications {
             ),
         )
     }
+
+    /** The system settings of the "Rest over" channel, where the user picks its sound and vibration. */
+    fun restOverSettingsIntent(context: Context): Intent =
+        Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+            .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+            .putExtra(Settings.EXTRA_CHANNEL_ID, REST_OVER_CHANNEL)
 
     /** The ongoing countdown. The system chronometer ticks it, so it's re-posted only when [timer] changes. */
     fun countdown(context: Context, timer: RestTimer?): Notification =

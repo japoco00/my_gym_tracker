@@ -246,6 +246,8 @@
     <string name="settings_auto_start_rest_description">When you complete a set. Otherwise, start it from each exercise.</string>
     <string name="settings_keep_screen_on">Keep screen on</string>
     <string name="settings_keep_screen_on_description">While a workout is open</string>
+    <string name="settings_rest_alert">Rest alert</string>
+    <string name="settings_rest_alert_description">Sound and vibration when the rest is over</string>
     <string name="settings_plates">Plates</string>
     <string name="settings_plates_owned">Your plates (%1$s)</string>
     <string name="settings_plates_description">Barbell exercises show which of these to load on each side.</string>
