@@ -81,6 +81,9 @@ dependencies {
     // Settings
     implementation(libs.androidx.datastore.preferences)
 
+    // Backup file (JSON)
+    implementation(libs.kotlinx.serialization.json)
+
     // Charts
     implementation(libs.vico.compose.m3)
 
