@@ -2,11 +2,13 @@ package com.jacopo.mygymtracker.data.repository
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
+import com.jacopo.mygymtracker.domain.model.ThemeMode
 import com.jacopo.mygymtracker.domain.model.UserSettings
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import kotlinx.coroutines.flow.Flow
@@ -33,6 +35,12 @@ class SettingsRepository(
                         ?.sortedDescending()
                         ?: unit.defaultPlates
                 },
+                themeMode = preferences[THEME_MODE]
+                    ?.let { name -> ThemeMode.entries.find { it.name == name } }
+                    ?: ThemeMode.SYSTEM,
+                dynamicColor = preferences[DYNAMIC_COLOR] ?: true,
+                autoStartRest = preferences[AUTO_START_REST] ?: true,
+                keepScreenOn = preferences[KEEP_SCREEN_ON] ?: true,
             )
         }
 
@@ -55,6 +63,22 @@ class SettingsRepository(
         }
     }
 
+    suspend fun setThemeMode(mode: ThemeMode) {
+        dataStore.edit { it[THEME_MODE] = mode.name }
+    }
+
+    suspend fun setDynamicColor(enabled: Boolean) {
+        dataStore.edit { it[DYNAMIC_COLOR] = enabled }
+    }
+
+    suspend fun setAutoStartRest(enabled: Boolean) {
+        dataStore.edit { it[AUTO_START_REST] = enabled }
+    }
+
+    suspend fun setKeepScreenOn(enabled: Boolean) {
+        dataStore.edit { it[KEEP_SCREEN_ON] = enabled }
+    }
+
     /**
      * Replaces every setting at once, as when restoring a backup.
      * Plates outside a unit's [WeightUnit.plateOptions] are dropped; a unit without plates gets the defaults.
@@ -69,12 +93,20 @@ class SettingsRepository(
                     .map { it.toString() }
                     .toSet()
             }
+            preferences[THEME_MODE] = settings.themeMode.name
+            preferences[DYNAMIC_COLOR] = settings.dynamicColor
+            preferences[AUTO_START_REST] = settings.autoStartRest
+            preferences[KEEP_SCREEN_ON] = settings.keepScreenOn
         }
     }
 
     private companion object {
         val WEIGHT_UNIT = stringPreferencesKey("weight_unit")
         val REST_SECONDS = intPreferencesKey("rest_seconds")
+        val THEME_MODE = stringPreferencesKey("theme_mode")
+        val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
+        val AUTO_START_REST = booleanPreferencesKey("auto_start_rest")
+        val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
 
         /** Plates as `Double.toString()` texts; a missing key means the [WeightUnit.defaultPlates]. */
         fun platesKey(unit: WeightUnit) = stringSetPreferencesKey("plates_${unit.name.lowercase()}")

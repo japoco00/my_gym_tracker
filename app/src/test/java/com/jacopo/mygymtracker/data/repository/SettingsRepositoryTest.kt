@@ -1,6 +1,7 @@
 package com.jacopo.mygymtracker.data.repository
 
 import com.jacopo.mygymtracker.data.InMemoryPreferencesDataStore
+import com.jacopo.mygymtracker.domain.model.ThemeMode
 import com.jacopo.mygymtracker.domain.model.UserSettings
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import kotlinx.coroutines.flow.first
@@ -21,8 +22,20 @@ class SettingsRepositoryTest {
     fun persistsUpdates() = runTest {
         repository.setWeightUnit(WeightUnit.LB)
         repository.setRestSeconds(120)
+        repository.setThemeMode(ThemeMode.DARK)
+        repository.setDynamicColor(false)
+        repository.setAutoStartRest(false)
+        repository.setKeepScreenOn(false)
 
-        assertEquals(UserSettings(WeightUnit.LB, 120), repository.observeSettings().first())
+        val expected = UserSettings(
+            weightUnit = WeightUnit.LB,
+            restSeconds = 120,
+            themeMode = ThemeMode.DARK,
+            dynamicColor = false,
+            autoStartRest = false,
+            keepScreenOn = false,
+        )
+        assertEquals(expected, repository.observeSettings().first())
     }
 
     @Test
