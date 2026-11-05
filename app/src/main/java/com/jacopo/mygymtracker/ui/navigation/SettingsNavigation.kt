@@ -36,6 +36,8 @@ fun NavGraphBuilder.settingsDestination() {
             onWeightUnitChange = viewModel::setWeightUnit,
             onRestSecondsChange = viewModel::changeRestSeconds,
             onPlateToggle = viewModel::togglePlate,
+            onThemeModeChange = viewModel::setThemeMode,
+            onDynamicColorChange = viewModel::setDynamicColor,
             onExportBackup = { exportLauncher.launch("my-gym-tracker-${LocalDate.now()}.json") },
             // Some providers report .json files as a generic binary.
             onImportBackup = { importLauncher.launch(arrayOf(BACKUP_MIME_TYPE, "application/octet-stream")) },

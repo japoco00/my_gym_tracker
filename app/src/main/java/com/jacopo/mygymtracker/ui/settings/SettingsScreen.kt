@@ -1,5 +1,6 @@
 package com.jacopo.mygymtracker.ui.settings
 
+import android.os.Build
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,11 +20,13 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.ListItemShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.ToggleButton
@@ -48,6 +51,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.R
+import com.jacopo.mygymtracker.domain.model.ThemeMode
 import com.jacopo.mygymtracker.domain.model.UserSettings
 import com.jacopo.mygymtracker.domain.model.UserSettings.Companion.REST_STEP_SECONDS
 import com.jacopo.mygymtracker.domain.model.WeightUnit
@@ -66,6 +70,8 @@ fun SettingsScreen(
     onWeightUnitChange: (WeightUnit) -> Unit,
     onRestSecondsChange: (deltaSeconds: Int) -> Unit,
     onPlateToggle: (Double) -> Unit,
+    onThemeModeChange: (ThemeMode) -> Unit,
+    onDynamicColorChange: (Boolean) -> Unit,
     onExportBackup: () -> Unit,
     onImportBackup: () -> Unit,
     onBackupMessageShown: () -> Unit,
@@ -110,7 +116,14 @@ fun SettingsScreen(
             SegmentedListItem(
                 shapes = ListItemDefaults.segmentedShapes(index = 0, count = 1),
                 supportingContent = { Text(text = stringResource(R.string.settings_weight_unit_description)) },
-                trailingContent = { WeightUnitToggles(selected = settings.weightUnit, onSelect = onWeightUnitChange) },
+                trailingContent = {
+                    ConnectedToggles(
+                        options = WeightUnit.entries,
+                        selected = settings.weightUnit,
+                        onSelect = onWeightUnitChange,
+                        label = { it.label() },
+                    )
+                },
             ) {
                 Text(text = stringResource(R.string.settings_weight_unit))
             }
@@ -138,6 +151,34 @@ fun SettingsScreen(
                     options = settings.weightUnit.plateOptions,
                     owned = settings.currentPlates,
                     onToggle = onPlateToggle,
+                )
+            }
+
+            SectionLabel(text = stringResource(R.string.settings_appearance), modifier = Modifier.padding(top = 16.dp))
+            // Wallpaper colours arrived in Android 12; older devices only get the theme row.
+            val supportsDynamicColor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+            val appearanceCount = if (supportsDynamicColor) 2 else 1
+            SegmentedListItem(
+                shapes = ListItemDefaults.segmentedShapes(index = 0, count = appearanceCount),
+                supportingContent = {
+                    ConnectedToggles(
+                        options = ThemeMode.entries,
+                        selected = settings.themeMode,
+                        onSelect = onThemeModeChange,
+                        label = { it.label() },
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
+                },
+            ) {
+                Text(text = stringResource(R.string.settings_theme))
+            }
+            if (supportsDynamicColor) {
+                SwitchItem(
+                    checked = settings.dynamicColor,
+                    onCheckedChange = onDynamicColorChange,
+                    title = stringResource(R.string.settings_dynamic_color),
+                    description = stringResource(R.string.settings_dynamic_color_description),
+                    shapes = ListItemDefaults.segmentedShapes(index = 1, count = appearanceCount),
                 )
             }
 
@@ -209,28 +250,54 @@ private fun PlateChips(options: List<Double>, owned: List<Double>, onToggle: (Do
     }
 }
 
-/** kg | lb as a connected button group. */
+/** One button per option in a connected group, with [selected] checked. */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun WeightUnitToggles(selected: WeightUnit, onSelect: (WeightUnit) -> Unit, modifier: Modifier = Modifier) {
+private fun <T> ConnectedToggles(
+    options: List<T>,
+    selected: T,
+    onSelect: (T) -> Unit,
+    label: @Composable (T) -> String,
+    modifier: Modifier = Modifier,
+) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
         modifier = modifier,
     ) {
-        WeightUnit.entries.forEachIndexed { index, unit ->
+        options.forEachIndexed { index, option ->
             ToggleButton(
-                checked = unit == selected,
-                onCheckedChange = { onSelect(unit) },
-                shapes = if (index == 0) {
-                    ButtonGroupDefaults.connectedLeadingButtonShapes()
-                } else {
-                    ButtonGroupDefaults.connectedTrailingButtonShapes()
+                checked = option == selected,
+                onCheckedChange = { onSelect(option) },
+                shapes = when (index) {
+                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                    options.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
                 },
                 modifier = Modifier.semantics { role = Role.RadioButton },
             ) {
-                Text(text = unit.label())
+                Text(text = label(option))
             }
         }
+    }
+}
+
+/** A row that toggles as a whole; the switch only shows the state. */
+@Composable
+private fun SwitchItem(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    title: String,
+    description: String,
+    shapes: ListItemShapes,
+) {
+    SegmentedListItem(
+        checked = checked,
+        onCheckedChange = onCheckedChange,
+        shapes = shapes,
+        supportingContent = { Text(text = description) },
+        trailingContent = { Switch(checked = checked, onCheckedChange = null) },
+    ) {
+        Text(text = title)
     }
 }
 
@@ -284,6 +351,8 @@ private fun SettingsScreenPreview() {
             onWeightUnitChange = {},
             onRestSecondsChange = {},
             onPlateToggle = {},
+            onThemeModeChange = {},
+            onDynamicColorChange = {},
             onExportBackup = {},
             onImportBackup = {},
             onBackupMessageShown = {},

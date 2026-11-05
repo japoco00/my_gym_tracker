@@ -244,6 +244,13 @@
     <string name="settings_plates">Plates</string>
     <string name="settings_plates_owned">Your plates (%1$s)</string>
     <string name="settings_plates_description">Barbell exercises show which of these to load on each side.</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_theme">Theme</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="settings_dynamic_color">Dynamic color</string>
+    <string name="settings_dynamic_color_description">Colors from your wallpaper</string>
     <string name="settings_backup">Backup</string>
     <string name="settings_backup_export">Export backup</string>
     <string name="settings_backup_export_description">Save your exercises, routines, finished workouts and settings to a file.</string>

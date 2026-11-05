@@ -11,6 +11,7 @@ import com.jacopo.mygymtracker.data.repository.BackupRepository
 import com.jacopo.mygymtracker.data.repository.ImportResult
 import com.jacopo.mygymtracker.data.repository.SettingsRepository
 import com.jacopo.mygymtracker.di.appContainer
+import com.jacopo.mygymtracker.domain.model.ThemeMode
 import com.jacopo.mygymtracker.domain.model.UserSettings
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -76,6 +77,14 @@ class SettingsViewModel(
     fun togglePlate(plate: Double) {
         val current = settings.value ?: return
         viewModelScope.launch { settingsRepository.togglePlate(current.weightUnit, plate) }
+    }
+
+    fun setThemeMode(mode: ThemeMode) {
+        viewModelScope.launch { settingsRepository.setThemeMode(mode) }
+    }
+
+    fun setDynamicColor(enabled: Boolean) {
+        viewModelScope.launch { settingsRepository.setDynamicColor(enabled) }
     }
 
     companion object {
