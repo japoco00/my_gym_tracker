@@ -2,6 +2,7 @@ package com.jacopo.mygymtracker.ui.workout
 
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -22,8 +23,12 @@ import com.jacopo.mygymtracker.resttimer.RestTimerController
 import com.jacopo.mygymtracker.ui.MainDispatcherRule
 import com.jacopo.mygymtracker.ui.components.EditingSet
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.job
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -49,6 +54,9 @@ class WorkoutViewModelTest {
     /** Clearing it plays the screen going away: cancels `viewModelScope`, then calls `onCleared`. */
     private val viewModels = ViewModelStore()
 
+    /** Each ViewModel's `viewModelScope` job, so [tearDown] can wait for saves that outlive cancelling it. */
+    private val viewModelJobs = mutableListOf<Job>()
+
     @Before
     fun setUp() {
         database = createTestDatabase()
@@ -59,6 +67,9 @@ class WorkoutViewModelTest {
     @After
     fun tearDown() {
         viewModels.clear()
+        // A draft save already running is NonCancellable on purpose. Closing the database under its
+        // transaction breaks it, and the error fails whichever test runs next.
+        runBlocking { viewModelJobs.joinAll() }
         database.close()
     }
 
@@ -242,7 +253,7 @@ class WorkoutViewModelTest {
                     settingsRepository = SettingsRepository(InMemoryPreferencesDataStore()),
                     restTimer = RestTimerController(backgroundScope, clock = { testScheduler.currentTime }),
                     applicationScope = backgroundScope,
-                )
+                ).also { viewModel -> viewModelJobs += viewModel.viewModelScope.coroutineContext.job }
             }
         }
         return ViewModelProvider.create(viewModels, factory)[WorkoutViewModel::class]

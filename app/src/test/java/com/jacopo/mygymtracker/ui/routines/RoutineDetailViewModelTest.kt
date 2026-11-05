@@ -2,6 +2,7 @@ package com.jacopo.mygymtracker.ui.routines
 
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -16,7 +17,11 @@ import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.Routine
 import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.ui.MainDispatcherRule
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.job
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -39,6 +44,9 @@ class RoutineDetailViewModelTest {
     private lateinit var exercises: ExerciseRepository
     private val viewModels = ViewModelStore()
 
+    /** Each ViewModel's `viewModelScope` job, so [tearDown] can wait for saves that outlive cancelling it. */
+    private val viewModelJobs = mutableListOf<Job>()
+
     @Before
     fun setUp() {
         database = createTestDatabase()
@@ -49,6 +57,9 @@ class RoutineDetailViewModelTest {
     @After
     fun tearDown() {
         viewModels.clear()
+        // A save already running is NonCancellable on purpose. Closing the database under its
+        // transaction breaks it, and the error fails whichever test runs next.
+        runBlocking { viewModelJobs.joinAll() }
         database.close()
     }
 
@@ -121,7 +132,7 @@ class RoutineDetailViewModelTest {
                     exerciseRepository = exercises,
                     settingsRepository = SettingsRepository(InMemoryPreferencesDataStore()),
                     applicationScope = backgroundScope,
-                )
+                ).also { viewModel -> viewModelJobs += viewModel.viewModelScope.coroutineContext.job }
             }
         }
         val viewModel = ViewModelProvider.create(viewModels, factory)[RoutineDetailViewModel::class]
