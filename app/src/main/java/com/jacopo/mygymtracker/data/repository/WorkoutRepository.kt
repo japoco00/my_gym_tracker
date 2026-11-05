@@ -45,7 +45,7 @@ class WorkoutRepository(
             if (workoutDao.hasActive()) return@withTransaction null
             val workout = routine.toWorkoutSession(startedAt = now)
             val sessionId = workoutDao.insertSession(workout.toEntity()).toInt()
-            writeExercises(sessionId, workout.exercises)
+            workoutDao.writeExercises(sessionId, workout.exercises, exerciseDao)
             sessionId
         }
 
@@ -55,7 +55,7 @@ class WorkoutRepository(
         database.withTransaction {
             if (!workoutDao.isActive(sessionId)) return@withTransaction
             workoutDao.updateSession(workout.copy(finishedAt = null).toEntity())
-            writeExercises(sessionId, workout.exercises)
+            workoutDao.writeExercises(sessionId, workout.exercises, exerciseDao)
         }
     }
 
@@ -72,7 +72,7 @@ class WorkoutRepository(
         val wasActive = database.withTransaction {
             if (!workoutDao.isActive(sessionId)) return@withTransaction false
             workoutDao.updateSession(finished.toEntity())
-            writeExercises(sessionId, finished.exercises)
+            workoutDao.writeExercises(sessionId, finished.exercises, exerciseDao)
             true
         }
         return if (wasActive) getWorkout(sessionId) else null
@@ -91,7 +91,7 @@ class WorkoutRepository(
         require(kept.isNotEmpty()) { "A workout needs at least one set" }
         val wasFinished = database.withTransaction {
             if (!workoutDao.isFinished(sessionId)) return@withTransaction false
-            writeExercises(sessionId, kept)
+            workoutDao.writeExercises(sessionId, kept, exerciseDao)
             true
         }
         return if (wasFinished) getWorkout(sessionId) else null
@@ -121,24 +121,31 @@ class WorkoutRepository(
                 .filter { it.performedAt < before }
                 .flatMap { it.sets }
         }
+}
 
-    /** Rebuilds the exercises and sets of a session; list order becomes `position`. */
-    private suspend fun writeExercises(sessionId: Int, exercises: List<WorkoutExercise>) {
-        workoutDao.deleteWorkoutExercises(sessionId)
-        exercises.forEachIndexed { position, workoutExercise ->
-            val workoutExerciseId = workoutDao.insertWorkoutExercise(
-                WorkoutExerciseEntity(
-                    sessionId = sessionId,
-                    exerciseId = exerciseDao.resolveCatalogId(workoutExercise.exercise),
-                    position = position,
-                    restSeconds = workoutExercise.restSeconds,
-                ),
-            ).toInt()
-            workoutDao.insertLoggedSets(
-                workoutExercise.sets.mapIndexed { setPosition, set ->
-                    set.toEntity(workoutExerciseId = workoutExerciseId, position = setPosition)
-                },
-            )
-        }
+/**
+ * Rebuilds the exercises and logged sets of a session; list order becomes `position`.
+ * Call inside a transaction.
+ */
+internal suspend fun WorkoutDao.writeExercises(
+    sessionId: Int,
+    exercises: List<WorkoutExercise>,
+    exerciseDao: ExerciseDao,
+) {
+    deleteWorkoutExercises(sessionId)
+    exercises.forEachIndexed { position, workoutExercise ->
+        val workoutExerciseId = insertWorkoutExercise(
+            WorkoutExerciseEntity(
+                sessionId = sessionId,
+                exerciseId = exerciseDao.resolveCatalogId(workoutExercise.exercise),
+                position = position,
+                restSeconds = workoutExercise.restSeconds,
+            ),
+        ).toInt()
+        insertLoggedSets(
+            workoutExercise.sets.mapIndexed { setPosition, set ->
+                set.toEntity(workoutExerciseId = workoutExerciseId, position = setPosition)
+            },
+        )
     }
 }

@@ -8,6 +8,7 @@ import com.jacopo.mygymtracker.data.local.entity.RoutineExerciseEntity
 import com.jacopo.mygymtracker.data.mapper.toDomain
 import com.jacopo.mygymtracker.data.mapper.toEntity
 import com.jacopo.mygymtracker.domain.model.Routine
+import com.jacopo.mygymtracker.domain.model.RoutineExercise
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -36,26 +37,37 @@ class RoutineRepository(
         val routineId = routine.id
             ?.also { routineDao.update(routine.toEntity()) }
             ?: routineDao.insert(routine.toEntity()).toInt()
-
-        routineDao.deleteRoutineExercises(routineId)
-        routine.exercises.forEachIndexed { position, routineExercise ->
-            val routineExerciseId = routineDao.insertRoutineExercise(
-                RoutineExerciseEntity(
-                    routineId = routineId,
-                    exerciseId = exerciseDao.resolveCatalogId(routineExercise.exercise),
-                    position = position,
-                    restSeconds = routineExercise.restSeconds,
-                ),
-            ).toInt()
-            routineDao.insertPlannedSets(
-                routineExercise.sets.mapIndexed { setPosition, set ->
-                    set.toEntity(routineExerciseId = routineExerciseId, position = setPosition)
-                },
-            )
-        }
+        routineDao.writeExercises(routineId, routine.exercises, exerciseDao)
         routineId
     }
 
     /** Deletes a routine. Its links and sets cascade; past workouts keep their name snapshot. */
     suspend fun deleteRoutine(routineId: Int) = routineDao.deleteById(routineId)
+}
+
+/**
+ * Rebuilds the exercise links and planned sets of a routine; list order becomes `position`.
+ * Call inside a transaction.
+ */
+internal suspend fun RoutineDao.writeExercises(
+    routineId: Int,
+    exercises: List<RoutineExercise>,
+    exerciseDao: ExerciseDao,
+) {
+    deleteRoutineExercises(routineId)
+    exercises.forEachIndexed { position, routineExercise ->
+        val routineExerciseId = insertRoutineExercise(
+            RoutineExerciseEntity(
+                routineId = routineId,
+                exerciseId = exerciseDao.resolveCatalogId(routineExercise.exercise),
+                position = position,
+                restSeconds = routineExercise.restSeconds,
+            ),
+        ).toInt()
+        insertPlannedSets(
+            routineExercise.sets.mapIndexed { setPosition, set ->
+                set.toEntity(routineExerciseId = routineExerciseId, position = setPosition)
+            },
+        )
+    }
 }
