@@ -19,7 +19,8 @@
 ```text
 com.jacopo.mygymtracker
 ├── MyApplication.kt      # Owns AppContainer; creates notification channels
-├── MainActivity.kt       # Single-activity Compose host
+├── MainActivity.kt       # Single-activity Compose host; applies the theme from MainViewModel
+├── MainViewModel.kt      # App-wide settings the activity needs (theme)
 ├── di/                   # AppContainer + CreationExtras.appContainer()
 ├── domain/
 │   ├── model/            # Pure Kotlin business models
@@ -76,11 +77,15 @@ com.jacopo.mygymtracker
 - `SettingsRepository` wraps Preferences DataStore and exposes `Flow<UserSettings>`.
 - Weights are stored in kilograms everywhere. Convert only at the UI edge through `WeightUnit` (`format`, `fromKg`, `toKg`).
 - Owned plates are stored per unit (`UserSettings.plates`). `domain/plates/platesPerSide` splits a weight greedily into plates for each side (weight / 2, no bar weight); the set editor shows it for exercises flagged `isBarbell`.
+- Enum settings (`WeightUnit`, `ThemeMode`) are stored by name: never rename an entry.
+- Theme: `MainActivity` reads `ThemeMode` and dynamic colour from `MainViewModel` and holds the first frame until settings load, so the app never draws in the wrong theme. It also re-applies `enableEdgeToEdge` so the system bar icons follow the app theme, not the system's.
+- Workout settings are read by `WorkoutViewModel` into `WorkoutUiState`: `autoStartRest` (off: each exercise shows a start button) and `keepScreenOn` (`Modifier.keepScreenOn()` on the workout screen, no wake lock).
 
 ### 4.5 Backup
 - `BackupRepository` exports settings, the catalog, routines and finished workouts to one JSON `BackupFile`, and imports it back. Import validates the whole file, then replaces everything in one transaction; it refuses while a workout is in progress.
 - The `@Serializable` DTOs in `data/backup/` are the file format, mapped in `data/mapper/BackupMappers.kt`. Exercises are referenced by name, routines by a file-local id.
 - When you add a persisted field (entity column or setting), add it to the DTOs too, or backups silently drop it, and fill it in `BackupRepositoryTest.fill()` so the round-trip test covers it. When the DTOs change, bump `BackupFile.CURRENT_FORMAT_VERSION` and give new fields a default so older files still import.
+- The JSON is written with `encodeDefaults = true`: every value is in the file, so changing a default later never changes what a restore brings back.
 
 ---
 
@@ -135,6 +140,7 @@ com.jacopo.mygymtracker
 - [`RestTimerController`](class://com.jacopo.mygymtracker.resttimer.RestTimerController) is the single source of truth: an app-scoped `StateFlow` countdown based on wall-clock end time, living in `AppContainer`.
 - `RestTimerService` is a `specialUse` foreground service that only mirrors the controller in a notification (chronometer, +15 s and Skip actions) and holds a partial wake lock until the rest ends. It stops itself when the rest is over.
 - Notification channels are created in `MyApplication`; `POST_NOTIFICATIONS` is requested when a workout opens. Without it the timer still runs in-app.
+- The rest-over sound and vibration belong to its notification channel: Settings > "Rest alert" opens the channel's system page (`RestTimerNotifications.restOverSettingsIntent`). Don't add an in-app sound setting; the channel's would override it.
 
 ---
 
