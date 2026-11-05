@@ -61,6 +61,19 @@ class WorkoutRepositoryTest {
     }
 
     @Test
+    fun restSeconds_comesFromRoutineAndSurvivesDraftAndFinish() = runTest {
+        val routine = savedRoutine().let { it.copy(exercises = listOf(it.exercises[0].copy(restSeconds = 180))) }
+        val id = workouts.startWorkout(routine)!!
+        assertEquals(180, workouts.getWorkout(id)!!.exercises.single().restSeconds)
+
+        val draft = workouts.getWorkout(id)!!.completeFirstSetOfFirstExercise()
+        workouts.saveDraft(draft.copy(exercises = draft.exercises.map { it.copy(restSeconds = 120) }))
+        val finished = workouts.finishWorkout(workouts.getWorkout(id)!!)!!
+
+        assertEquals(120, finished.exercises.single().restSeconds)
+    }
+
+    @Test
     fun finishWorkout_keepsOnlyCompletedSets() = runTest {
         val id = workouts.startWorkout(savedRoutine(), now = time(1))!!
         val draft = workouts.getWorkout(id)!!.completeFirstSetOfFirstExercise()

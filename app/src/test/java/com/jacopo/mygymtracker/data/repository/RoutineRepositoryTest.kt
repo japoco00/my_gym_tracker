@@ -50,6 +50,20 @@ class RoutineRepositoryTest {
     }
 
     @Test
+    fun saveRoutine_persistsRestPerExerciseAndBarbellFlag() = runTest {
+        val squat = newExercise("Squat").copy(isBarbell = true)
+        val id = repository.saveRoutine(
+            routineOf("Legs", squat to emptyList(), newExercise("Leg Press") to emptyList()).let { routine ->
+                routine.copy(exercises = listOf(routine.exercises[0].copy(restSeconds = 180), routine.exercises[1]))
+            },
+        )
+
+        val exercises = repository.getRoutine(id)!!.exercises
+        assertEquals(listOf(180, null), exercises.map { it.restSeconds })
+        assertEquals(listOf(true, false), exercises.map { it.exercise.isBarbell })
+    }
+
+    @Test
     fun saveRoutine_reusesCatalogExerciseWithSameNameIgnoringCase() = runTest {
         val catalogId = database.exerciseDao()
             .insert(newExercise("Bench Press", Category.CHEST).toEntity()).toInt()

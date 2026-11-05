@@ -8,6 +8,7 @@ import androidx.room.PrimaryKey
 /**
  * A catalog [ExerciseEntity] performed inside a [WorkoutSessionEntity] at [position].
  * A catalog exercise cannot be deleted while it appears in a workout.
+ * [restSeconds] is copied from the routine; `null` means the default from the settings.
  */
 @Entity(
     tableName = "workout_exercises",
@@ -33,4 +34,5 @@ data class WorkoutExerciseEntity(
     val sessionId: Int,
     val exerciseId: Int,
     val position: Int,
+    val restSeconds: Int? = null,
 )

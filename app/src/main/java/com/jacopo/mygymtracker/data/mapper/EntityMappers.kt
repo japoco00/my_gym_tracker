@@ -30,6 +30,7 @@ fun Exercise.toEntity(): ExerciseEntity = ExerciseEntity(
     category = category,
     trackingType = trackingType,
     note = note,
+    isBarbell = isBarbell,
 )
 
 fun ExerciseEntity.toDomain(): Exercise = Exercise(
@@ -38,6 +39,7 @@ fun ExerciseEntity.toDomain(): Exercise = Exercise(
     category = category,
     trackingType = trackingType,
     note = note,
+    isBarbell = isBarbell,
 )
 
 // endregion
@@ -62,6 +64,7 @@ fun RoutineWithExercises.toDomain(): Routine = Routine(
 fun RoutineExerciseWithDetails.toDomain(): RoutineExercise = RoutineExercise(
     exercise = exercise.toDomain(),
     sets = sets.sortedBy { it.position }.map { it.toDomain() },
+    restSeconds = routineExercise.restSeconds,
 )
 
 fun PlannedSet.toEntity(routineExerciseId: Int, position: Int): PlannedSetEntity = PlannedSetEntity(
@@ -104,6 +107,7 @@ fun WorkoutSessionWithExercises.toDomain(): WorkoutSession = WorkoutSession(
 fun WorkoutExerciseWithDetails.toDomain(): WorkoutExercise = WorkoutExercise(
     exercise = exercise.toDomain(),
     sets = sets.sortedBy { it.position }.map { it.toDomain() },
+    restSeconds = workoutExercise.restSeconds,
 )
 
 fun LoggedSet.toEntity(workoutExerciseId: Int, position: Int): LoggedSetEntity = LoggedSetEntity(

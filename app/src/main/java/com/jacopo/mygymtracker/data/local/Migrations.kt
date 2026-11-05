@@ -27,3 +27,24 @@ internal val MIGRATION_4_5 = object : Migration(4, 5) {
         )
     }
 }
+
+/**
+ * Adds a rest time to routine and workout exercises (`NULL` = the settings default)
+ * and a barbell flag to exercises. Seeded barbell lifts get the flag; names frozen as above.
+ */
+internal val MIGRATION_5_6 = object : Migration(5, 6) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE routine_exercises ADD COLUMN restSeconds INTEGER")
+        db.execSQL("ALTER TABLE workout_exercises ADD COLUMN restSeconds INTEGER")
+        db.execSQL("ALTER TABLE exercises ADD COLUMN isBarbell INTEGER NOT NULL DEFAULT 0")
+        db.execSQL(
+            """
+            UPDATE exercises SET isBarbell = 1
+            WHERE name IN (
+                'Bench Press', 'Squat', 'Deadlift', 'Romanian Deadlift', 'Barbell Row',
+                'Overhead Press', 'Barbell Curl', 'Hip Thrust'
+            )
+            """,
+        )
+    }
+}

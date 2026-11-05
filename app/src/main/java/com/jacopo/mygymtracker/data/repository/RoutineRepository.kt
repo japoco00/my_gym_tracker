@@ -44,6 +44,7 @@ class RoutineRepository(
                     routineId = routineId,
                     exerciseId = exerciseDao.resolveCatalogId(routineExercise.exercise),
                     position = position,
+                    restSeconds = routineExercise.restSeconds,
                 ),
             ).toInt()
             routineDao.insertPlannedSets(

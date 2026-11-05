@@ -8,6 +8,7 @@ import androidx.room.PrimaryKey
 /**
  * A catalog [ExerciseEntity] placed inside a [RoutineEntity] at [position].
  * Deleting the routine removes the link; a catalog exercise cannot be deleted while linked.
+ * [restSeconds] is the rest after each set; `null` means the default from the settings.
  */
 @Entity(
     tableName = "routine_exercises",
@@ -33,4 +34,5 @@ data class RoutineExerciseEntity(
     val routineId: Int,
     val exerciseId: Int,
     val position: Int,
+    val restSeconds: Int? = null,
 )

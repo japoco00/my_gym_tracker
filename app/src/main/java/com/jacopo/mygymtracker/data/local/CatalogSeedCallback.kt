@@ -18,8 +18,8 @@ internal object CatalogSeedCallback : RoomDatabase.Callback() {
     private fun seed(db: SupportSQLiteDatabase) {
         SEED_EXERCISES.forEach { exercise ->
             db.execSQL(
-                "INSERT OR IGNORE INTO exercises (name, category, trackingType) VALUES (?, ?, ?)",
-                arrayOf(exercise.name, exercise.category.name, exercise.trackingType.name),
+                "INSERT OR IGNORE INTO exercises (name, category, trackingType, isBarbell) VALUES (?, ?, ?, ?)",
+                arrayOf<Any>(exercise.name, exercise.category.name, exercise.trackingType.name, if (exercise.isBarbell) 1 else 0),
             )
         }
     }
@@ -28,37 +28,38 @@ internal object CatalogSeedCallback : RoomDatabase.Callback() {
         val name: String,
         val category: Category,
         val trackingType: TrackingType = TrackingType.WEIGHT_REPS,
+        val isBarbell: Boolean = false,
     )
 
     private val SEED_EXERCISES: List<SeedExercise> = listOf(
-        SeedExercise("Bench Press", Category.CHEST),
+        SeedExercise("Bench Press", Category.CHEST, isBarbell = true),
         SeedExercise("Incline Dumbbell Press", Category.CHEST),
         SeedExercise("Chest Fly", Category.CHEST),
         SeedExercise("Push-Up", Category.CHEST, TrackingType.REPS),
-        SeedExercise("Deadlift", Category.BACK),
+        SeedExercise("Deadlift", Category.BACK, isBarbell = true),
         SeedExercise("Pull-Up", Category.BACK, TrackingType.REPS),
         SeedExercise("Lat Pulldown", Category.BACK),
-        SeedExercise("Barbell Row", Category.BACK),
+        SeedExercise("Barbell Row", Category.BACK, isBarbell = true),
         SeedExercise("Seated Cable Row", Category.BACK),
-        SeedExercise("Overhead Press", Category.SHOULDERS),
+        SeedExercise("Overhead Press", Category.SHOULDERS, isBarbell = true),
         SeedExercise("Dumbbell Shoulder Press", Category.SHOULDERS),
         SeedExercise("Lateral Raise", Category.SHOULDERS),
         SeedExercise("Face Pull", Category.SHOULDERS),
-        SeedExercise("Barbell Curl", Category.BICEPS),
+        SeedExercise("Barbell Curl", Category.BICEPS, isBarbell = true),
         SeedExercise("Dumbbell Curl", Category.BICEPS),
         SeedExercise("Hammer Curl", Category.BICEPS),
         SeedExercise("Triceps Pushdown", Category.TRICEPS),
         SeedExercise("Skull Crusher", Category.TRICEPS),
         SeedExercise("Overhead Triceps Extension", Category.TRICEPS),
         SeedExercise("Dip", Category.TRICEPS, TrackingType.REPS),
-        SeedExercise("Squat", Category.LEGS),
+        SeedExercise("Squat", Category.LEGS, isBarbell = true),
         SeedExercise("Leg Press", Category.LEGS),
-        SeedExercise("Romanian Deadlift", Category.LEGS),
+        SeedExercise("Romanian Deadlift", Category.LEGS, isBarbell = true),
         SeedExercise("Leg Extension", Category.LEGS),
         SeedExercise("Leg Curl", Category.LEGS),
         SeedExercise("Walking Lunge", Category.LEGS),
         SeedExercise("Calf Raise", Category.LEGS),
-        SeedExercise("Hip Thrust", Category.GLUTES),
+        SeedExercise("Hip Thrust", Category.GLUTES, isBarbell = true),
         SeedExercise("Bulgarian Split Squat", Category.GLUTES),
         SeedExercise("Plank", Category.CORE, TrackingType.DURATION),
         SeedExercise("Hanging Leg Raise", Category.CORE, TrackingType.REPS),

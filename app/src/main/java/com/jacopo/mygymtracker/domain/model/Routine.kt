@@ -12,10 +12,14 @@ data class Routine(
     val exercises: List<RoutineExercise> = emptyList(),
 )
 
-/** A catalog [exercise] placed inside a routine, with its ordered planned [sets]. */
+/**
+ * A catalog [exercise] placed inside a routine, with its ordered planned [sets].
+ * [restSeconds] is the rest after each set; `null` means the default from the settings.
+ */
 data class RoutineExercise(
     val exercise: Exercise,
     val sets: List<PlannedSet> = emptyList(),
+    val restSeconds: Int? = null,
 )
 
 /**

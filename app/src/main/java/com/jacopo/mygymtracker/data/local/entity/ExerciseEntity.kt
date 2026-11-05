@@ -26,4 +26,6 @@ data class ExerciseEntity(
     @ColumnInfo(defaultValue = "WEIGHT_REPS")
     val trackingType: TrackingType = TrackingType.WEIGHT_REPS,
     val note: String? = null,
+    @ColumnInfo(defaultValue = "0")
+    val isBarbell: Boolean = false,
 )

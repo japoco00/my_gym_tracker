@@ -131,6 +131,7 @@ class WorkoutRepository(
                     sessionId = sessionId,
                     exerciseId = exerciseDao.resolveCatalogId(workoutExercise.exercise),
                     position = position,
+                    restSeconds = workoutExercise.restSeconds,
                 ),
             ).toInt()
             workoutDao.insertLoggedSets(

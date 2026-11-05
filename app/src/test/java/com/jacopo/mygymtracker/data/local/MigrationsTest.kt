@@ -4,6 +4,7 @@ import androidx.room.testing.MigrationTestHelper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -50,6 +51,37 @@ class MigrationsTest {
             assertEquals(5, cursor.getInt(0))
             assertEquals(100.0, cursor.getDouble(1), 0.0)
             assertEquals(0, cursor.getInt(2))
+        }
+    }
+
+    @Test
+    fun migrate5To6_addsDefaultRestAndFlagsBarbellLifts() {
+        helper.createDatabase(DB_NAME, 5).use { db ->
+            db.execSQL(
+                """
+                INSERT INTO exercises (exerciseId, name, category) VALUES
+                (1, 'bench press', 'CHEST'), (2, 'Leg Press', 'LEGS')
+                """,
+            )
+            db.execSQL("INSERT INTO routines (routineId, name) VALUES (1, 'Push')")
+            db.execSQL("INSERT INTO routine_exercises (routineId, exerciseId, position) VALUES (1, 1, 0)")
+            db.execSQL("INSERT INTO workout_sessions (sessionId, routineName, startedAtEpochMs) VALUES (1, 'Push', 0)")
+            db.execSQL("INSERT INTO workout_exercises (sessionId, exerciseId, position) VALUES (1, 1, 0)")
+        }
+
+        val db = helper.runMigrationsAndValidate(DB_NAME, 6, true, MIGRATION_5_6)
+
+        db.query("SELECT name, isBarbell FROM exercises ORDER BY exerciseId").use { cursor ->
+            val flags = buildList {
+                while (cursor.moveToNext()) add(cursor.getString(0) to cursor.getInt(1))
+            }
+            assertEquals(listOf("bench press" to 1, "Leg Press" to 0), flags)
+        }
+        for (table in listOf("routine_exercises", "workout_exercises")) {
+            db.query("SELECT restSeconds FROM $table").use { cursor ->
+                cursor.moveToFirst()
+                assertTrue("$table rest should default to the settings", cursor.isNull(0))
+            }
         }
     }
 

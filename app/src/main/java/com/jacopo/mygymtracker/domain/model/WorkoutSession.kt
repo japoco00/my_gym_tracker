@@ -15,9 +15,11 @@ data class WorkoutSession(
     val exercises: List<WorkoutExercise> = emptyList(),
 )
 
+/** [restSeconds] is copied from the routine and can change mid-workout; `null` means the default. */
 data class WorkoutExercise(
     val exercise: Exercise,
     val sets: List<LoggedSet>,
+    val restSeconds: Int? = null,
 )
 
 /** A performed set; like [PlannedSet], the fields that matter depend on the exercise's [TrackingType]. */
@@ -39,6 +41,7 @@ fun Routine.toWorkoutSession(startedAt: Instant): WorkoutSession = WorkoutSessio
             sets = routineExercise.sets.map {
                 LoggedSet(reps = it.reps, weightKg = it.weightKg, durationSeconds = it.durationSeconds)
             },
+            restSeconds = routineExercise.restSeconds,
         )
     },
 )
@@ -57,5 +60,6 @@ fun WorkoutSession.toRoutineExercises(): List<RoutineExercise> = exercises.map {
         sets = exercise.sets.map {
             PlannedSet(reps = it.reps, weightKg = it.weightKg, durationSeconds = it.durationSeconds)
         },
+        restSeconds = exercise.restSeconds,
     )
 }
