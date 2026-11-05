@@ -19,6 +19,7 @@ import com.jacopo.mygymtracker.data.withAllSetsCompleted
 import com.jacopo.mygymtracker.domain.model.LoggedSet
 import com.jacopo.mygymtracker.domain.model.PlannedSet
 import com.jacopo.mygymtracker.domain.model.Routine
+import com.jacopo.mygymtracker.domain.model.UserSettings
 import com.jacopo.mygymtracker.resttimer.RestTimerController
 import com.jacopo.mygymtracker.ui.MainDispatcherRule
 import com.jacopo.mygymtracker.ui.components.EditingSet
@@ -228,6 +229,33 @@ class WorkoutViewModelTest {
 
         viewModel.setCompleted(squat.key, firstSet.key, completed = false)
         assertEquals(emptySet<String>(), viewModel.uiState.value.prSetKeys)
+    }
+
+    @Test
+    fun completingSet_startsExerciseRestOrDefault() = runTest {
+        val viewModel = loadedViewModel(startWorkout())
+        val squat = viewModel.uiState.value.exercises.single()
+        val (firstSet, secondSet) = squat.sets
+
+        viewModel.setCompleted(squat.key, firstSet.key, completed = true)
+        assertEquals(UserSettings.DEFAULT_REST_SECONDS, viewModel.uiState.value.restTimer?.totalSeconds)
+
+        viewModel.setRest(squat.key, 180)
+        viewModel.setCompleted(squat.key, secondSet.key, completed = true)
+        assertEquals(180, viewModel.uiState.value.restTimer?.totalSeconds)
+    }
+
+    @Test
+    fun setRest_isSavedAsDraft() = runTest {
+        val viewModel = loadedViewModel(startWorkout())
+        val squat = viewModel.uiState.value.exercises.single()
+
+        viewModel.setRest(squat.key, 150)
+
+        val saved = workouts.observeActiveWorkout()
+            .map { it?.exercises?.single()?.restSeconds }
+            .first { it != null }
+        assertEquals(150, saved)
     }
 
     /** Starts a workout from a "Push" routine planning two squat sets of 5 x 100 kg. */

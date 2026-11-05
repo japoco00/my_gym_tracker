@@ -111,6 +111,20 @@ class RoutineDetailViewModelTest {
     }
 
     @Test
+    fun setRest_isSavedPerExerciseAndClearsBackToDefault() = runTest {
+        val viewModel = loadedViewModel()
+        viewModel.addNewExercise("Squat", Category.LEGS, TrackingType.WEIGHT_REPS)
+        val squat = viewModel.uiState.value.exercises.single()
+
+        viewModel.setRest(squat.key, 180)
+        val saved = awaitRoutines { routines -> routines.any { routine -> routine.exercises.any { it.restSeconds != null } } }
+        assertEquals(180, saved.single().exercises.single().restSeconds)
+
+        viewModel.setRest(squat.key, null)
+        awaitRoutines { it.single().exercises.single().restSeconds == null }
+    }
+
+    @Test
     fun isNameTaken_ignoresCaseAcrossTheCatalogAndNewExercises() {
         val state = RoutineDetailUiState(
             catalogExercises = listOf(Exercise(id = 1, name = "Bench Press", category = Category.CHEST)),

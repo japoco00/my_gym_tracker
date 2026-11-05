@@ -53,6 +53,7 @@ import com.jacopo.mygymtracker.ui.components.AddExercisesSheet
 import com.jacopo.mygymtracker.ui.components.AppHeader
 import com.jacopo.mygymtracker.ui.components.ExerciseEditorSheet
 import com.jacopo.mygymtracker.ui.components.Pill
+import com.jacopo.mygymtracker.ui.components.RestEditorSheet
 import com.jacopo.mygymtracker.ui.components.SetEditorSheet
 import com.jacopo.mygymtracker.ui.components.headerTitle
 import com.jacopo.mygymtracker.ui.theme.AppTheme
@@ -73,6 +74,9 @@ fun RoutineDetailScreen(
     onConfirmNewExercise: (name: String, Category, TrackingType) -> Unit,
     onRemoveExercise: (exerciseKey: String) -> Unit,
     onAddSet: (exerciseKey: String) -> Unit,
+    onOpenRestEditor: (exerciseKey: String) -> Unit,
+    onCloseRestEditor: () -> Unit,
+    onRestChange: (exerciseKey: String, seconds: Int?) -> Unit,
     onOpenSetEditor: (exerciseKey: String, setKey: String) -> Unit,
     onCloseSetEditor: () -> Unit,
     onDeleteSet: (exerciseKey: String, setKey: String) -> Unit,
@@ -112,8 +116,10 @@ fun RoutineDetailScreen(
                 RoutineExerciseSection(
                     exercise = exercise,
                     weightUnit = uiState.weightUnit,
+                    defaultRestSeconds = uiState.defaultRestSeconds,
                     onRemove = { onRemoveExercise(exerciseKey) },
                     onAddSet = { onAddSet(exerciseKey) },
+                    onEditRest = { onOpenRestEditor(exerciseKey) },
                     onOpenSet = { setKey -> onOpenSetEditor(exerciseKey, setKey) },
                     onDeleteSet = { setKey -> onDeleteSet(exerciseKey, setKey) },
                     modifier = Modifier
@@ -179,6 +185,17 @@ fun RoutineDetailScreen(
             onDurationChange = { onDurationChange(exerciseKey, setKey, it) },
             onDelete = { onDeleteSet(exerciseKey, setKey) },
             onDismiss = onCloseSetEditor,
+        )
+    }
+
+    uiState.editingRestKey?.let { exerciseKey ->
+        val exercise = uiState.exercises.find { it.key == exerciseKey } ?: return@let
+        RestEditorSheet(
+            exerciseName = exercise.name,
+            restSeconds = exercise.restSeconds,
+            defaultSeconds = uiState.defaultRestSeconds,
+            onRestChange = { onRestChange(exerciseKey, it) },
+            onDismiss = onCloseRestEditor,
         )
     }
 
@@ -331,6 +348,9 @@ private fun RoutineDetailScreenPreview() {
             onConfirmNewExercise = { _, _, _ -> },
             onRemoveExercise = {},
             onAddSet = {},
+            onOpenRestEditor = {},
+            onCloseRestEditor = {},
+            onRestChange = { _, _ -> },
             onOpenSetEditor = { _, _ -> },
             onCloseSetEditor = {},
             onDeleteSet = { _, _ -> },

@@ -6,6 +6,7 @@ import com.jacopo.mygymtracker.domain.model.PlannedSet
 import com.jacopo.mygymtracker.domain.model.Routine
 import com.jacopo.mygymtracker.domain.model.RoutineExercise
 import com.jacopo.mygymtracker.domain.model.TrackingType
+import com.jacopo.mygymtracker.domain.model.UserSettings
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.ui.components.EditingSet
 import kotlin.uuid.ExperimentalUuidApi
@@ -14,6 +15,7 @@ import kotlin.uuid.Uuid
 /**
  * @property id null until a new routine is first saved.
  * @property editingSet the set open in the editor sheet, or null.
+ * @property editingRestKey the key of the exercise whose rest is being edited, or null.
  */
 data class RoutineDetailUiState(
     val id: Int? = null,
@@ -24,7 +26,9 @@ data class RoutineDetailUiState(
     val isAddExercisesSheetOpen: Boolean = false,
     val isNewExerciseSheetOpen: Boolean = false,
     val editingSet: EditingSet? = null,
+    val editingRestKey: String? = null,
     val weightUnit: WeightUnit = WeightUnit.KG,
+    val defaultRestSeconds: Int = UserSettings.DEFAULT_REST_SECONDS,
     val isLoading: Boolean = true,
 ) {
     val setCount: Int get() = exercises.sumOf { it.sets.size }
@@ -48,6 +52,7 @@ data class RoutineDetailUiState(
  *
  * @property exerciseId catalog id, or `null` for a new exercise typed in this screen.
  * @property key stable UI identity, unique even when the same catalog exercise appears twice.
+ * @property restSeconds rest after each set in this routine; null uses the default from the settings.
  */
 data class RoutineExerciseUiState @OptIn(ExperimentalUuidApi::class) constructor(
     val exerciseId: Int? = null,
@@ -56,7 +61,9 @@ data class RoutineExerciseUiState @OptIn(ExperimentalUuidApi::class) constructor
     val note: String? = null,
     val category: Category = Category.OTHER,
     val trackingType: TrackingType = TrackingType.WEIGHT_REPS,
+    val isBarbell: Boolean = false,
     val sets: List<PlannedSetUiState> = emptyList(),
+    val restSeconds: Int? = null,
 )
 
 data class PlannedSetUiState @OptIn(ExperimentalUuidApi::class) constructor(
@@ -83,9 +90,11 @@ fun RoutineExercise.toUiState(): RoutineExerciseUiState = RoutineExerciseUiState
     note = exercise.note,
     category = exercise.category,
     trackingType = exercise.trackingType,
+    isBarbell = exercise.isBarbell,
     sets = sets.map {
         PlannedSetUiState(reps = it.reps, weightKg = it.weightKg, durationSeconds = it.durationSeconds)
     },
+    restSeconds = restSeconds,
 )
 
 /** A catalog exercise freshly added to the routine starts with three empty sets. */
@@ -95,6 +104,7 @@ fun Exercise.toUiState(): RoutineExerciseUiState = RoutineExerciseUiState(
     note = note,
     category = category,
     trackingType = trackingType,
+    isBarbell = isBarbell,
     sets = List(3) { PlannedSetUiState() },
 )
 
@@ -113,8 +123,10 @@ private fun RoutineExerciseUiState.toDomain(): RoutineExercise = RoutineExercise
         category = category,
         trackingType = trackingType,
         note = note,
+        isBarbell = isBarbell,
     ),
     sets = sets.map { PlannedSet(reps = it.reps, weightKg = it.weightKg, durationSeconds = it.durationSeconds) },
+    restSeconds = restSeconds,
 )
 
 // endregion

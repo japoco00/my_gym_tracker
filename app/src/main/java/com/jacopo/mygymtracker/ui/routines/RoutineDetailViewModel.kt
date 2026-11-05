@@ -53,7 +53,7 @@ class RoutineDetailViewModel(
     init {
         loadInitialRoutine()
         observeExerciseCatalog()
-        observeWeightUnit()
+        observeSettings()
     }
 
     private fun loadInitialRoutine() {
@@ -65,10 +65,12 @@ class RoutineDetailViewModel(
         }
     }
 
-    private fun observeWeightUnit() {
+    private fun observeSettings() {
         viewModelScope.launch {
             settingsRepository.observeSettings().collect { settings ->
-                _uiState.update { it.copy(weightUnit = settings.weightUnit) }
+                _uiState.update {
+                    it.copy(weightUnit = settings.weightUnit, defaultRestSeconds = settings.restSeconds)
+                }
             }
         }
     }
@@ -132,8 +134,22 @@ class RoutineDetailViewModel(
             state.copy(
                 exercises = state.exercises.filterNot { it.key == exerciseKey },
                 editingSet = state.editingSet?.takeIf { it.exerciseKey != exerciseKey },
+                editingRestKey = state.editingRestKey?.takeIf { it != exerciseKey },
             )
         }
+    }
+
+    fun openRestEditor(exerciseKey: String) {
+        _uiState.update { it.copy(editingRestKey = exerciseKey) }
+    }
+
+    fun closeRestEditor() {
+        _uiState.update { it.copy(editingRestKey = null) }
+    }
+
+    /** Sets the rest after each set of an exercise in this routine; null goes back to the default. */
+    fun setRest(exerciseKey: String, seconds: Int?) {
+        updateExercise(exerciseKey) { it.copy(restSeconds = seconds) }
     }
 
     fun addSet(exerciseKey: String) {

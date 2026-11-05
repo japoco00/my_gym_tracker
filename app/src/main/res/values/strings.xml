@@ -151,6 +151,10 @@
     <string name="progress_no_value">–</string>
 
     <!-- Rest timer -->
+    <string name="rest_chip">Rest %1$s</string>
+    <string name="rest_editor_title">Rest time</string>
+    <string name="rest_editor_label">After each set</string>
+    <string name="rest_editor_use_default">Use default (%1$s)</string>
     <string name="rest_countdown_channel">Rest countdown</string>
     <string name="rest_over_channel">Rest over</string>
     <string name="rest_countdown_title">Resting</string>

@@ -2,6 +2,7 @@ package com.jacopo.mygymtracker.ui.workout
 
 import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.LoggedSet
+import com.jacopo.mygymtracker.domain.model.UserSettings
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.domain.model.WorkoutExercise
 import com.jacopo.mygymtracker.domain.model.WorkoutSession
@@ -17,6 +18,7 @@ import kotlin.uuid.Uuid
  * @property earlierSets sets of every finished workout before this one, by catalog exercise id: the records to beat.
  * @property restTimer the running rest between sets, or null.
  * @property editingSet the set open in the editor sheet, or null.
+ * @property editingRestKey the key of the exercise whose rest is being edited, or null.
  * @property exit set once the screen should close, saying why.
  */
 data class WorkoutUiState(
@@ -28,10 +30,12 @@ data class WorkoutUiState(
     val earlierSets: Map<Int, List<LoggedSet>> = emptyMap(),
     val catalogExercises: List<Exercise> = emptyList(),
     val weightUnit: WeightUnit = WeightUnit.KG,
+    val defaultRestSeconds: Int = UserSettings.DEFAULT_REST_SECONDS,
     val restTimer: RestTimer? = null,
     val dialog: WorkoutDialog? = null,
     val isAddExercisesSheetOpen: Boolean = false,
     val editingSet: EditingSet? = null,
+    val editingRestKey: String? = null,
     val isLoading: Boolean = true,
     val exit: WorkoutExit? = null,
 ) {
@@ -59,11 +63,15 @@ enum class WorkoutExit {
     CLOSED,
 }
 
-/** An exercise of the workout. [key] is a stable UI identity for list keys and callbacks. */
+/**
+ * An exercise of the workout. [key] is a stable UI identity for list keys and callbacks.
+ * [restSeconds] is the rest after each of its sets; null uses the default from the settings.
+ */
 data class WorkoutExerciseUiState @OptIn(ExperimentalUuidApi::class) constructor(
     val key: String = Uuid.random().toString(),
     val exercise: Exercise,
     val sets: List<WorkoutSetUiState> = emptyList(),
+    val restSeconds: Int? = null,
 )
 
 data class WorkoutSetUiState @OptIn(ExperimentalUuidApi::class) constructor(
@@ -108,6 +116,7 @@ fun WorkoutUiState.withWorkout(
 private fun WorkoutExercise.toUiState(): WorkoutExerciseUiState = WorkoutExerciseUiState(
     exercise = exercise,
     sets = sets.map { it.toUiState() },
+    restSeconds = restSeconds,
 )
 
 fun LoggedSet.toUiState(): WorkoutSetUiState = WorkoutSetUiState(
@@ -123,7 +132,11 @@ fun WorkoutUiState.toDomain(sessionId: Int): WorkoutSession = WorkoutSession(
     routineName = routineName,
     startedAt = startedAt,
     exercises = exercises.map { exercise ->
-        WorkoutExercise(exercise = exercise.exercise, sets = exercise.sets.map { it.toLoggedSet() })
+        WorkoutExercise(
+            exercise = exercise.exercise,
+            sets = exercise.sets.map { it.toLoggedSet() },
+            restSeconds = exercise.restSeconds,
+        )
     },
 )
 

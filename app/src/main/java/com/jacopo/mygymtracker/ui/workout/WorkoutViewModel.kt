@@ -12,7 +12,6 @@ import com.jacopo.mygymtracker.data.repository.WorkoutRepository
 import com.jacopo.mygymtracker.di.appContainer
 import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.Routine
-import com.jacopo.mygymtracker.domain.model.UserSettings
 import com.jacopo.mygymtracker.domain.model.toRoutineExercises
 import com.jacopo.mygymtracker.resttimer.RestTimerController
 import com.jacopo.mygymtracker.ui.components.EditingSet
@@ -53,8 +52,6 @@ class WorkoutViewModel(
     /** The routine rewritten with the finished workout's plan, waiting for the user's answer. */
     private var routineUpdate: Routine? = null
 
-    private var restSeconds = UserSettings.DEFAULT_REST_SECONDS
-
     init {
         loadWorkout()
         observeExerciseCatalog()
@@ -87,8 +84,9 @@ class WorkoutViewModel(
     private fun observeSettings() {
         viewModelScope.launch {
             settingsRepository.observeSettings().collect { settings ->
-                restSeconds = settings.restSeconds
-                _uiState.update { it.copy(weightUnit = settings.weightUnit) }
+                _uiState.update {
+                    it.copy(weightUnit = settings.weightUnit, defaultRestSeconds = settings.restSeconds)
+                }
             }
         }
     }
@@ -149,8 +147,22 @@ class WorkoutViewModel(
                 exercises = state.exercises.filterNot { it.key == exerciseKey },
                 dialog = null,
                 editingSet = state.editingSet?.takeIf { it.exerciseKey != exerciseKey },
+                editingRestKey = state.editingRestKey?.takeIf { it != exerciseKey },
             )
         }
+    }
+
+    fun openRestEditor(exerciseKey: String) {
+        _uiState.update { it.copy(editingRestKey = exerciseKey) }
+    }
+
+    fun closeRestEditor() {
+        _uiState.update { it.copy(editingRestKey = null) }
+    }
+
+    /** Sets the rest after each set of an exercise; null goes back to the default. */
+    fun setRest(exerciseKey: String, seconds: Int?) {
+        updateExercise(exerciseKey) { it.copy(restSeconds = seconds) }
     }
 
     /** Adds a set that copies the last one, so the next set is usually one tap away. */
@@ -195,10 +207,13 @@ class WorkoutViewModel(
         updateSet(exerciseKey, setKey) { it.copy(durationSeconds = seconds.coerceAtLeast(0)) }
     }
 
-    /** Ticking a set off starts the rest before the next one. */
+    /** Ticking a set off starts the rest before the next one: the exercise's own, or the default. */
     fun setCompleted(exerciseKey: String, setKey: String, completed: Boolean) {
         updateSet(exerciseKey, setKey) { it.copy(isCompleted = completed) }
-        if (completed) restTimer.start(restSeconds)
+        if (!completed) return
+        val state = _uiState.value
+        val exercise = state.exercises.find { it.key == exerciseKey } ?: return
+        restTimer.start(exercise.restSeconds ?: state.defaultRestSeconds)
     }
 
     fun adjustRest(deltaSeconds: Int) {

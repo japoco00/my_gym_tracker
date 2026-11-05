@@ -4,6 +4,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -25,6 +26,7 @@ import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.ui.components.DestructiveOverflowMenu
+import com.jacopo.mygymtracker.ui.components.RestChip
 import com.jacopo.mygymtracker.ui.components.SetNumber
 import com.jacopo.mygymtracker.ui.components.SetRow
 import com.jacopo.mygymtracker.ui.components.SwipeToDeleteContainer
@@ -40,8 +42,10 @@ import com.jacopo.mygymtracker.ui.theme.AppTheme
 fun RoutineExerciseSection(
     exercise: RoutineExerciseUiState,
     weightUnit: WeightUnit,
+    defaultRestSeconds: Int,
     onRemove: () -> Unit,
     onAddSet: () -> Unit,
+    onEditRest: () -> Unit,
     onOpenSet: (setKey: String) -> Unit,
     onDeleteSet: (setKey: String) -> Unit,
     modifier: Modifier = Modifier,
@@ -84,10 +88,19 @@ fun RoutineExerciseSection(
                 }
             }
         }
-        TextButton(onClick = onAddSet, modifier = Modifier.padding(start = 52.dp)) {
-            Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
-            Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
-            Text(text = stringResource(R.string.action_add_set))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 52.dp, end = 20.dp),
+        ) {
+            TextButton(onClick = onAddSet) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
+                Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
+                Text(text = stringResource(R.string.action_add_set))
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            RestChip(restSeconds = exercise.restSeconds, defaultSeconds = defaultRestSeconds, onClick = onEditRest)
         }
     }
 }
@@ -104,8 +117,10 @@ private fun RoutineExerciseSectionPreview() {
                 sets = List(3) { PlannedSetUiState(reps = 8, weightKg = 80.0) },
             ),
             weightUnit = WeightUnit.KG,
+            defaultRestSeconds = 90,
             onRemove = {},
             onAddSet = {},
+            onEditRest = {},
             onOpenSet = {},
             onDeleteSet = {},
         )
