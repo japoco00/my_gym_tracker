@@ -23,10 +23,12 @@ com.jacopo.mygymtracker
 ├── di/                   # AppContainer + CreationExtras.appContainer()
 ├── domain/
 │   ├── model/            # Pure Kotlin business models
+│   ├── plates/           # Pure plate math: which plates to load on each side
 │   └── progress/         # Pure progress math: e1RM, volume, personal records
 ├── data/
+│   ├── backup/           # @Serializable DTOs: the backup file format
 │   ├── local/            # AppDatabase, catalog seed, dao/, entity/ (tables, @Relation POJOs, query rows)
-│   ├── mapper/           # Entity <-> Domain extensions
+│   ├── mapper/           # Entity <-> Domain and Backup <-> Domain extensions
 │   └── repository/       # Repositories exposing Domain models & Flows (Room, DataStore)
 ├── resttimer/            # Rest timer: controller, foreground service, notifications
 └── ui/
@@ -60,6 +62,8 @@ com.jacopo.mygymtracker
 - **Ownership cascades**: `routines → routine_exercises → planned_sets` and `workout_sessions → workout_exercises → logged_sets` use `onDelete = CASCADE`.
 - **Catalog references RESTRICT**: `routine_exercises.exerciseId` and `workout_exercises.exerciseId` block deleting an exercise still in use; `ExerciseRepository` checks first so the UI can explain why.
 - **History outlives routines**: `workout_sessions.routineId` is `SET_NULL` and `routineName` is a snapshot taken at start.
+- **Rest per exercise**: `routine_exercises.restSeconds` and `workout_exercises.restSeconds` are nullable; `null` means the settings default. A workout copies the routine's value at start; workout edits reach the routine only through "update routine" after finishing.
+- **Writing exercise lists**: Replace a routine's or a workout's exercises only through the `RoutineDao.writeExercises` / `WorkoutDao.writeExercises` extensions, shared by the repositories and the backup import.
 - **Ordering**: Ordered children store a `position`. `@Relation` results come back unordered, so mappers sort by `position`; on save, list order becomes `position`.
 - **Indexing**: Index every foreign key column (`indices = [Index("...")]`).
 
@@ -71,6 +75,12 @@ com.jacopo.mygymtracker
 ### 4.4 Settings & Units
 - `SettingsRepository` wraps Preferences DataStore and exposes `Flow<UserSettings>`.
 - Weights are stored in kilograms everywhere. Convert only at the UI edge through `WeightUnit` (`format`, `fromKg`, `toKg`).
+- Owned plates are stored per unit (`UserSettings.plates`). `domain/plates/platesPerSide` splits a weight greedily into plates for each side (weight / 2, no bar weight); the set editor shows it for exercises flagged `isBarbell`.
+
+### 4.5 Backup
+- `BackupRepository` exports settings, the catalog, routines and finished workouts to one JSON `BackupFile`, and imports it back. Import validates the whole file, then replaces everything in one transaction; it refuses while a workout is in progress.
+- The `@Serializable` DTOs in `data/backup/` are the file format, mapped in `data/mapper/BackupMappers.kt`. Exercises are referenced by name, routines by a file-local id.
+- When you add a persisted field (entity column or setting), add it to the DTOs too, or backups silently drop it, and fill it in `BackupRepositoryTest.fill()` so the round-trip test covers it. When the DTOs change, bump `BackupFile.CURRENT_FORMAT_VERSION` and give new fields a default so older files still import.
 
 ---
 
@@ -86,6 +96,7 @@ com.jacopo.mygymtracker
       onValueChange = onNameChange,
   )
   ```
+- **One-off events** (navigate, show a snackbar) are state too: the ViewModel sets a value, a `LaunchedEffect` keyed on it acts, then calls back to clear it (`onWorkoutOpened`, `onBackupMessageShown`).
 
 ### 5.2 Compose Conventions
 - **Feature Co-location**: Group each screen's `*Screen.kt`, `*ViewModel.kt`, `*UiState` and feature-specific components inside `ui/<feature>/`. Place reusable widgets shared by multiple features in `ui/components/`.
@@ -97,7 +108,8 @@ com.jacopo.mygymtracker
   - `Pill` for header facts, `SectionLabel` for list section titles, `ShapeBadge` for a short value + label inside a `MaterialShapes` shape in `AppHeader`'s actions (stays visible when collapsed). Animate only the shape through its `shapeModifier`.
   - `PrTag`: the personal-record star tag, shared by the live workout and history.
   - `SetRow` + `SetNumber`: the one set row for workouts, history and routines; tapping an editable row opens `SetEditorSheet`.
-  - `SetEditorSheet`: the only set editor (`RepsField` / `WeightField` / `DurationField` with steppers). Passing `isCompleted = null` gives plan mode (routines: no completion toggle, no previous values).
+  - `SetEditorSheet`: the only set editor (`RepsField` / `WeightField` / `DurationField` with steppers). Passing `isCompleted = null` gives plan mode (routines: no completion toggle, no previous values). Pass `plates` for barbell exercises to show the plates per side.
+  - `RestChip` + `RestEditorSheet` show and edit an exercise's rest (`null` = the settings default) in the routine editor and the workout.
   - `ExerciseEditorSheet` creates or edits a catalog exercise. Pass `isNameTaken` so duplicate names can't be saved.
   - `AddExercisesSheet` picks catalog exercises; `DestructiveOverflowMenu` holds a single destructive action; `SwipeToDeleteContainer` wraps swipe-to-delete rows.
 - **Editors save as you go**: the routine editor has no Save button. Its ViewModel debounces each edit into a save and flushes pending edits in `onCleared` on the app scope, so Back (and predictive back) never loses work.
@@ -110,7 +122,7 @@ com.jacopo.mygymtracker
 - Use **type-safe routes** with `kotlinx.serialization` (e.g., `@Serializable data object RoutinesRoute`, `@Serializable data class RoutineDetailRoute(val routineId: Int? = null)`). Use nullable parameters (`Int? = null`) rather than magic sentinel integers like `-1`.
 - Each `ui/navigation/<Feature>Navigation.kt` provides:
   - Route declaration (`@Serializable`).
-  - `NavGraphBuilder.<feature>Destination(...)`: creates the ViewModel, collects state, and exposes navigation as lambdas wired in `AppNavHost`.
+  - `NavGraphBuilder.<feature>Destination(...)`: creates the ViewModel, collects state, holds Activity Result launchers (e.g. the backup file pickers, so the screen stays previewable) and exposes navigation as lambdas wired in `AppNavHost`.
   - `NavController.navigateTo<Feature>(...)`.
 - **Tabs**: Switch tabs only through `navigateToTopLevelDestination`, which keeps one copy per tab and saves/restores each tab's back stack.
 - **Closing screens**: Close a screen with `popBackStack<Route>(inclusive = true)`, so a double Back or a close racing with Back can't pop the screen below. This relies on **acyclic routes**: at most one entry per route type on the back stack. Keep links pointing forward (e.g. Workout detail → Progress); a link back to an earlier route type needs a different close strategy first.
