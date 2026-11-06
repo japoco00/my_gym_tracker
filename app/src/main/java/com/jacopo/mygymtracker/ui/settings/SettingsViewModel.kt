@@ -49,6 +49,16 @@ class SettingsViewModel(
         }
     }
 
+    fun exportCsv(uri: Uri) {
+        viewModelScope.launch {
+            _backupMessage.value = if (backupRepository.exportCsvTo(uri)) {
+                R.string.csv_exported
+            } else {
+                R.string.csv_export_failed
+            }
+        }
+    }
+
     /** Replaces everything with the backup at [uri]; the screen has already asked for confirmation. */
     fun importBackup(uri: Uri) {
         viewModelScope.launch {

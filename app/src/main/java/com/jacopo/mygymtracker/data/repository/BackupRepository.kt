@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.net.Uri
 import androidx.room.withTransaction
 import com.jacopo.mygymtracker.data.backup.BackupFile
+import com.jacopo.mygymtracker.data.backup.workoutsToCsv
 import com.jacopo.mygymtracker.data.local.AppDatabase
 import com.jacopo.mygymtracker.data.local.dao.BodyWeightDao
 import com.jacopo.mygymtracker.data.local.dao.ExerciseDao
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.io.IOException
+import java.time.ZoneId
 
 enum class ImportResult { IMPORTED, INVALID_FILE, WORKOUT_IN_PROGRESS }
 
@@ -34,10 +36,18 @@ class BackupRepository(
     private val contentResolver: ContentResolver,
 ) {
     /** Writes the backup to [uri], a new document the user created. Returns `false` if it can't be written. */
-    suspend fun exportTo(uri: Uri): Boolean = withContext(Dispatchers.IO) {
-        val text = exportJson()
+    suspend fun exportTo(uri: Uri): Boolean = write(uri) { exportJson() }
+
+    /** Writes the finished workouts to [uri] as CSV, see [workoutsToCsv]. Returns `false` if it can't be written. */
+    suspend fun exportCsvTo(uri: Uri): Boolean = write(uri) {
+        workoutsToCsv(workoutDao.getFinishedWithExercises().map { it.toDomain() }, ZoneId.systemDefault())
+    }
+
+    /** Builds the [text] off the main thread too: a long history makes a big file. */
+    private suspend fun write(uri: Uri, text: suspend () -> String): Boolean = withContext(Dispatchers.IO) {
+        val content = text()
         try {
-            contentResolver.openOutputStream(uri)?.writer()?.use { it.write(text) } != null
+            contentResolver.openOutputStream(uri)?.writer()?.use { it.write(content) } != null
         } catch (e: IOException) {
             false
         }

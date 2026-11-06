@@ -80,6 +80,7 @@ fun SettingsScreen(
     onDynamicColorChange: (Boolean) -> Unit,
     onExportBackup: () -> Unit,
     onImportBackup: () -> Unit,
+    onExportCsv: () -> Unit,
     onBackupMessageShown: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -213,17 +214,24 @@ fun SettingsScreen(
             SectionLabel(text = stringResource(R.string.settings_backup), modifier = Modifier.padding(top = 16.dp))
             SegmentedListItem(
                 onClick = onExportBackup,
-                shapes = ListItemDefaults.segmentedShapes(index = 0, count = 2),
+                shapes = ListItemDefaults.segmentedShapes(index = 0, count = 3),
                 supportingContent = { Text(text = stringResource(R.string.settings_backup_export_description)) },
             ) {
                 Text(text = stringResource(R.string.settings_backup_export))
             }
             SegmentedListItem(
                 onClick = { confirmImport = true },
-                shapes = ListItemDefaults.segmentedShapes(index = 1, count = 2),
+                shapes = ListItemDefaults.segmentedShapes(index = 1, count = 3),
                 supportingContent = { Text(text = stringResource(R.string.settings_backup_import_description)) },
             ) {
                 Text(text = stringResource(R.string.settings_backup_import))
+            }
+            SegmentedListItem(
+                onClick = onExportCsv,
+                shapes = ListItemDefaults.segmentedShapes(index = 2, count = 3),
+                supportingContent = { Text(text = stringResource(R.string.settings_csv_export_description)) },
+            ) {
+                Text(text = stringResource(R.string.settings_csv_export))
             }
         }
     }
@@ -386,6 +394,7 @@ private fun SettingsScreenPreview() {
             onDynamicColorChange = {},
             onExportBackup = {},
             onImportBackup = {},
+            onExportCsv = {},
             onBackupMessageShown = {},
         )
     }

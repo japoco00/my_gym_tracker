@@ -295,4 +295,8 @@
     <string name="backup_imported">Backup restored</string>
     <string name="backup_invalid_file">Not a backup from this app, or from a newer version of it</string>
     <string name="backup_workout_in_progress">Finish or discard the workout in progress first</string>
+    <string name="settings_csv_export">Export workouts as CSV</string>
+    <string name="settings_csv_export_description">Save your finished workouts as a spreadsheet, one row per set. It can\'t be imported back.</string>
+    <string name="csv_exported">Workouts exported</string>
+    <string name="csv_export_failed">Couldn\'t export the workouts</string>
 </resources>
