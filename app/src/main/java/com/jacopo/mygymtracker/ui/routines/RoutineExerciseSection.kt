@@ -6,14 +6,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.R
@@ -22,6 +19,7 @@ import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.domain.model.normalSetNumbers
 import com.jacopo.mygymtracker.ui.components.AddSetButton
 import com.jacopo.mygymtracker.ui.components.DestructiveOverflowMenu
+import com.jacopo.mygymtracker.ui.components.ExerciseTitle
 import com.jacopo.mygymtracker.ui.components.RestChip
 import com.jacopo.mygymtracker.ui.components.SetMarker
 import com.jacopo.mygymtracker.ui.components.SetRow
@@ -52,26 +50,14 @@ fun RoutineExerciseSection(
             .padding(top = 20.dp, bottom = 4.dp)
             .animateContentSize(),
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(start = 20.dp, end = 8.dp),
+        ExerciseTitle(
+            name = exercise.name,
+            subtitle = stringResource(
+                R.string.routine_exercise_subtitle,
+                exercise.category.label(),
+                exercise.trackingType.label(),
+            ),
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = exercise.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Text(
-                    text = stringResource(
-                        R.string.routine_exercise_subtitle,
-                        exercise.category.label(),
-                        exercise.trackingType.label(),
-                    ),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
             DestructiveOverflowMenu(action = stringResource(R.string.action_remove_exercise), onAction = onRemove)
         }
         val numbers = exercise.sets.map { it.type }.normalSetNumbers()

@@ -54,7 +54,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
@@ -68,6 +67,7 @@ import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.domain.model.normalSetNumbers
 import com.jacopo.mygymtracker.ui.components.AddSetButton
 import com.jacopo.mygymtracker.ui.components.DestructiveOverflowMenu
+import com.jacopo.mygymtracker.ui.components.ExerciseTitle
 import com.jacopo.mygymtracker.ui.components.PrTag
 import com.jacopo.mygymtracker.ui.components.RestChip
 import com.jacopo.mygymtracker.ui.components.SetRow
@@ -115,22 +115,10 @@ fun WorkoutExerciseSection(
             .padding(top = 20.dp, bottom = 4.dp)
             .animateContentSize(),
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(start = 20.dp, end = 8.dp),
+        ExerciseTitle(
+            name = exercise.exercise.name,
+            subtitle = pluralStringResource(R.plurals.workout_sets_progress, sets.size, doneCount, sets.size),
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = exercise.exercise.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Text(
-                    text = pluralStringResource(R.plurals.workout_sets_progress, sets.size, doneCount, sets.size),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
             DestructiveOverflowMenu(action = stringResource(R.string.action_remove_exercise), onAction = onRemove) { close ->
                 if (onWarmUp != null) {
                     DropdownMenuItem(

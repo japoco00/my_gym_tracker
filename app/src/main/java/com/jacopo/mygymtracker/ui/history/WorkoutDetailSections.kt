@@ -3,7 +3,6 @@ package com.jacopo.mygymtracker.ui.history
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -12,13 +11,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.R
@@ -29,6 +25,7 @@ import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.domain.model.WorkoutExercise
 import com.jacopo.mygymtracker.domain.model.normalSetNumbers
 import com.jacopo.mygymtracker.ui.components.AddSetButton
+import com.jacopo.mygymtracker.ui.components.ExerciseTitle
 import com.jacopo.mygymtracker.ui.components.PrTag
 import com.jacopo.mygymtracker.ui.components.SetMarker
 import com.jacopo.mygymtracker.ui.components.SetRow
@@ -50,7 +47,7 @@ fun LoggedExerciseSection(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.padding(top = 20.dp, bottom = 4.dp)) {
-        ExerciseTitle(name = exercise.exercise.name, setCount = exercise.sets.size, onClick = onClick)
+        LoggedExerciseTitle(name = exercise.exercise.name, setCount = exercise.sets.size, onClick = onClick)
         val numbers = exercise.sets.map { it.type }.normalSetNumbers()
         exercise.sets.forEachIndexed { index, set ->
             SetRow(
@@ -78,7 +75,7 @@ fun EditableExerciseSection(
             .padding(top = 20.dp, bottom = 4.dp)
             .animateContentSize(),
     ) {
-        ExerciseTitle(name = exercise.exercise.name, setCount = exercise.sets.size, onClick = null)
+        LoggedExerciseTitle(name = exercise.exercise.name, setCount = exercise.sets.size, onClick = null)
         val numbers = exercise.sets.map { it.type }.normalSetNumbers()
         exercise.sets.forEachIndexed { index, set ->
             key(set.key) {
@@ -96,23 +93,15 @@ fun EditableExerciseSection(
 }
 
 @Composable
-private fun ExerciseTitle(name: String, setCount: Int, onClick: (() -> Unit)?) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
+private fun LoggedExerciseTitle(name: String, setCount: Int, onClick: (() -> Unit)?) {
+    ExerciseTitle(
+        name = name,
+        subtitle = pluralStringResource(R.plurals.history_set_count, setCount, setCount),
         modifier = Modifier
             .fillMaxWidth()
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .heightIn(min = 48.dp)
-            .padding(start = 20.dp, end = 8.dp),
+            .heightIn(min = 48.dp),
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            Text(
-                text = pluralStringResource(R.plurals.history_set_count, setCount, setCount),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
         if (onClick != null) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
