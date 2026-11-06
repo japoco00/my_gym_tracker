@@ -11,7 +11,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,14 +19,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingToolbarDefaults
 import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.Icon
@@ -65,6 +62,7 @@ import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.domain.model.UserSettings
 import com.jacopo.mygymtracker.domain.model.normalSetNumbers
 import com.jacopo.mygymtracker.resttimer.RestTimer
+import com.jacopo.mygymtracker.ui.components.AddExercisesButton
 import com.jacopo.mygymtracker.ui.components.AddExercisesSheet
 import com.jacopo.mygymtracker.ui.components.RestEditorSheet
 import com.jacopo.mygymtracker.ui.components.SetEditorSheet
@@ -195,15 +193,7 @@ fun WorkoutScreen(
                         .fillMaxWidth()
                         .padding(16.dp),
                 ) {
-                    FilledTonalButton(onClick = onOpenAddExercises, shapes = ButtonDefaults.shapes()) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = null,
-                            modifier = Modifier.size(ButtonDefaults.IconSize),
-                        )
-                        Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
-                        Text(text = stringResource(R.string.workout_add_exercises))
-                    }
+                    AddExercisesButton(onClick = onOpenAddExercises)
                 }
             }
         }

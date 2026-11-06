@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,13 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -49,6 +42,7 @@ import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.SetType
 import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.domain.model.normalSetNumbers
+import com.jacopo.mygymtracker.ui.components.AddExercisesButton
 import com.jacopo.mygymtracker.ui.components.AddExercisesSheet
 import com.jacopo.mygymtracker.ui.components.AppHeader
 import com.jacopo.mygymtracker.ui.components.BackButton
@@ -60,7 +54,7 @@ import com.jacopo.mygymtracker.ui.components.headerTitle
 import com.jacopo.mygymtracker.ui.theme.AppTheme
 
 /** Creates or edits a routine. Edits save as you go, so there is no Save button. */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoutineDetailScreen(
     uiState: RoutineDetailUiState,
@@ -150,15 +144,7 @@ fun RoutineDetailScreen(
                         .fillMaxWidth()
                         .padding(16.dp),
                 ) {
-                    FilledTonalButton(onClick = onOpenAddExercises, shapes = ButtonDefaults.shapes()) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = null,
-                            modifier = Modifier.size(ButtonDefaults.IconSize),
-                        )
-                        Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
-                        Text(text = stringResource(R.string.routine_add_from_catalog))
-                    }
+                    AddExercisesButton(onClick = onOpenAddExercises, text = stringResource(R.string.routine_add_from_catalog))
                     TextButton(onClick = onOpenNewExercise) {
                         Text(text = stringResource(R.string.routine_add_new_exercise))
                     }

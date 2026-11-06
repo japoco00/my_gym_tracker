@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
@@ -27,7 +26,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialShapes
@@ -62,6 +60,7 @@ import com.jacopo.mygymtracker.domain.model.SetType
 import com.jacopo.mygymtracker.domain.model.WorkoutExercise
 import com.jacopo.mygymtracker.domain.model.WorkoutSession
 import com.jacopo.mygymtracker.domain.model.normalSetNumbers
+import com.jacopo.mygymtracker.ui.components.AddExercisesButton
 import com.jacopo.mygymtracker.ui.components.AddExercisesSheet
 import com.jacopo.mygymtracker.ui.components.AppHeader
 import com.jacopo.mygymtracker.ui.components.BackButton
@@ -198,15 +197,7 @@ fun WorkoutDetailScreen(
                             .fillMaxWidth()
                             .padding(16.dp),
                     ) {
-                        FilledTonalButton(onClick = onOpenAddExercises, shapes = ButtonDefaults.shapes()) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = null,
-                                modifier = Modifier.size(ButtonDefaults.IconSize),
-                            )
-                            Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
-                            Text(text = stringResource(R.string.workout_add_exercises))
-                        }
+                        AddExercisesButton(onClick = onOpenAddExercises)
                     }
                 }
             }

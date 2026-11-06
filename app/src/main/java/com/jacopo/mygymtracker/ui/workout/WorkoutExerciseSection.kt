@@ -22,7 +22,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -31,7 +30,6 @@ import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.toPath
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -68,6 +66,7 @@ import com.jacopo.mygymtracker.domain.model.LoggedSet
 import com.jacopo.mygymtracker.domain.model.SetType
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.domain.model.normalSetNumbers
+import com.jacopo.mygymtracker.ui.components.AddSetButton
 import com.jacopo.mygymtracker.ui.components.DestructiveOverflowMenu
 import com.jacopo.mygymtracker.ui.components.PrTag
 import com.jacopo.mygymtracker.ui.components.RestChip
@@ -187,11 +186,7 @@ fun WorkoutExerciseSection(
                 .fillMaxWidth()
                 .padding(start = 52.dp, end = 20.dp),
         ) {
-            TextButton(onClick = onAddSet) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
-                Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
-                Text(text = stringResource(R.string.action_add_set))
-            }
+            AddSetButton(onClick = onAddSet)
             Spacer(modifier = Modifier.weight(1f))
             RestChip(restSeconds = exercise.restSeconds, defaultSeconds = defaultRestSeconds, onClick = onEditRest)
             if (onStartRest != null) {
