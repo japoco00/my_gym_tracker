@@ -23,9 +23,11 @@ com.jacopo.mygymtracker
 ├── MainViewModel.kt      # App-wide settings the activity needs (theme)
 ├── di/                   # AppContainer + CreationExtras.appContainer()
 ├── domain/
+│   ├── history/          # Pure history math: workouts grouped by week, week streaks
 │   ├── model/            # Pure Kotlin business models
 │   ├── plates/           # Pure plate math: which plates to load on each side
-│   └── progress/         # Pure progress math: e1RM, volume, personal records
+│   ├── progress/         # Pure progress math: e1RM, volume, personal records
+│   └── warmup/           # Pure warm-up math: ramp-up sets towards a working weight
 ├── data/
 │   ├── backup/           # @Serializable DTOs: the backup file format
 │   ├── local/            # AppDatabase, catalog seed, dao/, entity/ (tables, @Relation POJOs, query rows)
@@ -37,7 +39,7 @@ com.jacopo.mygymtracker
     ├── components/       # Shared, feature-agnostic composables
     ├── format/           # Display formatting: dates, durations, weights, enum labels
     ├── navigation/       # AppNavHost, TopLevelDestination, one *Navigation.kt per feature
-    ├── <feature>/        # routines, workout, history, progress, exercises, settings (list + detail screens together)
+    ├── <feature>/        # routines, workout, history, progress, bodyweight, exercises, settings (list + detail screens together)
     └── theme/            # Material 3 Theme, Color, Typography
 ```
 
@@ -64,6 +66,7 @@ com.jacopo.mygymtracker
 - **Catalog references RESTRICT**: `routine_exercises.exerciseId` and `workout_exercises.exerciseId` block deleting an exercise still in use; `ExerciseRepository` checks first so the UI can explain why.
 - **History outlives routines**: `workout_sessions.routineId` is `SET_NULL` and `routineName` is a snapshot taken at start.
 - **Rest per exercise**: `routine_exercises.restSeconds` and `workout_exercises.restSeconds` are nullable; `null` means the settings default. A workout copies the routine's value at start; workout edits reach the routine only through "update routine" after finishing.
+- **Warm-up sets never count**: they're left out of volume, personal records and progress charts. In Kotlin go through `domain/progress` (`volumeKg()`, the record and progress functions); SQL aggregates such as `WorkoutDao`'s history volume must skip `type = 'WARM_UP'` themselves.
 - **Writing exercise lists**: Replace a routine's or a workout's exercises only through the `RoutineDao.writeExercises` / `WorkoutDao.writeExercises` extensions, shared by the repositories and the backup import.
 - **Ordering**: Ordered children store a `position`. `@Relation` results come back unordered, so mappers sort by `position`; on save, list order becomes `position`.
 - **Indexing**: Index every foreign key column (`indices = [Index("...")]`).
@@ -77,7 +80,7 @@ com.jacopo.mygymtracker
 - `SettingsRepository` wraps Preferences DataStore and exposes `Flow<UserSettings>`.
 - Weights are stored in kilograms everywhere. Convert only at the UI edge through `WeightUnit` (`format`, `fromKg`, `toKg`).
 - Owned plates are stored per unit (`UserSettings.plates`). `domain/plates/platesPerSide` splits a weight greedily into plates for each side (weight / 2, no bar weight); the set editor shows it for exercises flagged `isBarbell`.
-- Enum settings (`WeightUnit`, `ThemeMode`) are stored by name: never rename an entry.
+- Enums persisted by name (`WeightUnit`, `ThemeMode` in settings; `SetType` in the database and SQL): never rename an entry.
 - Theme: `MainActivity` reads `ThemeMode` and dynamic colour from `MainViewModel` and holds the first frame until settings load, so the app never draws in the wrong theme. It also re-applies `enableEdgeToEdge` so the system bar icons follow the app theme, not the system's.
 - Workout settings are read by `WorkoutViewModel` into `WorkoutUiState`: `autoStartRest` (off: each exercise shows a start button) and `keepScreenOn` (`Modifier.keepScreenOn()` on the workout screen, no wake lock).
 
@@ -113,10 +116,11 @@ com.jacopo.mygymtracker
   - `Pill` for header facts, `SectionLabel` for list section titles, `ShapeBadge` for a short value + label inside a `MaterialShapes` shape in `AppHeader`'s actions (stays visible when collapsed). Animate only the shape through its `shapeModifier`.
   - `PrTag`: the personal-record star tag, shared by the live workout and history.
   - `SetRow` + `SetNumber`: the one set row for workouts, history and routines; tapping an editable row opens `SetEditorSheet`.
-  - `SetEditorSheet`: the only set editor (`RepsField` / `WeightField` / `DurationField` with steppers). Passing `isCompleted = null` gives plan mode (routines: no completion toggle, no previous values). Pass `plates` for barbell exercises to show the plates per side.
+  - `SetEditorSheet`: the only set editor (`RepsField` / `WeightField` / `DurationField` with steppers). Passing `isCompleted = null` gives plan mode (routines: no completion toggle, no previous values). Pass `plates` for barbell exercises to show the plates per side. Pass `onRpeChange` only for logged sets (workouts, history), never for a plan.
   - `RestChip` + `RestEditorSheet` show and edit an exercise's rest (`null` = the settings default) in the routine editor and the workout.
   - `ExerciseEditorSheet` creates or edits a catalog exercise. Pass `isNameTaken` so duplicate names can't be saved.
-  - `AddExercisesSheet` picks catalog exercises; `DestructiveOverflowMenu` holds a single destructive action; `SwipeToDeleteContainer` wraps swipe-to-delete rows.
+  - `AddExercisesSheet` picks catalog exercises; `DestructiveOverflowMenu` ends with one destructive action, other `items` above it; `SwipeToDeleteContainer` wraps swipe-to-delete rows.
+  - `DateLineChart`: the one line chart over dates (exercise progress, body weight).
 - **Editors save as you go**: the routine editor has no Save button. Its ViewModel debounces each edit into a save and flushes pending edits in `onCleared` on the app scope, so Back (and predictive back) never loses work.
 - **Motion**: Take specs from `MaterialTheme.motionScheme` (`*SpatialSpec` for position/size, `*EffectsSpec` for alpha/color) instead of hand-written tweens; a hand-timed sequence like the finish celebration is the exception. Pair state changes with `LocalHapticFeedback` using the M3 types (`ToggleOn`/`ToggleOff`, `Confirm`, `GestureThresholdActivate`), and fire them from the user's action, not from restored state.
 - **Previews**: Include private `@Preview` composables wrapped in `AppTheme` with realistic sample data.
