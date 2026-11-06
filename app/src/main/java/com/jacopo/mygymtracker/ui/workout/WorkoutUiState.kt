@@ -7,6 +7,7 @@ import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.domain.model.WorkoutExercise
 import com.jacopo.mygymtracker.domain.model.WorkoutSession
 import com.jacopo.mygymtracker.domain.progress.prSetIndex
+import com.jacopo.mygymtracker.domain.progress.volumeKg
 import com.jacopo.mygymtracker.resttimer.RestTimer
 import com.jacopo.mygymtracker.ui.components.EditingSet
 import java.time.Instant
@@ -50,7 +51,7 @@ data class WorkoutUiState(
 
     /** Ticked sets only, so it matches the volume History shows once the workout is saved. */
     val completedVolumeKg: Double = exercises.sumOf { exercise ->
-        exercise.sets.filter { it.isCompleted }.sumOf { it.reps * it.weightKg }
+        exercise.sets.filter { it.isCompleted }.map { it.toLoggedSet() }.volumeKg()
     }
 
     /** Keys of the ticked sets that are personal records, at most one per exercise, as History will star them. */

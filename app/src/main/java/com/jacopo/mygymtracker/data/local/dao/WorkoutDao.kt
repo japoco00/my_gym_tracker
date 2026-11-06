@@ -63,7 +63,7 @@ interface WorkoutDao {
         """
         SELECT s.sessionId, s.routineName, s.startedAtEpochMs, s.finishedAtEpochMs,
                COUNT(ls.loggedSetId) AS setCount,
-               COALESCE(SUM(ls.reps * ls.weightKg), 0) AS volumeKg
+               COALESCE(SUM(CASE WHEN ls.type = 'WARM_UP' THEN 0 ELSE ls.reps * ls.weightKg END), 0) AS volumeKg
         FROM workout_sessions s
         LEFT JOIN workout_exercises we ON we.sessionId = s.sessionId
         LEFT JOIN logged_sets ls ON ls.workoutExerciseId = we.workoutExerciseId AND ls.isCompleted = 1

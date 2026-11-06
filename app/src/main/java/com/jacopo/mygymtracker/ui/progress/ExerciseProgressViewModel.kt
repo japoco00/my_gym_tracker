@@ -66,7 +66,7 @@ class ExerciseProgressViewModel(
             category = exercise?.category,
             trackingType = trackingType,
             metric = selected?.takeIf { it in metrics } ?: metrics.first(),
-            sessions = history.map { it.toSessionProgress(trackingType) },
+            sessions = history.mapNotNull { it.toSessionProgress(trackingType) },
             weightUnit = settings.weightUnit,
             isLoading = false,
         )

@@ -8,6 +8,7 @@ import com.jacopo.mygymtracker.data.routineOf
 import com.jacopo.mygymtracker.domain.model.LoggedSet
 import com.jacopo.mygymtracker.domain.model.PlannedSet
 import com.jacopo.mygymtracker.domain.model.Routine
+import com.jacopo.mygymtracker.domain.model.SetType
 import com.jacopo.mygymtracker.domain.model.WorkoutSession
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -137,6 +138,21 @@ class WorkoutRepositoryTest {
         assertEquals(secondId, history.first().id)
         assertEquals(1, history.first().setCount)
         assertEquals(500.0, history.first().volumeKg, 1e-9)
+    }
+
+    @Test
+    fun history_leavesWarmUpsOutOfVolume() = runTest {
+        val id = workouts.startWorkout(savedRoutine(), now = time(0))!!
+        val draft = workouts.getWorkout(id)!!.completeFirstSetOfFirstExercise()
+        val first = draft.exercises.first()
+        val warmUp = LoggedSet(reps = 5, weightKg = 60.0, isCompleted = true, type = SetType.WARM_UP, rpe = 6.5)
+        val withWarmUp = listOf(first.copy(sets = listOf(warmUp) + first.sets)) + draft.exercises.drop(1)
+        workouts.finishWorkout(draft.copy(exercises = withWarmUp), now = time(1))
+
+        assertEquals(warmUp, workouts.getWorkout(id)!!.exercises.first().sets.first())
+        val summary = workouts.observeHistory().first().single()
+        assertEquals(2, summary.setCount)
+        assertEquals(500.0, summary.volumeKg, 1e-9)
     }
 
     @Test

@@ -2,7 +2,7 @@ package com.jacopo.mygymtracker.domain.model
 
 import java.time.Instant
 
-/** A finished workout as listed in the history. [volumeKg] is the sum of reps x weight. */
+/** A finished workout as listed in the history. [volumeKg] is the sum of reps x weight, warm-ups excluded. */
 data class WorkoutSummary(
     val id: Int,
     val routineName: String,
