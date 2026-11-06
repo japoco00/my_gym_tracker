@@ -51,6 +51,7 @@ data class EditableExerciseUiState @OptIn(ExperimentalUuidApi::class) constructo
     val key: String = Uuid.random().toString(),
     val exercise: Exercise,
     val sets: List<EditableSetUiState> = emptyList(),
+    val restSeconds: Int? = null,
 )
 
 data class EditableSetUiState @OptIn(ExperimentalUuidApi::class) constructor(
@@ -69,6 +70,7 @@ fun WorkoutExercise.toEditableUiState(): EditableExerciseUiState = EditableExerc
     sets = sets.map {
         EditableSetUiState(reps = it.reps, weightKg = it.weightKg, durationSeconds = it.durationSeconds, type = it.type, rpe = it.rpe)
     },
+    restSeconds = restSeconds,
 )
 
 fun EditableExerciseUiState.toDomain(): WorkoutExercise = WorkoutExercise(
@@ -83,6 +85,7 @@ fun EditableExerciseUiState.toDomain(): WorkoutExercise = WorkoutExercise(
             rpe = it.rpe,
         )
     },
+    restSeconds = restSeconds,
 )
 
 // endregion

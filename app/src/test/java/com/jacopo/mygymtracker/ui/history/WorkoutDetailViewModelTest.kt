@@ -70,6 +70,7 @@ class WorkoutDetailViewModelTest {
         val expected = listOf(LoggedSet(7, 100.0, isCompleted = true, type = SetType.FAILURE, rpe = 9.5))
         assertEquals(expected, state.workout!!.exercises.single().sets)
         assertEquals(expected, workouts.getWorkout(sessionId)!!.exercises.single().sets)
+        assertEquals(90, workouts.getWorkout(sessionId)!!.exercises.single().restSeconds)
     }
 
     @Test
@@ -134,12 +135,11 @@ class WorkoutDetailViewModelTest {
         assertNull(viewModel.uiState.value.editingSet)
     }
 
-    /** A finished workout with two completed squat sets of 5 x 100 kg. */
+    /** A finished workout with two completed squat sets of 5 x 100 kg and a 90 s rest. */
     private suspend fun finishedWorkout(startedAt: Instant = Instant.now()): Int {
         val routines = RoutineRepository(database, database.routineDao(), database.exerciseDao())
-        val routineId = routines.saveRoutine(
-            routineOf("Push", newExercise("Squat") to listOf(PlannedSet(5, 100.0), PlannedSet(5, 100.0))),
-        )
+        val routine = routineOf("Push", newExercise("Squat") to listOf(PlannedSet(5, 100.0), PlannedSet(5, 100.0)))
+        val routineId = routines.saveRoutine(routine.copy(exercises = routine.exercises.map { it.copy(restSeconds = 90) }))
         val sessionId = workouts.startWorkout(routines.getRoutine(routineId)!!, startedAt)!!
         workouts.finishWorkout(workouts.getWorkout(sessionId)!!.withAllSetsCompleted(), startedAt.plusSeconds(3_600))
         return sessionId
