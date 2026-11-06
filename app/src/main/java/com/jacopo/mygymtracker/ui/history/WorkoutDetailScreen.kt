@@ -112,6 +112,7 @@ fun WorkoutDetailScreen(
     onWeightChange: (exerciseKey: String, setKey: String, Double) -> Unit,
     onDurationChange: (exerciseKey: String, setKey: String, seconds: Int) -> Unit,
     onTypeChange: (exerciseKey: String, setKey: String, type: SetType) -> Unit,
+    onRpeChange: (exerciseKey: String, setKey: String, rpe: Double?) -> Unit,
     modifier: Modifier = Modifier,
     celebrate: Boolean = false,
 ) {
@@ -234,6 +235,8 @@ fun WorkoutDetailScreen(
             onDelete = { onDeleteSet(exerciseKey, setKey) },
             onDismiss = onCloseSetEditor,
             plates = uiState.plates.takeIf { exercise.exercise.isBarbell },
+            rpe = set.rpe,
+            onRpeChange = { onRpeChange(exerciseKey, setKey, it) },
         )
     }
 
@@ -425,6 +428,7 @@ private fun WorkoutDetailScreenPreview() {
             onWeightChange = { _, _, _ -> },
             onDurationChange = { _, _, _ -> },
             onTypeChange = { _, _, _ -> },
+            onRpeChange = { _, _, _ -> },
         )
     }
 }

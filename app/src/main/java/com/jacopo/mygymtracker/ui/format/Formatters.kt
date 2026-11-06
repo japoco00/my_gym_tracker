@@ -11,6 +11,7 @@ import com.jacopo.mygymtracker.domain.model.SetType
 import com.jacopo.mygymtracker.domain.model.ThemeMode
 import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.domain.model.WeightUnit
+import com.jacopo.mygymtracker.domain.model.formatWeight
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -63,7 +64,7 @@ fun shortDateFormatter(): DateTimeFormatter {
 fun WeightUnit.formatVolume(volumeKg: Double): String =
     stringResource(R.string.weight_with_unit, fromKg(volumeKg).roundToLong().toString(), label())
 
-/** A set with its unit, e.g. `80 kg × 8`, `+10 kg × 8`, `12 reps` or `1:30`. */
+/** A set with its unit, e.g. `80 kg × 8`, `+10 kg × 8`, `12 reps` or `1:30`, plus ` · RPE 8.5` if [rpe] is set. */
 @Composable
 fun formatSet(
     trackingType: TrackingType,
@@ -71,12 +72,16 @@ fun formatSet(
     reps: Int,
     weightKg: Double,
     durationSeconds: Int,
-): String = when {
-    trackingType == TrackingType.DURATION -> formatDuration(durationSeconds.toLong())
-    trackingType == TrackingType.REPS && weightKg > 0.0 ->
-        stringResource(R.string.set_summary_added, weightUnit.format(weightKg), weightUnit.label(), reps)
-    trackingType == TrackingType.REPS -> pluralStringResource(R.plurals.reps_count, reps, reps)
-    else -> stringResource(R.string.set_summary, weightUnit.format(weightKg), weightUnit.label(), reps)
+    rpe: Double? = null,
+): String {
+    val summary = when {
+        trackingType == TrackingType.DURATION -> formatDuration(durationSeconds.toLong())
+        trackingType == TrackingType.REPS && weightKg > 0.0 ->
+            stringResource(R.string.set_summary_added, weightUnit.format(weightKg), weightUnit.label(), reps)
+        trackingType == TrackingType.REPS -> pluralStringResource(R.plurals.reps_count, reps, reps)
+        else -> stringResource(R.string.set_summary, weightUnit.format(weightKg), weightUnit.label(), reps)
+    }
+    return if (rpe == null) summary else stringResource(R.string.set_with_rpe, summary, formatWeight(rpe))
 }
 
 /** A set's leading marker: its [number] if it's a normal set, else its type's letter, e.g. `W`. */

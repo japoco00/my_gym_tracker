@@ -19,6 +19,7 @@ import com.jacopo.mygymtracker.data.withAllSetsCompleted
 import com.jacopo.mygymtracker.domain.model.LoggedSet
 import com.jacopo.mygymtracker.domain.model.PlannedSet
 import com.jacopo.mygymtracker.domain.model.Routine
+import com.jacopo.mygymtracker.domain.model.SetType
 import com.jacopo.mygymtracker.domain.model.UserSettings
 import com.jacopo.mygymtracker.domain.model.WorkoutExercise
 import com.jacopo.mygymtracker.resttimer.RestTimerController
@@ -166,6 +167,19 @@ class WorkoutViewModelTest {
         viewModel.updateFirstSetReps(8)
 
         assertEquals(listOf(LoggedSet(8, 100.0), LoggedSet(5, 100.0)), awaitActiveSets { it.first().reps == 8 })
+    }
+
+    @Test
+    fun typeAndRpe_areSavedAsDraft() = runTest {
+        val viewModel = loadedViewModel(startWorkout())
+        val squat = viewModel.uiState.value.exercises.single()
+        val firstSet = squat.sets.first().key
+
+        viewModel.updateSetType(squat.key, firstSet, SetType.WARM_UP)
+        viewModel.updateSetRpe(squat.key, firstSet, 8.5)
+
+        val saved = awaitActiveSets { it.first().rpe == 8.5 }.first()
+        assertEquals(SetType.WARM_UP, saved.type)
     }
 
     @Test

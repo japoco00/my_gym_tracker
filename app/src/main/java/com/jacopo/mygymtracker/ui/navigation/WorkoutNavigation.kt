@@ -67,6 +67,7 @@ fun NavGraphBuilder.workoutDestination(
             onWeightChange = viewModel::updateSetWeight,
             onDurationChange = viewModel::updateSetDuration,
             onTypeChange = viewModel::updateSetType,
+            onRpeChange = viewModel::updateSetRpe,
             onSetCompletedChange = viewModel::setCompleted,
             onAdjustRest = viewModel::adjustRest,
             onSkipRest = viewModel::skipRest,

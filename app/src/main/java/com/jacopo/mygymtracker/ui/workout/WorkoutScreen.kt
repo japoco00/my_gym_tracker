@@ -102,6 +102,7 @@ fun WorkoutScreen(
     onWeightChange: (exerciseKey: String, setKey: String, Double) -> Unit,
     onDurationChange: (exerciseKey: String, setKey: String, seconds: Int) -> Unit,
     onTypeChange: (exerciseKey: String, setKey: String, type: SetType) -> Unit,
+    onRpeChange: (exerciseKey: String, setKey: String, rpe: Double?) -> Unit,
     onSetCompletedChange: (exerciseKey: String, setKey: String, completed: Boolean) -> Unit,
     onAdjustRest: (deltaSeconds: Int) -> Unit,
     onSkipRest: () -> Unit,
@@ -229,6 +230,8 @@ fun WorkoutScreen(
             isCompleted = set.isCompleted,
             onCompletedChange = { onSetCompletedChange(exerciseKey, setKey, it) },
             plates = uiState.plates.takeIf { exercise.exercise.isBarbell },
+            rpe = set.rpe,
+            onRpeChange = { onRpeChange(exerciseKey, setKey, it) },
         )
     }
 
@@ -543,6 +546,7 @@ private fun WorkoutScreenSample(restTimer: RestTimer?) {
             onWeightChange = { _, _, _ -> },
             onDurationChange = { _, _, _ -> },
             onTypeChange = { _, _, _ -> },
+            onRpeChange = { _, _, _ -> },
             onSetCompletedChange = { _, _, _ -> },
             onAdjustRest = {},
             onSkipRest = {},

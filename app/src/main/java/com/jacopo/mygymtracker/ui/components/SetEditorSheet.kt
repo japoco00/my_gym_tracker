@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
@@ -69,6 +71,7 @@ data class EditingSet(val exerciseKey: String, val setKey: String)
  * @param isCompleted whether a live workout's set is ticked; the main button toggles it.
  * Null for sets that can't be ticked (a plan, a finished workout): the main button just closes.
  * @param plates the plates owned, in [weightUnit], to show what to load per side; null for non-barbell exercises.
+ * @param onRpeChange edits the set's [rpe]; null hides the field, for sets that aren't logged (a plan).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -91,6 +94,8 @@ fun SetEditorSheet(
     isCompleted: Boolean? = null,
     onCompletedChange: (Boolean) -> Unit = {},
     plates: List<Double>? = null,
+    rpe: Double? = null,
+    onRpeChange: ((Double?) -> Unit)? = null,
 ) {
     val sheetState = rememberBottomSheetState(
         initialValue = SheetValue.Hidden,
@@ -114,10 +119,12 @@ fun SetEditorSheet(
             previous = previous,
             isCompleted = isCompleted,
             plates = plates,
+            rpe = rpe,
             onRepsChange = onRepsChange,
             onWeightChange = onWeightChange,
             onDurationChange = onDurationChange,
             onTypeChange = onTypeChange,
+            onRpeChange = onRpeChange,
             onPrimary = {
                 hideThen {
                     if (isCompleted != null) onCompletedChange(!isCompleted)
@@ -143,14 +150,21 @@ private fun SetEditorContent(
     previous: LoggedSet?,
     isCompleted: Boolean?,
     plates: List<Double>?,
+    rpe: Double?,
     onRepsChange: (Int) -> Unit,
     onWeightChange: (Double) -> Unit,
     onDurationChange: (seconds: Int) -> Unit,
     onTypeChange: (SetType) -> Unit,
+    onRpeChange: ((Double?) -> Unit)?,
     onPrimary: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    Column(modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 24.dp)) {
+    // Up to three stepper cards plus the type buttons: scroll rather than clip on short screens.
+    Column(
+        modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .padding(start = 24.dp, end = 24.dp, bottom = 24.dp),
+    ) {
         Text(
             text = exerciseName,
             style = MaterialTheme.typography.titleMedium,
@@ -175,6 +189,7 @@ private fun SetEditorContent(
                 },
             )
         }
+        val fieldCount = (if (trackingType == TrackingType.DURATION) 1 else 2) + (if (onRpeChange != null) 1 else 0)
         Column(
             verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
             modifier = Modifier.padding(top = 16.dp),
@@ -184,7 +199,7 @@ private fun SetEditorContent(
                     seconds = durationSeconds,
                     onSecondsChange = onDurationChange,
                     label = stringResource(R.string.set_time),
-                    shape = ListItemDefaults.segmentedShapes(index = 0, count = 1).shape,
+                    shape = ListItemDefaults.segmentedShapes(index = 0, count = fieldCount).shape,
                 )
                 TrackingType.WEIGHT_REPS, TrackingType.REPS -> {
                     val weightLabel = if (trackingType == TrackingType.REPS) R.string.set_added_weight else R.string.set_weight
@@ -193,15 +208,23 @@ private fun SetEditorContent(
                         unit = weightUnit,
                         onWeightKgChange = onWeightChange,
                         label = stringResource(weightLabel, weightUnit.label()),
-                        shape = ListItemDefaults.segmentedShapes(index = 0, count = 2).shape,
+                        shape = ListItemDefaults.segmentedShapes(index = 0, count = fieldCount).shape,
                     )
                     RepsField(
                         reps = reps,
                         onRepsChange = onRepsChange,
                         label = stringResource(R.string.set_reps),
-                        shape = ListItemDefaults.segmentedShapes(index = 1, count = 2).shape,
+                        shape = ListItemDefaults.segmentedShapes(index = 1, count = fieldCount).shape,
                     )
                 }
+            }
+            if (onRpeChange != null) {
+                RpeField(
+                    rpe = rpe,
+                    onRpeChange = onRpeChange,
+                    label = stringResource(R.string.set_rpe),
+                    shape = ListItemDefaults.segmentedShapes(index = fieldCount - 1, count = fieldCount).shape,
+                )
             }
         }
         if (plates != null && trackingType == TrackingType.WEIGHT_REPS && weightKg > 0) {
@@ -359,10 +382,12 @@ private fun SetEditorContentPreview() {
                 previous = LoggedSet(reps = 8, weightKg = 77.5, isCompleted = true),
                 isCompleted = false,
                 plates = WeightUnit.KG.defaultPlates,
+                rpe = 8.5,
                 onRepsChange = {},
                 onWeightChange = {},
                 onDurationChange = {},
                 onTypeChange = {},
+                onRpeChange = {},
                 onPrimary = {},
                 onDelete = {},
             )

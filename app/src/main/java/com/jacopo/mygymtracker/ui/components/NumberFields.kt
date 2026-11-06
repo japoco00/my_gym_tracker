@@ -113,6 +113,53 @@ fun DurationField(
 
 private const val DURATION_STEP_SECONDS = 15.0
 
+/**
+ * Shows and edits an optional RPE, 6 to 10 in steps of 0.5, as "–" when not logged.
+ * + on an empty field starts at 6 and − below 6 clears it; typed values off the scale are ignored.
+ */
+@Composable
+fun RpeField(
+    rpe: Double?,
+    onRpeChange: (Double?) -> Unit,
+    label: String,
+    shape: Shape,
+    modifier: Modifier = Modifier,
+) {
+    // The stepper works on numbers: 0 stands for "not logged".
+    NumberField(
+        value = rpe ?: 0.0,
+        onValueChange = { value ->
+            onRpeChange(
+                when {
+                    value >= MIN_RPE -> value.coerceAtMost(MAX_RPE)
+                    rpe == null && value > 0 -> MIN_RPE
+                    else -> null
+                },
+            )
+        },
+        format = { if (it == 0.0) NO_RPE else formatWeight(it) },
+        parse = ::parseRpe,
+        keyboardType = KeyboardType.Decimal,
+        step = RPE_STEP,
+        label = label,
+        shape = shape,
+        modifier = modifier,
+    )
+}
+
+private const val MIN_RPE = 6.0
+private const val MAX_RPE = 10.0
+private const val RPE_STEP = 0.5
+private const val NO_RPE = "–"
+
+/** Blank or "–" is no RPE (0); otherwise a value on the scale, rounded to the nearest step. */
+private fun parseRpe(text: String): Double? {
+    val trimmed = text.trim()
+    if (trimmed.isEmpty() || trimmed == NO_RPE) return 0.0
+    val rpe = parseWeight(trimmed)?.let { (it / RPE_STEP).roundToInt() * RPE_STEP } ?: return null
+    return rpe.takeIf { it in MIN_RPE..MAX_RPE }
+}
+
 /** `90`, `1:30` and `0:01:30` are all 90 seconds; `null` for anything else. */
 private fun parseDuration(text: String): Double? {
     val parts = text.trim().split(':').map { part -> part.toIntOrNull()?.takeIf { it >= 0 } ?: return null }

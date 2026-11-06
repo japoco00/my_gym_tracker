@@ -155,6 +155,10 @@ class WorkoutDetailViewModel(
         updateSet(exerciseKey, setKey) { it.copy(type = type) }
     }
 
+    fun updateSetRpe(exerciseKey: String, setKey: String, rpe: Double?) {
+        updateSet(exerciseKey, setKey) { it.copy(rpe = rpe) }
+    }
+
     /** Stores the edits; exercises left without sets are dropped. */
     fun saveEdits() {
         val state = _uiState.value

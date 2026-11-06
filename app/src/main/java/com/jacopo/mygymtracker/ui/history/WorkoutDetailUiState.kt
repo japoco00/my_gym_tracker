@@ -59,6 +59,7 @@ data class EditableSetUiState @OptIn(ExperimentalUuidApi::class) constructor(
     val weightKg: Double = 0.0,
     val durationSeconds: Int = 0,
     val type: SetType = SetType.NORMAL,
+    val rpe: Double? = null,
 )
 
 // region Mappers
@@ -66,7 +67,7 @@ data class EditableSetUiState @OptIn(ExperimentalUuidApi::class) constructor(
 fun WorkoutExercise.toEditableUiState(): EditableExerciseUiState = EditableExerciseUiState(
     exercise = exercise,
     sets = sets.map {
-        EditableSetUiState(reps = it.reps, weightKg = it.weightKg, durationSeconds = it.durationSeconds, type = it.type)
+        EditableSetUiState(reps = it.reps, weightKg = it.weightKg, durationSeconds = it.durationSeconds, type = it.type, rpe = it.rpe)
     },
 )
 
@@ -79,6 +80,7 @@ fun EditableExerciseUiState.toDomain(): WorkoutExercise = WorkoutExercise(
             durationSeconds = it.durationSeconds,
             isCompleted = true,
             type = it.type,
+            rpe = it.rpe,
         )
     },
 )

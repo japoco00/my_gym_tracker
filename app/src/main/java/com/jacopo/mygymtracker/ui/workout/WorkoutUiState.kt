@@ -89,6 +89,7 @@ data class WorkoutSetUiState @OptIn(ExperimentalUuidApi::class) constructor(
     val durationSeconds: Int = 0,
     val isCompleted: Boolean = false,
     val type: SetType = SetType.NORMAL,
+    val rpe: Double? = null,
 )
 
 sealed interface WorkoutDialog {
@@ -137,6 +138,7 @@ fun LoggedSet.toUiState(): WorkoutSetUiState = WorkoutSetUiState(
     durationSeconds = durationSeconds,
     isCompleted = isCompleted,
     type = type,
+    rpe = rpe,
 )
 
 fun WorkoutUiState.toDomain(sessionId: Int): WorkoutSession = WorkoutSession(
@@ -159,6 +161,7 @@ private fun WorkoutSetUiState.toLoggedSet(): LoggedSet = LoggedSet(
     durationSeconds = durationSeconds,
     isCompleted = isCompleted,
     type = type,
+    rpe = rpe,
 )
 
 // endregion

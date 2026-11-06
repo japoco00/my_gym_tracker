@@ -58,7 +58,7 @@ fun LoggedExerciseSection(
         val numbers = exercise.sets.map { it.type }.normalSetNumbers()
         exercise.sets.forEachIndexed { index, set ->
             SetRow(
-                value = formatSet(exercise.exercise.trackingType, weightUnit, set.reps, set.weightKg, set.durationSeconds),
+                value = formatSet(exercise.exercise.trackingType, weightUnit, set.reps, set.weightKg, set.durationSeconds, set.rpe),
                 leading = { SetMarker(label = setMarker(numbers[index], set.type)) },
             ) {
                 if (index == prSetIndex) PrTag()
@@ -88,7 +88,7 @@ fun EditableExerciseSection(
             key(set.key) {
                 SwipeToDeleteContainer(onDelete = { onDeleteSet(set.key) }) {
                     SetRow(
-                        value = formatSet(exercise.exercise.trackingType, weightUnit, set.reps, set.weightKg, set.durationSeconds),
+                        value = formatSet(exercise.exercise.trackingType, weightUnit, set.reps, set.weightKg, set.durationSeconds, set.rpe),
                         leading = { SetMarker(label = setMarker(numbers[index], set.type)) },
                         onClick = { onOpenSet(set.key) },
                     )

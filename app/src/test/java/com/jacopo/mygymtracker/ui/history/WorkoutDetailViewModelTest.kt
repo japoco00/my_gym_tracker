@@ -17,6 +17,7 @@ import com.jacopo.mygymtracker.data.routineOf
 import com.jacopo.mygymtracker.data.withAllSetsCompleted
 import com.jacopo.mygymtracker.domain.model.LoggedSet
 import com.jacopo.mygymtracker.domain.model.PlannedSet
+import com.jacopo.mygymtracker.domain.model.SetType
 import com.jacopo.mygymtracker.ui.MainDispatcherRule
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -59,12 +60,14 @@ class WorkoutDetailViewModelTest {
         val viewModel = editingViewModel(sessionId)
         val squat = viewModel.uiState.value.editedExercises!!.single()
         viewModel.updateSetReps(squat.key, squat.sets.first().key, 7)
+        viewModel.updateSetType(squat.key, squat.sets.first().key, SetType.FAILURE)
+        viewModel.updateSetRpe(squat.key, squat.sets.first().key, 9.5)
         viewModel.removeSet(squat.key, squat.sets.last().key)
 
         viewModel.saveEdits()
 
         val state = viewModel.uiState.first { !it.isEditing }
-        val expected = listOf(LoggedSet(7, 100.0, isCompleted = true))
+        val expected = listOf(LoggedSet(7, 100.0, isCompleted = true, type = SetType.FAILURE, rpe = 9.5))
         assertEquals(expected, state.workout!!.exercises.single().sets)
         assertEquals(expected, workouts.getWorkout(sessionId)!!.exercises.single().sets)
     }

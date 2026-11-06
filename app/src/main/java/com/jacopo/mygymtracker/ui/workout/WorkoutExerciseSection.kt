@@ -138,7 +138,7 @@ fun WorkoutExerciseSection(
                     val previous = previousSets.getOrNull(index)
                     val number = numbers[index]
                     SetRow(
-                        value = formatSet(trackingType, weightUnit, set.reps, set.weightKg, set.durationSeconds),
+                        value = formatSet(trackingType, weightUnit, set.reps, set.weightKg, set.durationSeconds, set.rpe),
                         leading = {
                             SetCheck(
                                 name = setName(number, set.type),

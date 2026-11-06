@@ -184,6 +184,8 @@
     <string name="set_weight">Weight (%1$s)</string>
     <string name="set_added_weight">Added (%1$s)</string>
     <string name="set_time">Time</string>
+    <!-- Rate of perceived exertion. -->
+    <string name="set_rpe">RPE</string>
     <string name="set_editor_title">Set %1$d</string>
     <string name="set_editor_use_last">Use last time · %1$s</string>
     <string name="set_editor_same_as_last">Same as last time · %1$s</string>
@@ -205,6 +207,8 @@
     <string name="plates_none">no plates</string>
     <string name="set_summary">%1$s %2$s × %3$d</string>
     <string name="set_summary_added">+%1$s %2$s × %3$d</string>
+    <!-- A set's summary with its RPE, e.g. "80 kg × 8 · RPE 8.5". -->
+    <string name="set_with_rpe">%1$s · RPE %2$s</string>
     <string name="action_add_set">Add set</string>
     <string name="action_remove_exercise">Remove exercise</string>
 

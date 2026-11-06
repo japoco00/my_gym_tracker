@@ -221,6 +221,10 @@ class WorkoutViewModel(
         updateSet(exerciseKey, setKey) { it.copy(type = type) }
     }
 
+    fun updateSetRpe(exerciseKey: String, setKey: String, rpe: Double?) {
+        updateSet(exerciseKey, setKey) { it.copy(rpe = rpe) }
+    }
+
     /** Ticking a set off starts the rest before the next one, unless auto-start is off in the settings. */
     fun setCompleted(exerciseKey: String, setKey: String, completed: Boolean) {
         updateSet(exerciseKey, setKey) { it.copy(isCompleted = completed) }
