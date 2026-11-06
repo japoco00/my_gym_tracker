@@ -64,6 +64,11 @@ fun AppNavHost(
 
                 historyDestination(
                     onOpenWorkoutDetail = { sessionId -> navController.navigateToWorkoutDetail(sessionId) },
+                    onOpenBodyWeight = { navController.navigateToBodyWeight() },
+                )
+
+                bodyWeightDestination(
+                    onNavigateBack = { navController.closeBodyWeight() },
                 )
 
                 workoutDetailDestination(

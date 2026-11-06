@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.jacopo.mygymtracker.data.repository.BodyWeightRepository
 import com.jacopo.mygymtracker.data.repository.SettingsRepository
 import com.jacopo.mygymtracker.data.repository.WorkoutRepository
 import com.jacopo.mygymtracker.di.appContainer
@@ -12,6 +13,7 @@ import com.jacopo.mygymtracker.domain.history.TrainingWeek
 import com.jacopo.mygymtracker.domain.history.groupByWeek
 import com.jacopo.mygymtracker.domain.history.weekStart
 import com.jacopo.mygymtracker.domain.history.weekStreak
+import com.jacopo.mygymtracker.domain.model.BodyWeight
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -28,6 +30,7 @@ import java.util.Locale
  * @property streakWeeks weeks in a row with a workout, up to this one.
  * @property weekDays the days of the current week, for the header strip.
  * @property trainedDays the days of [weekDays] with a workout.
+ * @property latestBodyWeight the last logged body weight, `null` when none.
  */
 data class HistoryUiState(
     val weeks: List<TrainingWeek> = emptyList(),
@@ -36,6 +39,7 @@ data class HistoryUiState(
     val weekDays: List<LocalDate> = emptyList(),
     val trainedDays: Set<LocalDate> = emptySet(),
     val weightUnit: WeightUnit = WeightUnit.KG,
+    val latestBodyWeight: BodyWeight? = null,
     val isLoading: Boolean = true,
 ) {
     val workoutCount: Int = weeks.sumOf { it.workouts.size }
@@ -44,6 +48,7 @@ data class HistoryUiState(
 class HistoryViewModel(
     workoutRepository: WorkoutRepository,
     settingsRepository: SettingsRepository,
+    bodyWeightRepository: BodyWeightRepository,
     clock: Clock = Clock.systemDefaultZone(),
     firstDayOfWeek: DayOfWeek = WeekFields.of(Locale.getDefault()).firstDayOfWeek,
 ) : ViewModel() {
@@ -51,7 +56,8 @@ class HistoryViewModel(
     val uiState: StateFlow<HistoryUiState> = combine(
         workoutRepository.observeHistory(),
         settingsRepository.observeSettings(),
-    ) { workouts, settings ->
+        bodyWeightRepository.observeAll(),
+    ) { workouts, settings, bodyWeights ->
         val today = LocalDate.now(clock)
         val weeks = groupByWeek(workouts, clock.zone, firstDayOfWeek)
         val thisWeek = today.weekStart(firstDayOfWeek)
@@ -63,6 +69,7 @@ class HistoryViewModel(
             trainedDays = weeks.firstOrNull { it.start == thisWeek }?.workouts.orEmpty()
                 .mapTo(HashSet()) { it.startedAt.atZone(clock.zone).toLocalDate() },
             weightUnit = settings.weightUnit,
+            latestBodyWeight = bodyWeights.lastOrNull(),
             isLoading = false,
         )
     }.stateIn(
@@ -78,6 +85,7 @@ class HistoryViewModel(
                 HistoryViewModel(
                     workoutRepository = container.workoutRepository,
                     settingsRepository = container.settingsRepository,
+                    bodyWeightRepository = container.bodyWeightRepository,
                 )
             }
         }

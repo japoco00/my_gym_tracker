@@ -42,14 +42,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.history.TrainingWeek
+import com.jacopo.mygymtracker.domain.model.BodyWeight
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.domain.model.WorkoutSummary
 import com.jacopo.mygymtracker.ui.components.AppHeader
 import com.jacopo.mygymtracker.ui.components.Pill
 import com.jacopo.mygymtracker.ui.components.SectionLabel
+import com.jacopo.mygymtracker.ui.format.formatDate
 import com.jacopo.mygymtracker.ui.format.formatDuration
 import com.jacopo.mygymtracker.ui.format.formatVolume
 import com.jacopo.mygymtracker.ui.format.formatWeekdayTime
+import com.jacopo.mygymtracker.ui.format.formatWithUnit
 import com.jacopo.mygymtracker.ui.format.shortDateFormatter
 import com.jacopo.mygymtracker.ui.theme.AppTheme
 import java.time.Duration
@@ -62,6 +65,7 @@ import java.time.format.TextStyle
 fun HistoryScreen(
     uiState: HistoryUiState,
     onWorkoutClick: (sessionId: Int) -> Unit,
+    onBodyWeightClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -85,6 +89,16 @@ fun HistoryScreen(
                 .fillMaxSize()
                 .padding(innerPadding),
         ) {
+            item(key = "body-weight") {
+                BodyWeightItem(
+                    latest = uiState.latestBodyWeight,
+                    weightUnit = uiState.weightUnit,
+                    onClick = onBodyWeightClick,
+                    modifier = Modifier
+                        .animateItem()
+                        .padding(bottom = 16.dp),
+                )
+            }
             if (uiState.weeks.isEmpty()) {
                 item(key = "empty") {
                     Text(
@@ -198,6 +212,36 @@ private fun weekLabel(start: LocalDate, thisWeek: LocalDate?): String = when (st
     else -> stringResource(R.string.history_week_of, shortDateFormatter().format(start))
 }
 
+/** Opens the body weight log: the latest weight and its date, or a hint when nothing is logged. */
+@Composable
+private fun BodyWeightItem(
+    latest: BodyWeight?,
+    weightUnit: WeightUnit,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    SegmentedListItem(
+        onClick = onClick,
+        shapes = ListItemDefaults.segmentedShapes(index = 0, count = 1),
+        modifier = modifier,
+        supportingContent = {
+            Text(text = if (latest != null) formatDate(latest.date) else stringResource(R.string.body_weight_hint))
+        },
+        trailingContent = latest?.let {
+            {
+                Text(
+                    text = weightUnit.formatWithUnit(it.weightKg),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+        },
+    ) {
+        Text(text = stringResource(R.string.body_weight_title), fontWeight = FontWeight.SemiBold)
+    }
+}
+
 @Composable
 private fun WorkoutListItem(
     workout: WorkoutSummary,
@@ -259,9 +303,11 @@ private fun HistoryScreenPreview() {
                 today = today,
                 weekDays = (0L..6L).map(thisWeek::plusDays),
                 trainedDays = setOf(today, thisWeek),
+                latestBodyWeight = BodyWeight(date = today, weightKg = 78.4),
                 isLoading = false,
             ),
             onWorkoutClick = {},
+            onBodyWeightClick = {},
         )
     }
 }

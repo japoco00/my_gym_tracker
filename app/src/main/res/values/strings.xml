@@ -121,6 +121,19 @@
     <string name="history_edit_title">Edit workout</string>
     <string name="history_edit_needs_set">Keep at least one set, or delete the workout instead.</string>
 
+    <!-- Body weight -->
+    <string name="body_weight_title">Body weight</string>
+    <string name="body_weight_log">Log weight</string>
+    <string name="body_weight_edit">Edit weight</string>
+    <string name="body_weight_hint">Log your weight to see how it changes</string>
+    <string name="body_weight_empty">No weights logged yet. Log one and track how it changes over time.</string>
+    <string name="body_weight_entries">Entries</string>
+    <plurals name="body_weight_entry_count">
+        <item quantity="one">%d entry</item>
+        <item quantity="other">%d entries</item>
+    </plurals>
+    <string name="body_weight_latest_description">Latest: %1$s</string>
+
     <!-- Progress -->
     <string name="progress_empty">No finished workouts with this exercise yet.</string>
     <string name="progress_metric_e1rm">e1RM</string>
@@ -284,11 +297,11 @@
     <string name="settings_dynamic_color_description">Colors from your wallpaper</string>
     <string name="settings_backup">Backup</string>
     <string name="settings_backup_export">Export backup</string>
-    <string name="settings_backup_export_description">Save your exercises, routines, finished workouts and settings to a file.</string>
+    <string name="settings_backup_export_description">Save your exercises, routines, finished workouts, body weights and settings to a file.</string>
     <string name="settings_backup_import">Import backup</string>
     <string name="settings_backup_import_description">Restore a backup file, replacing everything in the app.</string>
     <string name="backup_import_confirm_title">Replace everything?</string>
-    <string name="backup_import_confirm_message">Your exercises, routines, workout history and settings will be replaced by the ones in the backup. This can\'t be undone.</string>
+    <string name="backup_import_confirm_message">Your exercises, routines, workout history, body weights and settings will be replaced by the ones in the backup. This can\'t be undone.</string>
     <string name="backup_import_confirm">Choose file</string>
     <string name="backup_exported">Backup saved</string>
     <string name="backup_export_failed">Couldn\'t save the backup</string>

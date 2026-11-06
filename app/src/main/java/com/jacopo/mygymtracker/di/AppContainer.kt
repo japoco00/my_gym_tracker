@@ -8,6 +8,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.jacopo.mygymtracker.MyApplication
 import com.jacopo.mygymtracker.data.local.AppDatabase
 import com.jacopo.mygymtracker.data.repository.BackupRepository
+import com.jacopo.mygymtracker.data.repository.BodyWeightRepository
 import com.jacopo.mygymtracker.data.repository.ExerciseRepository
 import com.jacopo.mygymtracker.data.repository.RoutineRepository
 import com.jacopo.mygymtracker.data.repository.SettingsRepository
@@ -48,6 +49,10 @@ class AppContainer(context: Context) {
             workoutDao = database.workoutDao(),
             exerciseDao = database.exerciseDao(),
         )
+    }
+
+    val bodyWeightRepository: BodyWeightRepository by lazy {
+        BodyWeightRepository(database = database, bodyWeightDao = database.bodyWeightDao())
     }
 
     val settingsRepository: SettingsRepository by lazy {

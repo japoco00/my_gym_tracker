@@ -23,6 +23,7 @@ data class WorkoutDetailRoute(val sessionId: Int, val celebrate: Boolean = false
 
 fun NavGraphBuilder.historyDestination(
     onOpenWorkoutDetail: (sessionId: Int) -> Unit,
+    onOpenBodyWeight: () -> Unit,
 ) {
     composable<HistoryRoute> {
         val viewModel: HistoryViewModel = viewModel(factory = HistoryViewModel.Factory)
@@ -31,6 +32,7 @@ fun NavGraphBuilder.historyDestination(
         HistoryScreen(
             uiState = uiState,
             onWorkoutClick = onOpenWorkoutDetail,
+            onBodyWeightClick = onOpenBodyWeight,
         )
     }
 }

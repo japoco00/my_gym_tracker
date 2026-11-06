@@ -13,6 +13,7 @@ import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.domain.model.formatWeight
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -44,6 +45,9 @@ fun formatWeekdayTime(instant: Instant): String {
 fun formatDate(instant: Instant): String =
     DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(instant.atZone(ZoneId.systemDefault()))
 
+/** [date] in the device's locale, e.g. `Jul 14, 2025`. */
+fun formatDate(date: LocalDate): String = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(date)
+
 /** `Today`, `Yesterday`, `3 days ago`, then a short date from one week on. */
 fun formatRelativeDay(instant: Instant): String =
     DateUtils.getRelativeTimeSpanString(
@@ -58,6 +62,11 @@ fun shortDateFormatter(): DateTimeFormatter {
     return DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(locale, "MMMd"), locale)
         .withZone(ZoneId.systemDefault())
 }
+
+/** A weight with its unit, e.g. `78.4 kg`. */
+@Composable
+fun WeightUnit.formatWithUnit(weightKg: Double): String =
+    stringResource(R.string.weight_with_unit, format(weightKg), label())
 
 /** Total volume in whole units, e.g. `4320 kg`. */
 @Composable
