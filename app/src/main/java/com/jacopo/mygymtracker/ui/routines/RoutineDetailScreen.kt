@@ -46,6 +46,7 @@ import com.jacopo.mygymtracker.ui.components.AddExercisesButton
 import com.jacopo.mygymtracker.ui.components.AddExercisesSheet
 import com.jacopo.mygymtracker.ui.components.AppHeader
 import com.jacopo.mygymtracker.ui.components.BackButton
+import com.jacopo.mygymtracker.ui.components.EmptyStateText
 import com.jacopo.mygymtracker.ui.components.ExerciseEditorSheet
 import com.jacopo.mygymtracker.ui.components.Pill
 import com.jacopo.mygymtracker.ui.components.RestEditorSheet
@@ -125,10 +126,8 @@ fun RoutineDetailScreen(
             }
             if (uiState.exercises.isEmpty()) {
                 item(key = "empty") {
-                    Text(
+                    EmptyStateText(
                         text = stringResource(R.string.routine_editor_empty),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()

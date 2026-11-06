@@ -62,6 +62,7 @@ import com.jacopo.mygymtracker.domain.model.WorkoutExercise
 import com.jacopo.mygymtracker.domain.model.WorkoutSession
 import com.jacopo.mygymtracker.domain.model.WorkoutSummary
 import com.jacopo.mygymtracker.ui.components.AppHeader
+import com.jacopo.mygymtracker.ui.components.EmptyStateText
 import com.jacopo.mygymtracker.ui.components.Pill
 import com.jacopo.mygymtracker.ui.components.SectionLabel
 import com.jacopo.mygymtracker.ui.components.SwipeToDeleteContainer
@@ -165,10 +166,8 @@ fun RoutinesScreen(
             }
             if (uiState.routines.isEmpty()) {
                 item(key = "empty") {
-                    Text(
+                    EmptyStateText(
                         text = stringResource(R.string.routines_empty),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 12.dp),
                     )
                 }

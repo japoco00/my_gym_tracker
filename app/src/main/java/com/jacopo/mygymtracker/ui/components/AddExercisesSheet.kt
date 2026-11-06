@@ -140,11 +140,7 @@ private fun AddExercisesSheetContent(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.fillMaxSize(),
                 ) {
-                    Text(
-                        text = stringResource(R.string.exercises_empty),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                    EmptyStateText(text = stringResource(R.string.exercises_empty))
                 }
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {

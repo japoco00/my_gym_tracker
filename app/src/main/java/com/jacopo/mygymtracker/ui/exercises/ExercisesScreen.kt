@@ -57,6 +57,7 @@ import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.ui.components.AppHeader
 import com.jacopo.mygymtracker.ui.components.DestructiveOverflowMenu
+import com.jacopo.mygymtracker.ui.components.EmptyStateText
 import com.jacopo.mygymtracker.ui.components.ExerciseEditorSheet
 import com.jacopo.mygymtracker.ui.components.Pill
 import com.jacopo.mygymtracker.ui.components.SectionLabel
@@ -121,10 +122,8 @@ fun ExercisesScreen(
         ) {
             if (uiState.visibleGroups.isEmpty()) {
                 item(key = "empty") {
-                    Text(
+                    EmptyStateText(
                         text = stringResource(R.string.exercises_empty),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 12.dp),
                     )
                 }

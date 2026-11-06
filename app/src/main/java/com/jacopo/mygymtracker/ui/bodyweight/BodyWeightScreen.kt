@@ -41,6 +41,7 @@ import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.ui.components.AppHeader
 import com.jacopo.mygymtracker.ui.components.BackButton
 import com.jacopo.mygymtracker.ui.components.DateLineChart
+import com.jacopo.mygymtracker.ui.components.EmptyStateText
 import com.jacopo.mygymtracker.ui.components.Pill
 import com.jacopo.mygymtracker.ui.components.SectionLabel
 import com.jacopo.mygymtracker.ui.components.ShapeBadge
@@ -88,10 +89,8 @@ fun BodyWeightScreen(
     ) { innerPadding ->
         when {
             uiState.isLoading -> Unit
-            uiState.entries.isEmpty() -> Text(
+            uiState.entries.isEmpty() -> EmptyStateText(
                 text = stringResource(R.string.body_weight_empty),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
                     .padding(innerPadding)
                     .padding(horizontal = 28.dp, vertical = 16.dp),

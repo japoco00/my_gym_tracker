@@ -45,6 +45,7 @@ import com.jacopo.mygymtracker.domain.model.BodyWeight
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.domain.model.WorkoutSummary
 import com.jacopo.mygymtracker.ui.components.AppHeader
+import com.jacopo.mygymtracker.ui.components.EmptyStateText
 import com.jacopo.mygymtracker.ui.components.Pill
 import com.jacopo.mygymtracker.ui.components.SectionLabel
 import com.jacopo.mygymtracker.ui.format.formatDate
@@ -100,10 +101,8 @@ fun HistoryScreen(
             }
             if (uiState.weeks.isEmpty()) {
                 item(key = "empty") {
-                    Text(
+                    EmptyStateText(
                         text = stringResource(R.string.history_empty),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 12.dp),
                     )
                 }

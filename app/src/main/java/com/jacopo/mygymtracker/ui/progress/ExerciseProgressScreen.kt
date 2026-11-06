@@ -51,6 +51,7 @@ import com.jacopo.mygymtracker.domain.progress.ProgressMetric
 import com.jacopo.mygymtracker.domain.progress.SessionProgress
 import com.jacopo.mygymtracker.ui.components.AppHeader
 import com.jacopo.mygymtracker.ui.components.BackButton
+import com.jacopo.mygymtracker.ui.components.EmptyStateText
 import com.jacopo.mygymtracker.ui.components.Pill
 import com.jacopo.mygymtracker.ui.components.SectionLabel
 import com.jacopo.mygymtracker.ui.components.ShapeBadge
@@ -78,10 +79,8 @@ fun ExerciseProgressScreen(
     ) { innerPadding ->
         when {
             uiState.isLoading -> Unit
-            uiState.sessions.isEmpty() -> Text(
+            uiState.sessions.isEmpty() -> EmptyStateText(
                 text = stringResource(R.string.progress_empty),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
                     .padding(innerPadding)
                     .padding(horizontal = 28.dp, vertical = 16.dp),
