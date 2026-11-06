@@ -10,21 +10,16 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -40,7 +35,6 @@ import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.ui.format.label
 import com.jacopo.mygymtracker.ui.theme.AppTheme
-import kotlinx.coroutines.launch
 
 /**
  * Edits the name, category, tracking type and barbell flag of [exercise], or of a new exercise when it is `null`.
@@ -50,7 +44,6 @@ import kotlinx.coroutines.launch
  * @param initialName the name to start from, e.g. one the repository just refused.
  * @param isNameTaken flags a name as a duplicate, which disables Save.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExerciseEditorSheet(
     exercise: Exercise?,
@@ -60,17 +53,12 @@ fun ExerciseEditorSheet(
     defaultCategory: Category = Category.OTHER,
     isNameTaken: (String) -> Boolean = { false },
 ) {
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
-    )
-    val scope = rememberCoroutineScope()
     var name by rememberSaveable { mutableStateOf(initialName) }
     var category by rememberSaveable { mutableStateOf(exercise?.category ?: defaultCategory) }
     var trackingType by rememberSaveable { mutableStateOf(exercise?.trackingType ?: TrackingType.WEIGHT_REPS) }
     var isBarbell by rememberSaveable { mutableStateOf(exercise?.isBarbell ?: false) }
 
-    ModalBottomSheet(sheetState = sheetState, onDismissRequest = onDismiss) {
+    AppBottomSheet(onDismissRequest = onDismiss) { hideThen ->
         ExerciseEditorContent(
             isNew = exercise == null,
             name = name,
@@ -82,11 +70,9 @@ fun ExerciseEditorSheet(
             onCategoryChange = { category = it },
             onTrackingTypeChange = { trackingType = it },
             onBarbellChange = { isBarbell = it },
-            onCancel = { scope.launch { sheetState.hide() }.invokeOnCompletion { onDismiss() } },
+            onCancel = { hideThen(onDismiss) },
             onSave = {
-                scope.launch { sheetState.hide() }.invokeOnCompletion {
-                    onSave(name, category, trackingType, isBarbell && trackingType == TrackingType.WEIGHT_REPS)
-                }
+                hideThen { onSave(name, category, trackingType, isBarbell && trackingType == TrackingType.WEIGHT_REPS) }
             },
         )
     }

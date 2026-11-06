@@ -18,20 +18,16 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SelectableDates
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -42,11 +38,11 @@ import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.BodyWeight
 import com.jacopo.mygymtracker.domain.model.WeightUnit
+import com.jacopo.mygymtracker.ui.components.AppBottomSheet
 import com.jacopo.mygymtracker.ui.components.WeightField
 import com.jacopo.mygymtracker.ui.format.formatDate
 import com.jacopo.mygymtracker.ui.format.label
 import com.jacopo.mygymtracker.ui.theme.AppTheme
-import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -55,7 +51,6 @@ import java.time.ZoneOffset
  * Logs a body weight, or edits [entry] when it isn't `null`.
  * A new entry starts on [today] with [initialWeightKg], e.g. the latest logged weight.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BodyWeightSheet(
     entry: BodyWeight?,
@@ -65,16 +60,11 @@ fun BodyWeightSheet(
     onSave: (date: LocalDate, weightKg: Double) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
-    )
-    val scope = rememberCoroutineScope()
     var date by rememberSaveable { mutableStateOf(entry?.date ?: today) }
     var weightKg by rememberSaveable { mutableDoubleStateOf(entry?.weightKg ?: initialWeightKg) }
     var isPickingDate by rememberSaveable { mutableStateOf(false) }
 
-    ModalBottomSheet(sheetState = sheetState, onDismissRequest = onDismiss) {
+    AppBottomSheet(onDismissRequest = onDismiss) { hideThen ->
         BodyWeightEditorContent(
             isNew = entry == null,
             date = date,
@@ -82,8 +72,8 @@ fun BodyWeightSheet(
             weightUnit = weightUnit,
             onPickDate = { isPickingDate = true },
             onWeightKgChange = { weightKg = it },
-            onCancel = { scope.launch { sheetState.hide() }.invokeOnCompletion { onDismiss() } },
-            onSave = { scope.launch { sheetState.hide() }.invokeOnCompletion { onSave(date, weightKg) } },
+            onCancel = { hideThen(onDismiss) },
+            onSave = { hideThen { onSave(date, weightKg) } },
         )
         // Inside the sheet, so the dialog's window always stacks above the sheet's, also after recreation.
         if (isPickingDate) {

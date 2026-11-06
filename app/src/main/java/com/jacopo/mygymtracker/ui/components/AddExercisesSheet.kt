@@ -17,23 +17,18 @@ import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,20 +41,13 @@ import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.ui.format.label
 import com.jacopo.mygymtracker.ui.theme.AppTheme
-import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddExercisesSheet(
     catalogExercises: List<Exercise>,
     onDismiss: () -> Unit,
     onConfirm: (List<Exercise>) -> Unit,
 ) {
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
-    )
-    val scope = rememberCoroutineScope()
     var searchQuery by remember { mutableStateOf("") }
     var isSearching by remember { mutableStateOf(false) }
     val selectedExercises = remember { mutableStateListOf<Exercise>() }
@@ -68,10 +56,7 @@ fun AddExercisesSheet(
         catalogExercises.filter { it.name.contains(searchQuery.trim(), ignoreCase = true) }
     }
 
-    ModalBottomSheet(
-        sheetState = sheetState,
-        onDismissRequest = onDismiss,
-    ) {
+    AppBottomSheet(onDismissRequest = onDismiss) { hideThen ->
         AddExercisesSheetContent(
             exercises = displayedExercises,
             selectedExercises = selectedExercises,
@@ -92,11 +77,7 @@ fun AddExercisesSheet(
             },
             onConfirm = {
                 val chosen = selectedExercises.toList()
-                scope.launch {
-                    sheetState.hide()
-                }.invokeOnCompletion {
-                    onConfirm(chosen)
-                }
+                hideThen { onConfirm(chosen) }
             },
         )
     }

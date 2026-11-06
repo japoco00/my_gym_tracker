@@ -11,19 +11,14 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -35,7 +30,6 @@ import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.UserSettings
 import com.jacopo.mygymtracker.ui.format.formatDuration
 import com.jacopo.mygymtracker.ui.theme.AppTheme
-import kotlinx.coroutines.launch
 
 /** "Rest 1:30" under an exercise: tonal when it has its own rest, outlined when it uses the default. */
 @Composable
@@ -69,7 +63,6 @@ fun RestChip(restSeconds: Int?, defaultSeconds: Int, onClick: () -> Unit, modifi
  * Edits the rest after each set of one exercise. `null` means the default from the settings.
  * Changes are reported as they happen, like the set editor.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RestEditorSheet(
     exerciseName: String,
@@ -78,18 +71,13 @@ fun RestEditorSheet(
     onRestChange: (seconds: Int?) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
-    )
-    val scope = rememberCoroutineScope()
-    ModalBottomSheet(sheetState = sheetState, onDismissRequest = onDismiss) {
+    AppBottomSheet(onDismissRequest = onDismiss) { hideThen ->
         RestEditorContent(
             exerciseName = exerciseName,
             restSeconds = restSeconds,
             defaultSeconds = defaultSeconds,
             onRestChange = onRestChange,
-            onDone = { scope.launch { sheetState.hide() }.invokeOnCompletion { onDismiss() } },
+            onDone = { hideThen(onDismiss) },
         )
     }
 }

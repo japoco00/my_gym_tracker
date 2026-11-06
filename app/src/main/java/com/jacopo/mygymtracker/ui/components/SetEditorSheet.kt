@@ -19,7 +19,6 @@ import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonGroupDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
@@ -27,14 +26,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
-import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -57,7 +52,6 @@ import com.jacopo.mygymtracker.ui.format.formatSet
 import com.jacopo.mygymtracker.ui.format.label
 import com.jacopo.mygymtracker.ui.format.setName
 import com.jacopo.mygymtracker.ui.theme.AppTheme
-import kotlinx.coroutines.launch
 
 /** Which set is open in a [SetEditorSheet], by the UI keys of its exercise and of itself. */
 data class EditingSet(val exerciseKey: String, val setKey: String)
@@ -73,7 +67,6 @@ data class EditingSet(val exerciseKey: String, val setKey: String)
  * @param plates the plates owned, in [weightUnit], to show what to load per side; null for non-barbell exercises.
  * @param onRpeChange edits the set's [rpe]; null hides the field, for sets that aren't logged (a plan).
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SetEditorSheet(
     exerciseName: String,
@@ -97,16 +90,7 @@ fun SetEditorSheet(
     rpe: Double? = null,
     onRpeChange: ((Double?) -> Unit)? = null,
 ) {
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
-    )
-    val scope = rememberCoroutineScope()
-    fun hideThen(action: () -> Unit) {
-        scope.launch { sheetState.hide() }.invokeOnCompletion { action() }
-    }
-
-    ModalBottomSheet(sheetState = sheetState, onDismissRequest = onDismiss) {
+    AppBottomSheet(onDismissRequest = onDismiss) { hideThen ->
         SetEditorContent(
             exerciseName = exerciseName,
             number = number,

@@ -9,18 +9,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SegmentedListItem
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -31,15 +26,14 @@ import com.jacopo.mygymtracker.domain.model.LoggedSet
 import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.domain.warmup.warmUpSets
+import com.jacopo.mygymtracker.ui.components.AppBottomSheet
 import com.jacopo.mygymtracker.ui.components.SetMarker
 import com.jacopo.mygymtracker.ui.format.formatSet
 import com.jacopo.mygymtracker.ui.format.label
 import com.jacopo.mygymtracker.ui.format.setMarker
 import com.jacopo.mygymtracker.ui.theme.AppTheme
-import kotlinx.coroutines.launch
 
 /** Previews the warm-up sets that ramp up to [targetKg], to put before an exercise's sets. */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WarmUpSheet(
     exerciseName: String,
@@ -49,18 +43,13 @@ fun WarmUpSheet(
     onAdd: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
-    )
-    val scope = rememberCoroutineScope()
-    ModalBottomSheet(sheetState = sheetState, onDismissRequest = onDismiss) {
+    AppBottomSheet(onDismissRequest = onDismiss) { hideThen ->
         WarmUpContent(
             exerciseName = exerciseName,
             targetKg = targetKg,
             sets = warmUpSets(targetKg, isBarbell, weightUnit),
             weightUnit = weightUnit,
-            onAdd = { scope.launch { sheetState.hide() }.invokeOnCompletion { onAdd() } },
+            onAdd = { hideThen(onAdd) },
         )
     }
 }
