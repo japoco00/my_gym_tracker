@@ -18,4 +18,10 @@ interface BodyWeightDao {
 
     @Query("DELETE FROM body_weights WHERE dateEpochDay = :dateEpochDay")
     suspend fun delete(dateEpochDay: Long)
+
+    @Query("SELECT * FROM body_weights ORDER BY dateEpochDay")
+    suspend fun getAll(): List<BodyWeightEntity>
+
+    @Query("DELETE FROM body_weights")
+    suspend fun deleteAll()
 }

@@ -1,6 +1,7 @@
 package com.jacopo.mygymtracker.data.backup
 
 import com.jacopo.mygymtracker.domain.model.Category
+import com.jacopo.mygymtracker.domain.model.SetType
 import com.jacopo.mygymtracker.domain.model.ThemeMode
 import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.domain.model.UserSettings
@@ -8,7 +9,7 @@ import com.jacopo.mygymtracker.domain.model.WeightUnit
 import kotlinx.serialization.Serializable
 
 /**
- * The backup file, stored as JSON: settings, catalog, routines and finished workouts.
+ * The backup file, stored as JSON: settings, catalog, routines, finished workouts and body weights.
  * Exercises are referenced by name; routines by an id that only means something inside the file.
  *
  * This is a file format: change these classes only together with [CURRENT_FORMAT_VERSION].
@@ -21,10 +22,14 @@ data class BackupFile(
     val exercises: List<BackupExercise>,
     val routines: List<BackupRoutine>,
     val workouts: List<BackupWorkout>,
+    val bodyWeights: List<BackupBodyWeight> = emptyList(),
 ) {
     companion object {
-        /** 2 added the theme, dynamic colour, rest auto-start and keep-screen-on settings. */
-        const val CURRENT_FORMAT_VERSION = 2
+        /**
+         * 2 added the theme, dynamic colour, rest auto-start and keep-screen-on settings.
+         * 3 added set types, RPE and body weights.
+         */
+        const val CURRENT_FORMAT_VERSION = 3
     }
 }
 
@@ -76,9 +81,19 @@ data class BackupExerciseSets(
     val sets: List<BackupSet>,
 )
 
+/** [rpe] is only ever set on a workout's sets. */
 @Serializable
 data class BackupSet(
     val reps: Int,
     val weightKg: Double,
     val durationSeconds: Int,
+    val type: SetType = SetType.NORMAL,
+    val rpe: Double? = null,
+)
+
+/** [dateEpochDay] is `LocalDate.toEpochDay()`. */
+@Serializable
+data class BackupBodyWeight(
+    val dateEpochDay: Long,
+    val weightKg: Double,
 )

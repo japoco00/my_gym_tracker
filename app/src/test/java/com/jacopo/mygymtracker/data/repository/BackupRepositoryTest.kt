@@ -7,12 +7,14 @@ import com.jacopo.mygymtracker.data.InMemoryPreferencesDataStore
 import com.jacopo.mygymtracker.data.backup.BackupFile
 import com.jacopo.mygymtracker.data.createTestDatabase
 import com.jacopo.mygymtracker.data.local.AppDatabase
+import com.jacopo.mygymtracker.data.local.entity.BodyWeightEntity
 import com.jacopo.mygymtracker.data.newExercise
 import com.jacopo.mygymtracker.data.routineOf
 import com.jacopo.mygymtracker.data.withAllSetsCompleted
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.PlannedSet
+import com.jacopo.mygymtracker.domain.model.SetType
 import com.jacopo.mygymtracker.domain.model.ThemeMode
 import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.domain.model.UserSettings
@@ -129,6 +131,7 @@ class BackupRepositoryTest {
             exerciseDao = database.exerciseDao(),
             routineDao = database.routineDao(),
             workoutDao = database.workoutDao(),
+            bodyWeightDao = database.bodyWeightDao(),
             settingsRepository = settings,
             contentResolver = ApplicationProvider.getApplicationContext<Context>().contentResolver,
         )
@@ -146,12 +149,18 @@ class BackupRepositoryTest {
             val plank = newExercise("Plank", Category.CORE).copy(trackingType = TrackingType.DURATION)
             val routine = routineOf(
                 "Push",
-                squat to listOf(PlannedSet(reps = 5, weightKg = 100.0)),
+                squat to listOf(
+                    PlannedSet(reps = 5, weightKg = 60.0, type = SetType.WARM_UP),
+                    PlannedSet(reps = 5, weightKg = 100.0),
+                ),
                 plank to listOf(PlannedSet(durationSeconds = 60)),
             ).let { it.copy(note = "Heavy day", exercises = it.exercises.map { e -> e.copy(restSeconds = 180) }) }
             routines.saveRoutine(routine)
             val sessionId = workouts.startWorkout(routines.observeRoutines().first().single(), Instant.ofEpochMilli(1_000))!!
-            workouts.finishWorkout(workouts.getWorkout(sessionId)!!.withAllSetsCompleted(), Instant.ofEpochMilli(2_000))
+            val workout = workouts.getWorkout(sessionId)!!.withAllSetsCompleted()
+            val rated = workout.copy(exercises = workout.exercises.map { e -> e.copy(sets = e.sets.map { it.copy(rpe = 8.5) }) })
+            workouts.finishWorkout(rated, Instant.ofEpochMilli(2_000))
+            database.bodyWeightDao().upsert(BodyWeightEntity(dateEpochDay = 20_000, weightKg = 80.5))
         }
     }
 }

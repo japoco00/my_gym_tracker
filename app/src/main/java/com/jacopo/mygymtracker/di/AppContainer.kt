@@ -62,6 +62,7 @@ class AppContainer(context: Context) {
             exerciseDao = database.exerciseDao(),
             routineDao = database.routineDao(),
             workoutDao = database.workoutDao(),
+            bodyWeightDao = database.bodyWeightDao(),
             settingsRepository = settingsRepository,
             contentResolver = context.contentResolver,
         )

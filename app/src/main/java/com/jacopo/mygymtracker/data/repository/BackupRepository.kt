@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.room.withTransaction
 import com.jacopo.mygymtracker.data.backup.BackupFile
 import com.jacopo.mygymtracker.data.local.AppDatabase
+import com.jacopo.mygymtracker.data.local.dao.BodyWeightDao
 import com.jacopo.mygymtracker.data.local.dao.ExerciseDao
 import com.jacopo.mygymtracker.data.local.dao.RoutineDao
 import com.jacopo.mygymtracker.data.local.dao.WorkoutDao
@@ -20,7 +21,7 @@ import java.io.IOException
 enum class ImportResult { IMPORTED, INVALID_FILE, WORKOUT_IN_PROGRESS }
 
 /**
- * Saves settings, catalog, routines and finished workouts to a JSON [BackupFile], and restores one.
+ * Saves settings, catalog, routines, finished workouts and body weights to a JSON [BackupFile], and restores one.
  * Restoring replaces everything; a workout in progress blocks it, since the backup can't hold one.
  */
 class BackupRepository(
@@ -28,6 +29,7 @@ class BackupRepository(
     private val exerciseDao: ExerciseDao,
     private val routineDao: RoutineDao,
     private val workoutDao: WorkoutDao,
+    private val bodyWeightDao: BodyWeightDao,
     private val settingsRepository: SettingsRepository,
     private val contentResolver: ContentResolver,
 ) {
@@ -60,6 +62,7 @@ class BackupRepository(
                 exercises = exerciseDao.getAll().map { it.toDomain().toBackup() },
                 routines = routineDao.getAllWithExercises().map { it.toDomain().toBackup() },
                 workouts = workoutDao.getFinishedWithExercises().map { it.toDomain().toBackup() },
+                bodyWeights = bodyWeightDao.getAll().map { it.toDomain().toBackup() },
             )
         }
         return json.encodeToString(backup)
@@ -80,6 +83,7 @@ class BackupRepository(
             workoutDao.deleteAll()
             routineDao.deleteAll()
             exerciseDao.deleteAll()
+            bodyWeightDao.deleteAll()
             val exercises = backup.exercises.associate { saved ->
                 val exercise = saved.toDomain()
                 saved.name to exercise.copy(id = exerciseDao.insert(exercise.toEntity()).toInt())
@@ -95,6 +99,7 @@ class BackupRepository(
                 val sessionId = workoutDao.insertSession(workout.toEntity()).toInt()
                 workoutDao.writeExercises(sessionId, workout.exercises, exerciseDao)
             }
+            backup.bodyWeights.forEach { bodyWeightDao.upsert(it.toDomain().toEntity()) }
             true
         }
         if (!imported) return ImportResult.WORKOUT_IN_PROGRESS

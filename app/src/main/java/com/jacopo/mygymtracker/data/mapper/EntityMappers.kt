@@ -1,5 +1,6 @@
 package com.jacopo.mygymtracker.data.mapper
 
+import com.jacopo.mygymtracker.data.local.entity.BodyWeightEntity
 import com.jacopo.mygymtracker.data.local.entity.ExerciseEntity
 import com.jacopo.mygymtracker.data.local.entity.ExerciseHistoryRow
 import com.jacopo.mygymtracker.data.local.entity.LoggedSetEntity
@@ -11,6 +12,7 @@ import com.jacopo.mygymtracker.data.local.entity.WorkoutExerciseWithDetails
 import com.jacopo.mygymtracker.data.local.entity.WorkoutSessionEntity
 import com.jacopo.mygymtracker.data.local.entity.WorkoutSessionWithExercises
 import com.jacopo.mygymtracker.data.local.entity.WorkoutSummaryRow
+import com.jacopo.mygymtracker.domain.model.BodyWeight
 import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.ExerciseHistoryEntry
 import com.jacopo.mygymtracker.domain.model.LoggedSet
@@ -21,6 +23,7 @@ import com.jacopo.mygymtracker.domain.model.WorkoutExercise
 import com.jacopo.mygymtracker.domain.model.WorkoutSession
 import com.jacopo.mygymtracker.domain.model.WorkoutSummary
 import java.time.Instant
+import java.time.LocalDate
 
 // region Exercise
 
@@ -158,5 +161,13 @@ fun List<ExerciseHistoryRow>.toExerciseHistory(): List<ExerciseHistoryEntry> =
             },
         )
     }
+
+// endregion
+
+// region Body weight
+
+fun BodyWeight.toEntity(): BodyWeightEntity = BodyWeightEntity(dateEpochDay = date.toEpochDay(), weightKg = weightKg)
+
+fun BodyWeightEntity.toDomain(): BodyWeight = BodyWeight(date = LocalDate.ofEpochDay(dateEpochDay), weightKg = weightKg)
 
 // endregion

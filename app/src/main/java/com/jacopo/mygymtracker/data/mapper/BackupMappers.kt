@@ -1,11 +1,13 @@
 package com.jacopo.mygymtracker.data.mapper
 
+import com.jacopo.mygymtracker.data.backup.BackupBodyWeight
 import com.jacopo.mygymtracker.data.backup.BackupExercise
 import com.jacopo.mygymtracker.data.backup.BackupExerciseSets
 import com.jacopo.mygymtracker.data.backup.BackupRoutine
 import com.jacopo.mygymtracker.data.backup.BackupSet
 import com.jacopo.mygymtracker.data.backup.BackupSettings
 import com.jacopo.mygymtracker.data.backup.BackupWorkout
+import com.jacopo.mygymtracker.domain.model.BodyWeight
 import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.LoggedSet
 import com.jacopo.mygymtracker.domain.model.PlannedSet
@@ -15,6 +17,7 @@ import com.jacopo.mygymtracker.domain.model.UserSettings
 import com.jacopo.mygymtracker.domain.model.WorkoutExercise
 import com.jacopo.mygymtracker.domain.model.WorkoutSession
 import java.time.Instant
+import java.time.LocalDate
 
 fun UserSettings.toBackup() = BackupSettings(
     weightUnit = weightUnit,
@@ -60,7 +63,7 @@ fun Routine.toBackup() = BackupRoutine(
         BackupExerciseSets(
             exercise = routineExercise.exercise.name,
             restSeconds = routineExercise.restSeconds,
-            sets = routineExercise.sets.map { BackupSet(it.reps, it.weightKg, it.durationSeconds) },
+            sets = routineExercise.sets.map { BackupSet(it.reps, it.weightKg, it.durationSeconds, it.type) },
         )
     },
 )
@@ -72,7 +75,7 @@ fun BackupRoutine.toDomain(exercises: Map<String, Exercise>) = Routine(
     exercises = this.exercises.map { backup ->
         RoutineExercise(
             exercise = exercises.getValue(backup.exercise),
-            sets = backup.sets.map { PlannedSet(it.reps, it.weightKg, it.durationSeconds) },
+            sets = backup.sets.map { PlannedSet(it.reps, it.weightKg, it.durationSeconds, it.type) },
             restSeconds = backup.restSeconds,
         )
     },
@@ -87,7 +90,7 @@ fun WorkoutSession.toBackup() = BackupWorkout(
         BackupExerciseSets(
             exercise = workoutExercise.exercise.name,
             restSeconds = workoutExercise.restSeconds,
-            sets = workoutExercise.sets.map { BackupSet(it.reps, it.weightKg, it.durationSeconds) },
+            sets = workoutExercise.sets.map { BackupSet(it.reps, it.weightKg, it.durationSeconds, it.type, it.rpe) },
         )
     },
 )
@@ -104,8 +107,14 @@ fun BackupWorkout.toDomain(exercises: Map<String, Exercise>, routineIds: Map<Int
     exercises = this.exercises.map { backup ->
         WorkoutExercise(
             exercise = exercises.getValue(backup.exercise),
-            sets = backup.sets.map { LoggedSet(it.reps, it.weightKg, it.durationSeconds, isCompleted = true) },
+            sets = backup.sets.map {
+                LoggedSet(it.reps, it.weightKg, it.durationSeconds, isCompleted = true, type = it.type, rpe = it.rpe)
+            },
             restSeconds = backup.restSeconds,
         )
     },
 )
+
+fun BodyWeight.toBackup() = BackupBodyWeight(dateEpochDay = date.toEpochDay(), weightKg = weightKg)
+
+fun BackupBodyWeight.toDomain() = BodyWeight(date = LocalDate.ofEpochDay(dateEpochDay), weightKg = weightKg)
