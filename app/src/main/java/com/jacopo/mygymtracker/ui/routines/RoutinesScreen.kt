@@ -18,12 +18,15 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumExtendedFloatingActionButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -79,6 +82,7 @@ fun RoutinesScreen(
     onUndoDelete: (routineId: Int) -> Unit,
     onConfirmDelete: (routineId: Int) -> Unit,
     onStartWorkout: (Routine) -> Unit,
+    onStartEmptyWorkout: () -> Unit,
     onResumeWorkout: (sessionId: Int) -> Unit,
     onDiscardActiveAndStart: () -> Unit,
     onDismissStartConflict: () -> Unit,
@@ -144,6 +148,14 @@ fun RoutinesScreen(
                             .padding(bottom = 16.dp),
                     )
                 }
+            }
+            item(key = "empty-workout") {
+                EmptyWorkoutItem(
+                    onStart = onStartEmptyWorkout,
+                    modifier = Modifier
+                        .animateItem()
+                        .padding(bottom = 16.dp),
+                )
             }
             item(key = "section") {
                 SectionLabel(
@@ -221,6 +233,27 @@ private fun HeaderPills(routineCount: Int, lastWorkout: WorkoutSummary?) {
                 overflow = TextOverflow.Ellipsis,
             )
         }
+    }
+}
+
+/** Starts a workout with no routine behind it; styled as a one-row group like a routine row. */
+@Composable
+private fun EmptyWorkoutItem(onStart: () -> Unit, modifier: Modifier = Modifier) {
+    SegmentedListItem(
+        onClick = onStart,
+        shapes = ListItemDefaults.segmentedShapes(index = 0, count = 1),
+        modifier = modifier,
+        supportingContent = { Text(stringResource(R.string.routines_empty_workout_hint)) },
+        trailingContent = {
+            FilledTonalIconButton(onClick = onStart, shapes = IconButtonDefaults.shapes()) {
+                Icon(
+                    imageVector = Icons.Default.PlayArrow,
+                    contentDescription = stringResource(R.string.routines_empty_workout_start),
+                )
+            }
+        },
+    ) {
+        Text(text = stringResource(R.string.routines_empty_workout), fontWeight = FontWeight.SemiBold)
     }
 }
 
@@ -385,6 +418,7 @@ private fun RoutinesScreenPreview() {
             onUndoDelete = {},
             onConfirmDelete = {},
             onStartWorkout = {},
+            onStartEmptyWorkout = {},
             onResumeWorkout = {},
             onDiscardActiveAndStart = {},
             onDismissStartConflict = {},

@@ -5,10 +5,12 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.ui.components.LocalNavAnimatedVisibilityScope
 import com.jacopo.mygymtracker.ui.routines.RoutinesScreen
 import com.jacopo.mygymtracker.ui.routines.RoutinesViewModel
@@ -38,6 +40,7 @@ fun NavGraphBuilder.routinesDestination(
         }
 
         CompositionLocalProvider(LocalNavAnimatedVisibilityScope provides this) {
+            val emptyWorkoutName = stringResource(R.string.workout_default_name)
             RoutinesScreen(
                 uiState = uiState,
                 onCreateRoutine = onCreateRoutine,
@@ -46,6 +49,7 @@ fun NavGraphBuilder.routinesDestination(
                 onUndoDelete = viewModel::undoDelete,
                 onConfirmDelete = viewModel::confirmDelete,
                 onStartWorkout = viewModel::startWorkout,
+                onStartEmptyWorkout = { viewModel.startEmptyWorkout(emptyWorkoutName) },
                 onResumeWorkout = onOpenWorkout,
                 onDiscardActiveAndStart = viewModel::discardActiveAndStart,
                 onDismissStartConflict = viewModel::dismissStartConflict,

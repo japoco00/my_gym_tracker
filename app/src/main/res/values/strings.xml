@@ -49,6 +49,9 @@
     <string name="routine_no_exercises">No exercises yet</string>
     <string name="routine_start">Start %1$s</string>
     <string name="routine_resume">Resume %1$s</string>
+    <string name="routines_empty_workout">Empty workout</string>
+    <string name="routines_empty_workout_hint">Add exercises as you go</string>
+    <string name="routines_empty_workout_start">Start an empty workout</string>
 
     <!-- Workout -->
     <string name="workout_resume">Resume</string>
@@ -87,6 +90,10 @@
     <string name="workout_update_routine_message">This workout differs from the routine. Save its exercises, sets, weights and reps as the new plan?</string>
     <string name="workout_update_routine">Update</string>
     <string name="workout_keep_routine">Keep routine</string>
+    <string name="workout_default_name">Workout</string>
+    <string name="workout_save_as_routine_title">Save as routine?</string>
+    <string name="workout_save_as_routine_message">Keep this workout’s exercises, sets, weights and reps as a new routine to start from next time.</string>
+    <string name="workout_not_now">Not now</string>
 
     <!-- History -->
     <string name="history_title">History</string>

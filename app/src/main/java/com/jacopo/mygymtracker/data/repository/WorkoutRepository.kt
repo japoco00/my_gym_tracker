@@ -35,13 +35,13 @@ class WorkoutRepository(
         workoutDao.getWithExercises(sessionId)?.toDomain()
 
     /**
-     * Starts a workout pre-filled with [routine]'s plan, which needs at least one exercise.
+     * Starts a workout pre-filled with [routine]'s plan. A routine without exercises (never saved,
+     * `id == null`) gives an empty workout the user fills as they go.
      *
      * @return the id of the new session, or `null` if another workout is already in progress.
      */
     suspend fun startWorkout(routine: Routine, now: Instant = Instant.now()): Int? =
         database.withTransaction {
-            require(routine.exercises.isNotEmpty()) { "Cannot start a workout without exercises" }
             if (workoutDao.hasActive()) return@withTransaction null
             val workout = routine.toWorkoutSession(startedAt = now)
             val sessionId = workoutDao.insertSession(workout.toEntity()).toInt()

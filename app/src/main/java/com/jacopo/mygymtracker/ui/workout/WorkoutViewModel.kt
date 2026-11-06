@@ -49,8 +49,11 @@ class WorkoutViewModel(
     /** Finish or discard in progress; both end the workout, so only the first one runs. */
     private var closeJob: Job? = null
 
-    /** The routine rewritten with the finished workout's plan, waiting for the user's answer. */
-    private var routineUpdate: Routine? = null
+    /**
+     * Routine to save if the user agrees: the workout's own routine rewritten with what was done,
+     * or a new routine when the workout was started empty.
+     */
+    private var pendingRoutine: Routine? = null
 
     init {
         loadWorkout()
@@ -252,7 +255,10 @@ class WorkoutViewModel(
         _uiState.update { it.copy(dialog = null) }
     }
 
-    /** Stores the workout as finished, then offers to update the routine if the plan changed. */
+    /**
+     * Stores the workout as finished, then offers to update the routine if the plan changed,
+     * or to save it as a new routine if it was started empty.
+     */
     fun confirmFinish() {
         if (closeJob != null) return
         _uiState.update { it.copy(dialog = null) }
@@ -269,16 +275,21 @@ class WorkoutViewModel(
 
             // Compared with every set, checked or not: unchecked sets still describe the plan.
             val performedPlan = workout.toRoutineExercises()
-            routineUpdate = workout.routineId
-                ?.let { routineRepository.getRoutine(it) }
-                ?.takeIf { it.exercises != performedPlan }
-                ?.copy(exercises = performedPlan)
+            val routineId = workout.routineId
+            pendingRoutine = if (routineId == null) {
+                Routine(name = workout.routineName, exercises = performedPlan)
+            } else {
+                routineRepository.getRoutine(routineId)
+                    ?.takeIf { it.exercises != performedPlan }
+                    ?.copy(exercises = performedPlan)
+            }
+            val dialog = when {
+                pendingRoutine == null -> null
+                routineId == null -> WorkoutDialog.SaveAsRoutine
+                else -> WorkoutDialog.UpdateRoutine
+            }
             _uiState.update {
-                if (routineUpdate != null) {
-                    it.copy(dialog = WorkoutDialog.UpdateRoutine)
-                } else {
-                    it.copy(exit = WorkoutExit.FINISHED)
-                }
+                if (dialog != null) it.copy(dialog = dialog) else it.copy(exit = WorkoutExit.FINISHED)
             }
         }
     }
@@ -295,10 +306,10 @@ class WorkoutViewModel(
         }
     }
 
-    /** Answers the "update routine?" question. The save outlives this screen. */
-    fun resolveRoutineUpdate(update: Boolean) {
-        val routine = routineUpdate?.takeIf { update }
-        routineUpdate = null
+    /** Answers the "update routine?" or "save as routine?" question. The save outlives this screen. */
+    fun resolvePendingRoutine(save: Boolean) {
+        val routine = pendingRoutine?.takeIf { save }
+        pendingRoutine = null
         if (routine != null) applicationScope.launch { routineRepository.saveRoutine(routine) }
         _uiState.update { it.copy(dialog = null, exit = WorkoutExit.FINISHED) }
     }

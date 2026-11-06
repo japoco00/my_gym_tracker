@@ -105,7 +105,7 @@ fun WorkoutScreen(
     onConfirmFinish: () -> Unit,
     onConfirmDiscard: () -> Unit,
     onConfirmRemoveExercise: (exerciseKey: String) -> Unit,
-    onResolveRoutineUpdate: (update: Boolean) -> Unit,
+    onResolvePendingRoutine: (save: Boolean) -> Unit,
     onDismissDialog: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -115,7 +115,7 @@ fun WorkoutScreen(
         onConfirmFinish = onConfirmFinish,
         onConfirmDiscard = onConfirmDiscard,
         onConfirmRemoveExercise = onConfirmRemoveExercise,
-        onResolveRoutineUpdate = onResolveRoutineUpdate,
+        onResolvePendingRoutine = onResolvePendingRoutine,
         onDismiss = onDismissDialog,
     )
 
@@ -380,7 +380,7 @@ private fun WorkoutDialogHost(
     onConfirmFinish: () -> Unit,
     onConfirmDiscard: () -> Unit,
     onConfirmRemoveExercise: (exerciseKey: String) -> Unit,
-    onResolveRoutineUpdate: (update: Boolean) -> Unit,
+    onResolvePendingRoutine: (save: Boolean) -> Unit,
     onDismiss: () -> Unit,
 ) {
     when (dialog) {
@@ -444,17 +444,32 @@ private fun WorkoutDialogHost(
             },
         )
         WorkoutDialog.UpdateRoutine -> AlertDialog(
-            onDismissRequest = { onResolveRoutineUpdate(false) },
+            onDismissRequest = { onResolvePendingRoutine(false) },
             title = { Text(stringResource(R.string.workout_update_routine_title, routineName)) },
             text = { Text(stringResource(R.string.workout_update_routine_message)) },
             confirmButton = {
-                TextButton(onClick = { onResolveRoutineUpdate(true) }) {
+                TextButton(onClick = { onResolvePendingRoutine(true) }) {
                     Text(stringResource(R.string.workout_update_routine))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { onResolveRoutineUpdate(false) }) {
+                TextButton(onClick = { onResolvePendingRoutine(false) }) {
                     Text(stringResource(R.string.workout_keep_routine))
+                }
+            },
+        )
+        WorkoutDialog.SaveAsRoutine -> AlertDialog(
+            onDismissRequest = { onResolvePendingRoutine(false) },
+            title = { Text(stringResource(R.string.workout_save_as_routine_title)) },
+            text = { Text(stringResource(R.string.workout_save_as_routine_message)) },
+            confirmButton = {
+                TextButton(onClick = { onResolvePendingRoutine(true) }) {
+                    Text(stringResource(R.string.action_save))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { onResolvePendingRoutine(false) }) {
+                    Text(stringResource(R.string.workout_not_now))
                 }
             },
         )
@@ -528,7 +543,7 @@ private fun WorkoutScreenSample(restTimer: RestTimer?) {
             onConfirmFinish = {},
             onConfirmDiscard = {},
             onConfirmRemoveExercise = {},
-            onResolveRoutineUpdate = {},
+            onResolvePendingRoutine = {},
             onDismissDialog = {},
         )
     }

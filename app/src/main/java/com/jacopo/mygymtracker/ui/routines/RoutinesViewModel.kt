@@ -85,6 +85,11 @@ class RoutinesViewModel(
         startJob = viewModelScope.launch { start(routine) }
     }
 
+    /** Starts a workout with no exercises and no routine behind it, called [name]. */
+    fun startEmptyWorkout(name: String) {
+        startWorkout(Routine(name = name))
+    }
+
     /** Throws away the running workout and starts the one that caused the conflict. */
     fun discardActiveAndStart() {
         val routine = startConflict.value ?: return

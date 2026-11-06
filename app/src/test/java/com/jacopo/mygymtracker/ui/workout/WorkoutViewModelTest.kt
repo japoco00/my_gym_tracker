@@ -20,6 +20,7 @@ import com.jacopo.mygymtracker.domain.model.LoggedSet
 import com.jacopo.mygymtracker.domain.model.PlannedSet
 import com.jacopo.mygymtracker.domain.model.Routine
 import com.jacopo.mygymtracker.domain.model.UserSettings
+import com.jacopo.mygymtracker.domain.model.WorkoutExercise
 import com.jacopo.mygymtracker.resttimer.RestTimerController
 import com.jacopo.mygymtracker.ui.MainDispatcherRule
 import com.jacopo.mygymtracker.ui.components.EditingSet
@@ -119,13 +120,31 @@ class WorkoutViewModelTest {
 
         viewModel.confirmFinish()
         viewModel.uiState.first { it.dialog == WorkoutDialog.UpdateRoutine }
-        viewModel.resolveRoutineUpdate(update = true)
+        viewModel.resolvePendingRoutine(save = true)
 
         assertEquals(WorkoutExit.FINISHED, viewModel.uiState.value.exit)
         val plan = routines.observeRoutines()
             .map { it.single().exercises.single().sets }
             .first { it.first().reps == 6 }
         assertEquals(listOf(PlannedSet(6, 100.0), PlannedSet(5, 100.0)), plan)
+    }
+
+    @Test
+    fun confirmFinish_onEmptyWorkout_savesItAsRoutineOnRequest() = runTest {
+        val sessionId = workouts.startWorkout(Routine(name = "Workout"))!!
+        val squat = WorkoutExercise(newExercise("Squat"), listOf(LoggedSet(reps = 5, weightKg = 100.0)))
+        workouts.saveDraft(workouts.getWorkout(sessionId)!!.copy(exercises = listOf(squat)))
+        val viewModel = loadedViewModel(sessionId)
+        viewModel.completeFirstSet()
+
+        viewModel.confirmFinish()
+        viewModel.uiState.first { it.dialog == WorkoutDialog.SaveAsRoutine }
+        viewModel.resolvePendingRoutine(save = true)
+
+        assertEquals(WorkoutExit.FINISHED, viewModel.uiState.value.exit)
+        val saved = routines.observeRoutines().first { it.isNotEmpty() }.single()
+        assertEquals("Workout", saved.name)
+        assertEquals(listOf(PlannedSet(5, 100.0)), saved.exercises.single().sets)
     }
 
     @Test

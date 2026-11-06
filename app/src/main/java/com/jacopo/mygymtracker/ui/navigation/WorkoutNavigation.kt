@@ -72,7 +72,7 @@ fun NavGraphBuilder.workoutDestination(
             onConfirmFinish = viewModel::confirmFinish,
             onConfirmDiscard = viewModel::confirmDiscard,
             onConfirmRemoveExercise = viewModel::confirmRemoveExercise,
-            onResolveRoutineUpdate = viewModel::resolveRoutineUpdate,
+            onResolvePendingRoutine = viewModel::resolvePendingRoutine,
             onDismissDialog = viewModel::dismissDialog,
         )
     }

@@ -102,6 +102,9 @@ sealed interface WorkoutDialog {
 
     /** The workout is finished and differs from its routine's plan. */
     data object UpdateRoutine : WorkoutDialog
+
+    /** The workout is finished and was started empty, so no routine holds its plan yet. */
+    data object SaveAsRoutine : WorkoutDialog
 }
 
 // region Mappers
