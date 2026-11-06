@@ -48,3 +48,19 @@ internal val MIGRATION_5_6 = object : Migration(5, 6) {
         )
     }
 }
+
+/**
+ * Adds a set type to planned and logged sets (existing sets become normal ones),
+ * an optional RPE to logged sets, and the body weight log.
+ */
+internal val MIGRATION_6_7 = object : Migration(6, 7) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE planned_sets ADD COLUMN type TEXT NOT NULL DEFAULT 'NORMAL'")
+        db.execSQL("ALTER TABLE logged_sets ADD COLUMN type TEXT NOT NULL DEFAULT 'NORMAL'")
+        db.execSQL("ALTER TABLE logged_sets ADD COLUMN rpe REAL")
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS body_weights " +
+                "(dateEpochDay INTEGER NOT NULL, weightKg REAL NOT NULL, PRIMARY KEY(dateEpochDay))",
+        )
+    }
+}

@@ -73,12 +73,14 @@ fun PlannedSet.toEntity(routineExerciseId: Int, position: Int): PlannedSetEntity
     reps = reps,
     weightKg = weightKg,
     durationSeconds = durationSeconds,
+    type = type,
 )
 
 fun PlannedSetEntity.toDomain(): PlannedSet = PlannedSet(
     reps = reps,
     weightKg = weightKg,
     durationSeconds = durationSeconds,
+    type = type,
 )
 
 // endregion
@@ -117,6 +119,8 @@ fun LoggedSet.toEntity(workoutExerciseId: Int, position: Int): LoggedSetEntity =
     weightKg = weightKg,
     durationSeconds = durationSeconds,
     isCompleted = isCompleted,
+    type = type,
+    rpe = rpe,
 )
 
 fun LoggedSetEntity.toDomain(): LoggedSet = LoggedSet(
@@ -124,6 +128,8 @@ fun LoggedSetEntity.toDomain(): LoggedSet = LoggedSet(
     weightKg = weightKg,
     durationSeconds = durationSeconds,
     isCompleted = isCompleted,
+    type = type,
+    rpe = rpe,
 )
 
 fun WorkoutSummaryRow.toDomain(): WorkoutSummary = WorkoutSummary(
@@ -147,6 +153,7 @@ fun List<ExerciseHistoryRow>.toExerciseHistory(): List<ExerciseHistoryEntry> =
                     weightKg = it.weightKg,
                     durationSeconds = it.durationSeconds,
                     isCompleted = true,
+                    type = it.type,
                 )
             },
         )

@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.jacopo.mygymtracker.domain.model.SetType
 
 /** A planned set of a [RoutineExerciseEntity], ordered by [position]. */
 @Entity(
@@ -28,4 +29,6 @@ data class PlannedSetEntity(
     val weightKg: Double,
     @ColumnInfo(defaultValue = "0")
     val durationSeconds: Int = 0,
+    @ColumnInfo(defaultValue = "'NORMAL'")
+    val type: SetType = SetType.NORMAL,
 )

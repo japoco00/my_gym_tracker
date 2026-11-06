@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.jacopo.mygymtracker.domain.model.SetType
 
 /** A set performed in a [WorkoutExerciseEntity], ordered by [position]. */
 @Entity(
@@ -29,4 +30,7 @@ data class LoggedSetEntity(
     @ColumnInfo(defaultValue = "0")
     val durationSeconds: Int = 0,
     val isCompleted: Boolean,
+    @ColumnInfo(defaultValue = "'NORMAL'")
+    val type: SetType = SetType.NORMAL,
+    val rpe: Double? = null,
 )

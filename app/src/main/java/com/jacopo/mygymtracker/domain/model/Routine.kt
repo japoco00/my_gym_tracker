@@ -30,4 +30,5 @@ data class PlannedSet(
     val reps: Int = 0,
     val weightKg: Double = 0.0,
     val durationSeconds: Int = 0,
+    val type: SetType = SetType.NORMAL,
 )

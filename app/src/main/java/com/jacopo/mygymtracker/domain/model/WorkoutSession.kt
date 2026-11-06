@@ -3,7 +3,7 @@ package com.jacopo.mygymtracker.domain.model
 import java.time.Instant
 
 /**
- * A workout performed from a routine. It is in progress while [finishedAt] is `null`.
+ * A workout, started from a routine or empty ([routineId] `null`). It is in progress while [finishedAt] is `null`.
  * [routineName] is a snapshot taken at start, so history keeps it after the routine changes.
  */
 data class WorkoutSession(
@@ -22,12 +22,18 @@ data class WorkoutExercise(
     val restSeconds: Int? = null,
 )
 
-/** A performed set; like [PlannedSet], the fields that matter depend on the exercise's [TrackingType]. */
+/**
+ * A performed set; like [PlannedSet], the fields that matter depend on the exercise's [TrackingType].
+ *
+ * @property rpe rate of perceived exertion, 6 to 10 in steps of 0.5, or `null` when not logged.
+ */
 data class LoggedSet(
     val reps: Int = 0,
     val weightKg: Double = 0.0,
     val durationSeconds: Int = 0,
     val isCompleted: Boolean = false,
+    val type: SetType = SetType.NORMAL,
+    val rpe: Double? = null,
 )
 
 /** Starts a workout pre-filled with the routine's plan. */
@@ -39,7 +45,7 @@ fun Routine.toWorkoutSession(startedAt: Instant): WorkoutSession = WorkoutSessio
         WorkoutExercise(
             exercise = routineExercise.exercise,
             sets = routineExercise.sets.map {
-                LoggedSet(reps = it.reps, weightKg = it.weightKg, durationSeconds = it.durationSeconds)
+                LoggedSet(reps = it.reps, weightKg = it.weightKg, durationSeconds = it.durationSeconds, type = it.type)
             },
             restSeconds = routineExercise.restSeconds,
         )
@@ -58,7 +64,7 @@ fun WorkoutSession.toRoutineExercises(): List<RoutineExercise> = exercises.map {
     RoutineExercise(
         exercise = exercise.exercise,
         sets = exercise.sets.map {
-            PlannedSet(reps = it.reps, weightKg = it.weightKg, durationSeconds = it.durationSeconds)
+            PlannedSet(reps = it.reps, weightKg = it.weightKg, durationSeconds = it.durationSeconds, type = it.type)
         },
         restSeconds = exercise.restSeconds,
     )

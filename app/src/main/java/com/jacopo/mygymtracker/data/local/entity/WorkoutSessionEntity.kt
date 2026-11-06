@@ -6,7 +6,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
- * A workout performed from a routine. [finishedAtEpochMs] is `null` while the workout is in progress.
+ * A workout, started from a routine or empty ([routineId] `null`). [finishedAtEpochMs] is `null` while it is in progress.
  * [routineName] is a snapshot, so history keeps its label after the routine is renamed or deleted.
  */
 @Entity(

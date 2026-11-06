@@ -85,6 +85,38 @@ class MigrationsTest {
         }
     }
 
+    @Test
+    fun migrate6To7_marksExistingSetsNormalAndAddsBodyWeights() {
+        helper.createDatabase(DB_NAME, 6).use { db ->
+            db.execSQL("INSERT INTO exercises (exerciseId, name, category, trackingType) VALUES (1, 'Squat', 'LEGS', 'WEIGHT_REPS')")
+            db.execSQL("INSERT INTO routines (routineId, name) VALUES (1, 'Legs')")
+            db.execSQL("INSERT INTO routine_exercises (routineExerciseId, routineId, exerciseId, position) VALUES (1, 1, 1, 0)")
+            db.execSQL("INSERT INTO planned_sets (routineExerciseId, position, reps, weightKg) VALUES (1, 0, 5, 100.0)")
+            db.execSQL("INSERT INTO workout_sessions (sessionId, routineName, startedAtEpochMs) VALUES (1, 'Legs', 0)")
+            db.execSQL("INSERT INTO workout_exercises (workoutExerciseId, sessionId, exerciseId, position) VALUES (1, 1, 1, 0)")
+            db.execSQL(
+                "INSERT INTO logged_sets (workoutExerciseId, position, reps, weightKg, isCompleted) VALUES (1, 0, 5, 100.0, 1)",
+            )
+        }
+
+        val db = helper.runMigrationsAndValidate(DB_NAME, 7, true, MIGRATION_6_7)
+
+        db.query("SELECT type FROM planned_sets").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals("NORMAL", cursor.getString(0))
+        }
+        db.query("SELECT type, rpe FROM logged_sets").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals("NORMAL", cursor.getString(0))
+            assertTrue("RPE should be unset", cursor.isNull(1))
+        }
+        db.execSQL("INSERT INTO body_weights (dateEpochDay, weightKg) VALUES (19000, 80.5)")
+        db.query("SELECT weightKg FROM body_weights").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals(80.5, cursor.getDouble(0), 0.0)
+        }
+    }
+
     private companion object {
         const val DB_NAME = "migration-test"
     }
