@@ -113,9 +113,12 @@ com.jacopo.mygymtracker
 - **Scaffolds**: Each screen owns its `Scaffold` and top bar, built with the shared `ui/components/AppHeader` (big collapsing title, `Pill` facts, rounded `surfaceContainer` block). `MyGymTrackerApp` shows the bottom `ShortNavigationBar` only on tab roots (`TopLevelDestination`), so detail screens are full screen.
 - **Shared building blocks** (`ui/components/`): every screen follows the workout screen's Material 3 Expressive style. Reuse these instead of writing a feature-local variant:
   - `AppHeader`: a `String` title, or a composable `(expanded) -> Unit` title for custom content such as the routine editor's editable name. Expanded titles use `Typography.headerTitle`.
-  - `Pill` for header facts, `SectionLabel` for list section titles, `ShapeBadge` for a short value + label inside a `MaterialShapes` shape in `AppHeader`'s actions (stays visible when collapsed). Animate only the shape through its `shapeModifier`.
+  - `Pill` for header facts (`Pill(icon, text)` for the usual icon + text), `SectionLabel` for list section titles, `ShapeBadge` for a short value + label inside a `MaterialShapes` shape in `AppHeader`'s actions (stays visible when collapsed). Animate only the shape through its `shapeModifier`.
+  - `BackButton` leaves a detail screen; `EmptyStateText` is the grey line of an empty screen or list.
   - `PrTag`: the personal-record star tag, shared by the live workout and history.
   - `SetRow` + `SetNumber`: the one set row for workouts, history and routines; tapping an editable row opens `SetEditorSheet`.
+  - `ExerciseTitle` heads every exercise section (name over a subtitle, trailing slot for its menu); `AddSetButton` and `AddExercisesButton` are the add actions under sets and at the end of the list.
+  - `AppBottomSheet` wraps every modal sheet: it opens fully expanded, and its `hideThen` slides the sheet away before running an action.
   - `SetEditorSheet`: the only set editor (`RepsField` / `WeightField` / `DurationField` with steppers). Passing `isCompleted = null` gives plan mode (routines: no completion toggle, no previous values). Pass `plates` for barbell exercises to show the plates per side. Pass `onRpeChange` only for logged sets (workouts, history), never for a plan.
   - `RestChip` + `RestEditorSheet` show and edit an exercise's rest (`null` = the settings default) in the routine editor and the workout.
   - `ExerciseEditorSheet` creates or edits a catalog exercise. Pass `isNameTaken` so duplicate names can't be saved.
