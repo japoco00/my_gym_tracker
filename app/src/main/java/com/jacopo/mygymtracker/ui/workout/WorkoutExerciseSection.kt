@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -87,6 +88,7 @@ private const val PR_HAPTIC_DELAY_MS = 150L
  * The next set to do is highlighted.
  *
  * @param onStartRest starts this exercise's rest by hand; null hides the button, as the rest starts on its own.
+ * @param onWarmUp opens the warm-up sets for this exercise; null hides the menu item, as there's no weight to warm up for.
  */
 @Composable
 fun WorkoutExerciseSection(
@@ -96,6 +98,7 @@ fun WorkoutExerciseSection(
     weightUnit: WeightUnit,
     defaultRestSeconds: Int,
     onRemove: () -> Unit,
+    onWarmUp: (() -> Unit)?,
     onAddSet: () -> Unit,
     onEditRest: () -> Unit,
     onStartRest: (() -> Unit)?,
@@ -129,7 +132,18 @@ fun WorkoutExerciseSection(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            DestructiveOverflowMenu(action = stringResource(R.string.action_remove_exercise), onAction = onRemove)
+            DestructiveOverflowMenu(action = stringResource(R.string.action_remove_exercise), onAction = onRemove) { close ->
+                if (onWarmUp != null) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.warm_up_add)) },
+                        leadingIcon = { Icon(imageVector = Icons.Default.Add, contentDescription = null) },
+                        onClick = {
+                            close()
+                            onWarmUp()
+                        },
+                    )
+                }
+            }
         }
         sets.forEachIndexed { index, set ->
             key(set.key) {
@@ -312,6 +326,7 @@ private fun WorkoutExerciseSectionPreview() {
             weightUnit = WeightUnit.KG,
             defaultRestSeconds = 90,
             onRemove = {},
+            onWarmUp = {},
             onAddSet = {},
             onEditRest = {},
             onStartRest = null,

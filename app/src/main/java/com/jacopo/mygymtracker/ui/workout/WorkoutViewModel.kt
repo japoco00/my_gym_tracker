@@ -14,6 +14,7 @@ import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.Routine
 import com.jacopo.mygymtracker.domain.model.SetType
 import com.jacopo.mygymtracker.domain.model.toRoutineExercises
+import com.jacopo.mygymtracker.domain.warmup.warmUpSets
 import com.jacopo.mygymtracker.resttimer.RestTimerController
 import com.jacopo.mygymtracker.ui.components.EditingSet
 import kotlinx.coroutines.CoroutineScope
@@ -158,8 +159,28 @@ class WorkoutViewModel(
                 dialog = null,
                 editingSet = state.editingSet?.takeIf { it.exerciseKey != exerciseKey },
                 editingRestKey = state.editingRestKey?.takeIf { it != exerciseKey },
+                warmUpPreviewKey = state.warmUpPreviewKey?.takeIf { it != exerciseKey },
             )
         }
+    }
+
+    fun openWarmUpPreview(exerciseKey: String) {
+        _uiState.update { it.copy(warmUpPreviewKey = exerciseKey) }
+    }
+
+    fun closeWarmUpPreview() {
+        _uiState.update { it.copy(warmUpPreviewKey = null) }
+    }
+
+    /** Puts warm-up sets before the others, ramping up to the first working set. */
+    fun addWarmUpSets(exerciseKey: String) {
+        val unit = _uiState.value.weightUnit
+        updateExercise(exerciseKey) { exercise ->
+            val targetKg = exercise.warmUpTargetKg ?: return@updateExercise exercise
+            val warmUps = warmUpSets(targetKg, exercise.exercise.isBarbell, unit).map { it.toUiState() }
+            exercise.copy(sets = warmUps + exercise.sets)
+        }
+        closeWarmUpPreview()
     }
 
     fun openRestEditor(exerciseKey: String) {

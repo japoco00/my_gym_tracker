@@ -90,6 +90,9 @@ fun WorkoutScreen(
     onDismissAddExercises: () -> Unit,
     onConfirmAddExercises: (List<Exercise>) -> Unit,
     onRemoveExercise: (exerciseKey: String) -> Unit,
+    onOpenWarmUp: (exerciseKey: String) -> Unit,
+    onCloseWarmUp: () -> Unit,
+    onAddWarmUpSets: (exerciseKey: String) -> Unit,
     onAddSet: (exerciseKey: String) -> Unit,
     onOpenRestEditor: (exerciseKey: String) -> Unit,
     onStartRest: (exerciseKey: String) -> Unit,
@@ -173,6 +176,7 @@ fun WorkoutScreen(
                     weightUnit = uiState.weightUnit,
                     defaultRestSeconds = uiState.defaultRestSeconds,
                     onRemove = { onRemoveExercise(exerciseKey) },
+                    onWarmUp = if (exercise.warmUpTargetKg == null) null else { { onOpenWarmUp(exerciseKey) } },
                     onAddSet = { onAddSet(exerciseKey) },
                     onEditRest = { onOpenRestEditor(exerciseKey) },
                     onStartRest = if (uiState.autoStartRest) null else { { onStartRest(exerciseKey) } },
@@ -243,6 +247,18 @@ fun WorkoutScreen(
             defaultSeconds = uiState.defaultRestSeconds,
             onRestChange = { onRestChange(exerciseKey, it) },
             onDismiss = onCloseRestEditor,
+        )
+    }
+
+    uiState.warmUpPreviewKey?.let { exerciseKey ->
+        val exercise = uiState.exercises.find { it.key == exerciseKey } ?: return@let
+        WarmUpSheet(
+            exerciseName = exercise.exercise.name,
+            targetKg = exercise.warmUpTargetKg ?: return@let,
+            isBarbell = exercise.exercise.isBarbell,
+            weightUnit = uiState.weightUnit,
+            onAdd = { onAddWarmUpSets(exerciseKey) },
+            onDismiss = onCloseWarmUp,
         )
     }
 
@@ -534,6 +550,9 @@ private fun WorkoutScreenSample(restTimer: RestTimer?) {
             onDismissAddExercises = {},
             onConfirmAddExercises = {},
             onRemoveExercise = {},
+            onOpenWarmUp = {},
+            onCloseWarmUp = {},
+            onAddWarmUpSets = {},
             onAddSet = {},
             onOpenRestEditor = {},
             onStartRest = {},

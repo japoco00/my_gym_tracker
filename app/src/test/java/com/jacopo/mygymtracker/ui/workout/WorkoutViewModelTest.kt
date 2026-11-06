@@ -183,6 +183,23 @@ class WorkoutViewModelTest {
     }
 
     @Test
+    fun warmUpSets_goBeforeTheWorkingSets() = runTest {
+        val viewModel = loadedViewModel(startWorkout())
+        val squat = viewModel.uiState.value.exercises.single()
+
+        viewModel.openWarmUpPreview(squat.key)
+        assertEquals(squat.key, viewModel.uiState.value.warmUpPreviewKey)
+        viewModel.addWarmUpSets(squat.key)
+
+        assertNull(viewModel.uiState.value.warmUpPreviewKey)
+        val warmUp = { reps: Int, kg: Double -> LoggedSet(reps, kg, type = SetType.WARM_UP) }
+        assertEquals(
+            listOf(warmUp(5, 40.0), warmUp(3, 60.0), warmUp(2, 80.0), LoggedSet(5, 100.0), LoggedSet(5, 100.0)),
+            awaitActiveSets { it.size == 5 },
+        )
+    }
+
+    @Test
     fun closingScreen_savesPendingEdits() = runTest {
         val viewModel = loadedViewModel(startWorkout())
         viewModel.updateFirstSetReps(8)

@@ -211,6 +211,10 @@
     <string name="set_with_rpe">%1$s · RPE %2$s</string>
     <string name="action_add_set">Add set</string>
     <string name="action_remove_exercise">Remove exercise</string>
+    <string name="warm_up_add">Add warm-up sets</string>
+    <string name="warm_up_title">Warm-up sets</string>
+    <!-- The first working set's weight, e.g. "Ramping up to 100 kg". -->
+    <string name="warm_up_target">Ramping up to %1$s</string>
 
     <!-- Exercise catalog -->
     <string name="exercises_title">Exercises</string>

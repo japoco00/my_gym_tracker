@@ -3,6 +3,7 @@ package com.jacopo.mygymtracker.ui.workout
 import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.LoggedSet
 import com.jacopo.mygymtracker.domain.model.SetType
+import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.domain.model.UserSettings
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.domain.model.WorkoutExercise
@@ -21,6 +22,7 @@ import kotlin.uuid.Uuid
  * @property restTimer the running rest between sets, or null.
  * @property editingSet the set open in the editor sheet, or null.
  * @property editingRestKey the key of the exercise whose rest is being edited, or null.
+ * @property warmUpPreviewKey the key of the exercise whose warm-up sets are being previewed, or null.
  * @property plates the plates owned in [weightUnit], for the set editor of barbell exercises.
  * @property autoStartRest whether ticking a set starts the rest; if not, each exercise offers a start button.
  * @property keepScreenOn whether the screen stays awake while the workout is open.
@@ -44,6 +46,7 @@ data class WorkoutUiState(
     val isAddExercisesSheetOpen: Boolean = false,
     val editingSet: EditingSet? = null,
     val editingRestKey: String? = null,
+    val warmUpPreviewKey: String? = null,
     val isLoading: Boolean = true,
     val exit: WorkoutExit? = null,
 ) {
@@ -80,7 +83,11 @@ data class WorkoutExerciseUiState @OptIn(ExperimentalUuidApi::class) constructor
     val exercise: Exercise,
     val sets: List<WorkoutSetUiState> = emptyList(),
     val restSeconds: Int? = null,
-)
+) {
+    /** The weight warm-up sets ramp up to: the first normal set's, or null when there's no weight to warm up for. */
+    val warmUpTargetKg: Double? = sets.firstOrNull { it.type == SetType.NORMAL }?.weightKg
+        ?.takeIf { exercise.trackingType == TrackingType.WEIGHT_REPS && it > 0 }
+}
 
 data class WorkoutSetUiState @OptIn(ExperimentalUuidApi::class) constructor(
     val key: String = Uuid.random().toString(),
