@@ -208,14 +208,10 @@ fun RoutinesScreen(
 
 @Composable
 private fun HeaderPills(routineCount: Int, lastWorkout: WorkoutSummary?) {
-    Pill {
-        Icon(
-            painter = painterResource(R.drawable.ic_fitness_center),
-            contentDescription = null,
-            modifier = Modifier.size(18.dp),
-        )
-        Text(text = pluralStringResource(R.plurals.routines_count, routineCount, routineCount))
-    }
+    Pill(
+        icon = painterResource(R.drawable.ic_fitness_center),
+        text = pluralStringResource(R.plurals.routines_count, routineCount, routineCount),
+    )
     if (lastWorkout != null) {
         Pill {
             Icon(

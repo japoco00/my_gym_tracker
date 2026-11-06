@@ -163,14 +163,7 @@ fun ExercisesScreen(
 
 @Composable
 private fun CatalogPill(count: Int) {
-    Pill {
-        Icon(
-            painter = painterResource(R.drawable.ic_list),
-            contentDescription = null,
-            modifier = Modifier.size(18.dp),
-        )
-        Text(text = pluralStringResource(R.plurals.exercises_catalog_count, count, count))
-    }
+    Pill(icon = painterResource(R.drawable.ic_list), text = pluralStringResource(R.plurals.exercises_catalog_count, count, count))
 }
 
 @Composable

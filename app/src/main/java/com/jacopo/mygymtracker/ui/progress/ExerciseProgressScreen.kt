@@ -137,14 +137,7 @@ private fun ProgressHeader(
         pills = {
             if (!uiState.isLoading) {
                 uiState.category?.let { category -> Pill { Text(text = category.label()) } }
-                Pill {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_history),
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                    )
-                    Text(text = workoutCount)
-                }
+                Pill(icon = painterResource(R.drawable.ic_history), text = workoutCount)
             }
         },
         collapsedSubtitle = { Text(text = workoutCount) },

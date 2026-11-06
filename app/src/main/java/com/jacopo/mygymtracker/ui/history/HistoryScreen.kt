@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.ListItemShapes
 import androidx.compose.material3.MaterialShapes
@@ -134,23 +133,15 @@ fun HistoryScreen(
 
 @Composable
 private fun HeaderPills(workoutCount: Int, streakWeeks: Int) {
-    Pill {
-        Icon(
-            painter = painterResource(R.drawable.ic_fitness_center),
-            contentDescription = null,
-            modifier = Modifier.size(18.dp),
-        )
-        Text(text = pluralStringResource(R.plurals.history_workout_count, workoutCount, workoutCount))
-    }
+    Pill(
+        icon = painterResource(R.drawable.ic_fitness_center),
+        text = pluralStringResource(R.plurals.history_workout_count, workoutCount, workoutCount),
+    )
     if (streakWeeks > 0) {
-        Pill {
-            Icon(
-                painter = painterResource(R.drawable.ic_history),
-                contentDescription = null,
-                modifier = Modifier.size(18.dp),
-            )
-            Text(text = pluralStringResource(R.plurals.history_week_streak, streakWeeks, streakWeeks))
-        }
+        Pill(
+            icon = painterResource(R.drawable.ic_history),
+            text = pluralStringResource(R.plurals.history_week_streak, streakWeeks, streakWeeks),
+        )
     }
 }
 

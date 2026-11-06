@@ -81,14 +81,7 @@ fun WorkoutHeader(
             DestructiveOverflowMenu(action = stringResource(R.string.workout_discard), onAction = onDiscard)
         },
         pills = {
-            Pill {
-                Icon(
-                    painter = painterResource(R.drawable.ic_timer),
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                )
-                Text(text = rememberElapsedTime(startedAt))
-            }
+            Pill(icon = painterResource(R.drawable.ic_timer), text = rememberElapsedTime(startedAt))
             Pill { Text(text = weightUnit.formatVolume(completedVolumeKg)) }
             AnimatedVisibility(
                 visible = prCount > 0,

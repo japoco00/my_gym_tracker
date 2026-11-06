@@ -317,14 +317,12 @@ private fun WorkoutDetailHeader(
             }
         },
         pills = {
-            Pill(modifier = Modifier.risingIn(celebration.pills[0])) {
-                Icon(painter = painterResource(R.drawable.ic_history), contentDescription = null, modifier = Modifier.size(18.dp))
-                Text(text = date)
-            }
-            Pill(modifier = Modifier.risingIn(celebration.pills[1])) {
-                Icon(painter = painterResource(R.drawable.ic_timer), contentDescription = null, modifier = Modifier.size(18.dp))
-                Text(text = formatDuration((uiState.durationSeconds * countUp).toLong()))
-            }
+            Pill(icon = painterResource(R.drawable.ic_history), text = date, modifier = Modifier.risingIn(celebration.pills[0]))
+            Pill(
+                icon = painterResource(R.drawable.ic_timer),
+                text = formatDuration((uiState.durationSeconds * countUp).toLong()),
+                modifier = Modifier.risingIn(celebration.pills[1]),
+            )
             if (uiState.volumeKg > 0) {
                 Pill(modifier = Modifier.risingIn(celebration.pills[2])) {
                     Text(text = uiState.weightUnit.formatVolume(uiState.volumeKg * countUp))

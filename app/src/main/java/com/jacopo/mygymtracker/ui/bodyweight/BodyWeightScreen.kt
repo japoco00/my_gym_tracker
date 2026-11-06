@@ -144,14 +144,7 @@ private fun BodyWeightHeader(
         },
         pills = {
             if (!uiState.isLoading) {
-                Pill {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_history),
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                    )
-                    Text(text = entryCount)
-                }
+                Pill(icon = painterResource(R.drawable.ic_history), text = entryCount)
             }
         },
         collapsedSubtitle = { Text(text = entryCount) },
