@@ -61,7 +61,8 @@
     <string name="workout_finish">Finish</string>
     <string name="workout_discard">Discard workout</string>
     <string name="workout_add_exercises">Add exercises</string>
-    <string name="workout_set_done">Set %1$d done</string>
+    <!-- %1$s is the set's name, e.g. "Set 2" or "Warm-up". -->
+    <string name="workout_set_done">%1$s done</string>
     <plurals name="workout_sets_progress">
         <item quantity="one">%1$d of %2$d set</item>
         <item quantity="other">%1$d of %2$d sets</item>
@@ -189,6 +190,14 @@
     <string name="set_decrease">Decrease %1$s</string>
     <string name="set_increase">Increase %1$s</string>
     <string name="set_delete">Delete set</string>
+    <string name="set_type_normal">Normal</string>
+    <string name="set_type_warm_up">Warm-up</string>
+    <string name="set_type_drop">Drop</string>
+    <string name="set_type_failure">Failure</string>
+    <!-- One-letter markers shown instead of the set number. -->
+    <string name="set_type_warm_up_short">W</string>
+    <string name="set_type_drop_short">D</string>
+    <string name="set_type_failure_short">F</string>
     <!-- Plates to load on each side of the bar, e.g. "Per side: 25 · 10 · 2.5". -->
     <string name="plates_per_side">Per side: %1$s</string>
     <!-- e.g. "Per side: 25 · 10, 0.5 kg short": the owned plates can't make up 0.5 kg per side. -->

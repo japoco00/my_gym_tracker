@@ -11,6 +11,7 @@ import com.jacopo.mygymtracker.data.repository.SettingsRepository
 import com.jacopo.mygymtracker.di.appContainer
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
+import com.jacopo.mygymtracker.domain.model.SetType
 import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.ui.components.EditingSet
 import kotlinx.coroutines.CoroutineScope
@@ -193,6 +194,10 @@ class RoutineDetailViewModel(
 
     fun updateSetDuration(exerciseKey: String, setKey: String, seconds: Int) {
         updateSet(exerciseKey, setKey) { it.copy(durationSeconds = seconds.coerceAtLeast(0)) }
+    }
+
+    fun updateSetType(exerciseKey: String, setKey: String, type: SetType) {
+        updateSet(exerciseKey, setKey) { it.copy(type = type) }
     }
 
     /** viewModelScope is already cancelled here, so pending edits are saved in the app scope. */

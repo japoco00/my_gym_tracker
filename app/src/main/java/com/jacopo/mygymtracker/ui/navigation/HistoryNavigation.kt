@@ -68,6 +68,7 @@ fun NavGraphBuilder.workoutDetailDestination(
             onRepsChange = viewModel::updateSetReps,
             onWeightChange = viewModel::updateSetWeight,
             onDurationChange = viewModel::updateSetDuration,
+            onTypeChange = viewModel::updateSetType,
             celebrate = route.celebrate,
         )
     }

@@ -25,13 +25,15 @@ import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.WeightUnit
+import com.jacopo.mygymtracker.domain.model.normalSetNumbers
 import com.jacopo.mygymtracker.ui.components.DestructiveOverflowMenu
 import com.jacopo.mygymtracker.ui.components.RestChip
-import com.jacopo.mygymtracker.ui.components.SetNumber
+import com.jacopo.mygymtracker.ui.components.SetMarker
 import com.jacopo.mygymtracker.ui.components.SetRow
 import com.jacopo.mygymtracker.ui.components.SwipeToDeleteContainer
 import com.jacopo.mygymtracker.ui.format.formatSet
 import com.jacopo.mygymtracker.ui.format.label
+import com.jacopo.mygymtracker.ui.format.setMarker
 import com.jacopo.mygymtracker.ui.theme.AppTheme
 
 /**
@@ -77,12 +79,13 @@ fun RoutineExerciseSection(
             }
             DestructiveOverflowMenu(action = stringResource(R.string.action_remove_exercise), onAction = onRemove)
         }
+        val numbers = exercise.sets.map { it.type }.normalSetNumbers()
         exercise.sets.forEachIndexed { index, set ->
             key(set.key) {
                 SwipeToDeleteContainer(onDelete = { onDeleteSet(set.key) }) {
                     SetRow(
                         value = formatSet(exercise.trackingType, weightUnit, set.reps, set.weightKg, set.durationSeconds),
-                        leading = { SetNumber(number = index + 1) },
+                        leading = { SetMarker(label = setMarker(numbers[index], set.type)) },
                         onClick = { onOpenSet(set.key) },
                     )
                 }

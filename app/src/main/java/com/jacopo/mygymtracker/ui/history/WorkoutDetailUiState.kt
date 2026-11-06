@@ -2,6 +2,7 @@ package com.jacopo.mygymtracker.ui.history
 
 import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.LoggedSet
+import com.jacopo.mygymtracker.domain.model.SetType
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.domain.model.WorkoutExercise
 import com.jacopo.mygymtracker.domain.model.WorkoutSession
@@ -57,19 +58,28 @@ data class EditableSetUiState @OptIn(ExperimentalUuidApi::class) constructor(
     val reps: Int = 0,
     val weightKg: Double = 0.0,
     val durationSeconds: Int = 0,
+    val type: SetType = SetType.NORMAL,
 )
 
 // region Mappers
 
 fun WorkoutExercise.toEditableUiState(): EditableExerciseUiState = EditableExerciseUiState(
     exercise = exercise,
-    sets = sets.map { EditableSetUiState(reps = it.reps, weightKg = it.weightKg, durationSeconds = it.durationSeconds) },
+    sets = sets.map {
+        EditableSetUiState(reps = it.reps, weightKg = it.weightKg, durationSeconds = it.durationSeconds, type = it.type)
+    },
 )
 
 fun EditableExerciseUiState.toDomain(): WorkoutExercise = WorkoutExercise(
     exercise = exercise,
     sets = sets.map {
-        LoggedSet(reps = it.reps, weightKg = it.weightKg, durationSeconds = it.durationSeconds, isCompleted = true)
+        LoggedSet(
+            reps = it.reps,
+            weightKg = it.weightKg,
+            durationSeconds = it.durationSeconds,
+            isCompleted = true,
+            type = it.type,
+        )
     },
 )
 

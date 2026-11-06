@@ -59,8 +59,10 @@ import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.LoggedSet
+import com.jacopo.mygymtracker.domain.model.SetType
 import com.jacopo.mygymtracker.domain.model.WorkoutExercise
 import com.jacopo.mygymtracker.domain.model.WorkoutSession
+import com.jacopo.mygymtracker.domain.model.normalSetNumbers
 import com.jacopo.mygymtracker.ui.components.AddExercisesSheet
 import com.jacopo.mygymtracker.ui.components.AppHeader
 import com.jacopo.mygymtracker.ui.components.DestructiveOverflowMenu
@@ -71,11 +73,11 @@ import com.jacopo.mygymtracker.ui.format.formatDate
 import com.jacopo.mygymtracker.ui.format.formatDuration
 import com.jacopo.mygymtracker.ui.format.formatVolume
 import com.jacopo.mygymtracker.ui.theme.AppTheme
+import java.time.Instant
+import kotlin.math.roundToInt
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.time.Instant
-import kotlin.math.roundToInt
 
 /** Lets the screen slide mostly in before the celebration starts. */
 private const val CELEBRATION_DELAY_MS = 300L
@@ -109,6 +111,7 @@ fun WorkoutDetailScreen(
     onRepsChange: (exerciseKey: String, setKey: String, Int) -> Unit,
     onWeightChange: (exerciseKey: String, setKey: String, Double) -> Unit,
     onDurationChange: (exerciseKey: String, setKey: String, seconds: Int) -> Unit,
+    onTypeChange: (exerciseKey: String, setKey: String, type: SetType) -> Unit,
     modifier: Modifier = Modifier,
     celebrate: Boolean = false,
 ) {
@@ -217,15 +220,17 @@ fun WorkoutDetailScreen(
         val set = exercise.sets[index]
         SetEditorSheet(
             exerciseName = exercise.exercise.name,
-            number = index + 1,
+            number = exercise.sets.map { it.type }.normalSetNumbers()[index],
             trackingType = exercise.exercise.trackingType,
             weightUnit = uiState.weightUnit,
             reps = set.reps,
             weightKg = set.weightKg,
             durationSeconds = set.durationSeconds,
+            type = set.type,
             onRepsChange = { onRepsChange(exerciseKey, setKey, it) },
             onWeightChange = { onWeightChange(exerciseKey, setKey, it) },
             onDurationChange = { onDurationChange(exerciseKey, setKey, it) },
+            onTypeChange = { onTypeChange(exerciseKey, setKey, it) },
             onDelete = { onDeleteSet(exerciseKey, setKey) },
             onDismiss = onCloseSetEditor,
             plates = uiState.plates.takeIf { exercise.exercise.isBarbell },
@@ -419,6 +424,7 @@ private fun WorkoutDetailScreenPreview() {
             onRepsChange = { _, _, _ -> },
             onWeightChange = { _, _, _ -> },
             onDurationChange = { _, _, _ -> },
+            onTypeChange = { _, _, _ -> },
         )
     }
 }

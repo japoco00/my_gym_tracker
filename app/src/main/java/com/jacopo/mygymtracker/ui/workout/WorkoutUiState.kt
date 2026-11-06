@@ -2,6 +2,7 @@ package com.jacopo.mygymtracker.ui.workout
 
 import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.LoggedSet
+import com.jacopo.mygymtracker.domain.model.SetType
 import com.jacopo.mygymtracker.domain.model.UserSettings
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.domain.model.WorkoutExercise
@@ -87,6 +88,7 @@ data class WorkoutSetUiState @OptIn(ExperimentalUuidApi::class) constructor(
     val weightKg: Double = 0.0,
     val durationSeconds: Int = 0,
     val isCompleted: Boolean = false,
+    val type: SetType = SetType.NORMAL,
 )
 
 sealed interface WorkoutDialog {
@@ -134,6 +136,7 @@ fun LoggedSet.toUiState(): WorkoutSetUiState = WorkoutSetUiState(
     weightKg = weightKg,
     durationSeconds = durationSeconds,
     isCompleted = isCompleted,
+    type = type,
 )
 
 fun WorkoutUiState.toDomain(sessionId: Int): WorkoutSession = WorkoutSession(
@@ -155,6 +158,7 @@ private fun WorkoutSetUiState.toLoggedSet(): LoggedSet = LoggedSet(
     weightKg = weightKg,
     durationSeconds = durationSeconds,
     isCompleted = isCompleted,
+    type = type,
 )
 
 // endregion

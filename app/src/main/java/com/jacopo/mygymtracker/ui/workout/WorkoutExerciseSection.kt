@@ -52,6 +52,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -63,13 +64,17 @@ import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.LoggedSet
+import com.jacopo.mygymtracker.domain.model.SetType
 import com.jacopo.mygymtracker.domain.model.WeightUnit
+import com.jacopo.mygymtracker.domain.model.normalSetNumbers
 import com.jacopo.mygymtracker.ui.components.DestructiveOverflowMenu
 import com.jacopo.mygymtracker.ui.components.PrTag
 import com.jacopo.mygymtracker.ui.components.RestChip
 import com.jacopo.mygymtracker.ui.components.SetRow
 import com.jacopo.mygymtracker.ui.components.SwipeToDeleteContainer
 import com.jacopo.mygymtracker.ui.format.formatSet
+import com.jacopo.mygymtracker.ui.format.setMarker
+import com.jacopo.mygymtracker.ui.format.setName
 import com.jacopo.mygymtracker.ui.theme.AppTheme
 import kotlinx.coroutines.delay
 
@@ -102,6 +107,7 @@ fun WorkoutExerciseSection(
     val sets = exercise.sets
     val doneCount = sets.count { it.isCompleted }
     val nextIndex = sets.indexOfFirst { !it.isCompleted }
+    val numbers = sets.map { it.type }.normalSetNumbers()
     Column(
         modifier = modifier
             .padding(top = 20.dp, bottom = 4.dp)
@@ -130,11 +136,14 @@ fun WorkoutExerciseSection(
                 SwipeToDeleteContainer(onDelete = { onDeleteSet(set.key) }) {
                     val trackingType = exercise.exercise.trackingType
                     val previous = previousSets.getOrNull(index)
+                    val number = numbers[index]
                     SetRow(
                         value = formatSet(trackingType, weightUnit, set.reps, set.weightKg, set.durationSeconds),
                         leading = {
                             SetCheck(
-                                number = index + 1,
+                                name = setName(number, set.type),
+                                // Normal sets keep the plain ring; the others show their letter until ticked.
+                                letter = if (set.type != SetType.NORMAL) setMarker(number, set.type) else null,
                                 checked = set.isCompleted,
                                 onCheckedChange = { completed -> onCompletedChange(set.key, completed) },
                             )
@@ -212,11 +221,13 @@ private fun LivePrTag(visible: Boolean) {
 
 /**
  * A ring that morphs into a filled, turning cookie with a tick once the set is done,
- * with a haptic tick each way.
+ * with a haptic tick each way. A [letter], if any, sits in the ring and fades out as it fills.
+ *
+ * @param name the set's name, e.g. "Set 2", for accessibility.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun SetCheck(number: Int, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+private fun SetCheck(name: String, letter: String?, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
     val progress by animateFloatAsState(
         targetValue = if (checked) 1f else 0f,
         animationSpec = MaterialTheme.motionScheme.fastSpatialSpec(),
@@ -226,7 +237,7 @@ private fun SetCheck(number: Int, checked: Boolean, onCheckedChange: (Boolean) -
     val fillColor = MaterialTheme.colorScheme.primary
     val ringColor = MaterialTheme.colorScheme.outline
     val haptics = LocalHapticFeedback.current
-    val description = stringResource(R.string.workout_set_done, number)
+    val description = stringResource(R.string.workout_set_done, name)
     IconToggleButton(
         checked = checked,
         onCheckedChange = { completed ->
@@ -257,6 +268,16 @@ private fun SetCheck(number: Int, checked: Boolean, onCheckedChange: (Boolean) -
                     }
                 },
         ) {
+            if (letter != null) {
+                Text(
+                    text = letter,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .clearAndSetSemantics {}
+                        .graphicsLayer { alpha = 1f - progress.coerceIn(0f, 1f) },
+                )
+            }
             Icon(
                 imageVector = Icons.Default.Check,
                 contentDescription = null,
@@ -280,6 +301,7 @@ private fun WorkoutExerciseSectionPreview() {
             exercise = WorkoutExerciseUiState(
                 exercise = Exercise(id = 1, name = "Bench Press", category = Category.CHEST),
                 sets = listOf(
+                    WorkoutSetUiState(reps = 10, weightKg = 40.0, isCompleted = true, type = SetType.WARM_UP),
                     record,
                     WorkoutSetUiState(reps = 8, weightKg = 80.0),
                     WorkoutSetUiState(reps = 8, weightKg = 80.0),

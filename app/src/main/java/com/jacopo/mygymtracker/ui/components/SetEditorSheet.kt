@@ -2,6 +2,7 @@ package com.jacopo.mygymtracker.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +16,7 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
@@ -27,6 +29,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -34,17 +37,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.LoggedSet
+import com.jacopo.mygymtracker.domain.model.SetType
 import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.domain.model.formatWeight
 import com.jacopo.mygymtracker.domain.plates.platesPerSide
 import com.jacopo.mygymtracker.ui.format.formatSet
 import com.jacopo.mygymtracker.ui.format.label
+import com.jacopo.mygymtracker.ui.format.setName
 import com.jacopo.mygymtracker.ui.theme.AppTheme
 import kotlinx.coroutines.launch
 
@@ -55,6 +64,7 @@ data class EditingSet(val exerciseKey: String, val setKey: String)
  * Edits one set with big stepper cards. Values are saved as they change; the buttons
  * slide the sheet away first and then act, so it never vanishes mid-animation.
  *
+ * @param number the set's number among the normal sets, null for the other [type]s.
  * @param previous the same set last time; a chip copies its values in.
  * @param isCompleted whether a live workout's set is ticked; the main button toggles it.
  * Null for sets that can't be ticked (a plan, a finished workout): the main button just closes.
@@ -64,15 +74,17 @@ data class EditingSet(val exerciseKey: String, val setKey: String)
 @Composable
 fun SetEditorSheet(
     exerciseName: String,
-    number: Int,
+    number: Int?,
     trackingType: TrackingType,
     weightUnit: WeightUnit,
     reps: Int,
     weightKg: Double,
     durationSeconds: Int,
+    type: SetType,
     onRepsChange: (Int) -> Unit,
     onWeightChange: (Double) -> Unit,
     onDurationChange: (seconds: Int) -> Unit,
+    onTypeChange: (SetType) -> Unit,
     onDelete: () -> Unit,
     onDismiss: () -> Unit,
     previous: LoggedSet? = null,
@@ -98,12 +110,14 @@ fun SetEditorSheet(
             reps = reps,
             weightKg = weightKg,
             durationSeconds = durationSeconds,
+            type = type,
             previous = previous,
             isCompleted = isCompleted,
             plates = plates,
             onRepsChange = onRepsChange,
             onWeightChange = onWeightChange,
             onDurationChange = onDurationChange,
+            onTypeChange = onTypeChange,
             onPrimary = {
                 hideThen {
                     if (isCompleted != null) onCompletedChange(!isCompleted)
@@ -119,18 +133,20 @@ fun SetEditorSheet(
 @Composable
 private fun SetEditorContent(
     exerciseName: String,
-    number: Int,
+    number: Int?,
     trackingType: TrackingType,
     weightUnit: WeightUnit,
     reps: Int,
     weightKg: Double,
     durationSeconds: Int,
+    type: SetType,
     previous: LoggedSet?,
     isCompleted: Boolean?,
     plates: List<Double>?,
     onRepsChange: (Int) -> Unit,
     onWeightChange: (Double) -> Unit,
     onDurationChange: (seconds: Int) -> Unit,
+    onTypeChange: (SetType) -> Unit,
     onPrimary: () -> Unit,
     onDelete: () -> Unit,
 ) {
@@ -141,7 +157,7 @@ private fun SetEditorContent(
             color = MaterialTheme.colorScheme.primary,
         )
         Text(
-            text = stringResource(R.string.set_editor_title, number),
+            text = setName(number, type),
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.SemiBold,
         )
@@ -191,6 +207,7 @@ private fun SetEditorContent(
         if (plates != null && trackingType == TrackingType.WEIGHT_REPS && weightKg > 0) {
             PlatesPerSide(weightKg = weightKg, unit = weightUnit, plates = plates)
         }
+        SetTypeToggles(selected = type, onSelect = onTypeChange, modifier = Modifier.padding(top = 16.dp))
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -210,6 +227,36 @@ private fun SetEditorContent(
                 Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(R.string.set_delete))
             }
             PrimaryButton(isCompleted = isCompleted, onClick = onPrimary, modifier = Modifier.weight(1f))
+        }
+    }
+}
+
+/** The set types as a connected button group, with exactly one selected. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun SetTypeToggles(selected: SetType, onSelect: (SetType) -> Unit, modifier: Modifier = Modifier) {
+    val types = SetType.entries
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        types.forEachIndexed { index, type ->
+            ToggleButton(
+                checked = type == selected,
+                onCheckedChange = { onSelect(type) },
+                shapes = when (index) {
+                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                    types.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                },
+                // Four labels share the width: the default padding would cut "Warm-up" short.
+                contentPadding = PaddingValues(horizontal = 4.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .semantics { role = Role.RadioButton },
+            ) {
+                Text(text = type.label(), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
         }
     }
 }
@@ -308,12 +355,14 @@ private fun SetEditorContentPreview() {
                 reps = 8,
                 weightKg = 80.0,
                 durationSeconds = 0,
+                type = SetType.NORMAL,
                 previous = LoggedSet(reps = 8, weightKg = 77.5, isCompleted = true),
                 isCompleted = false,
                 plates = WeightUnit.KG.defaultPlates,
                 onRepsChange = {},
                 onWeightChange = {},
                 onDurationChange = {},
+                onTypeChange = {},
                 onPrimary = {},
                 onDelete = {},
             )

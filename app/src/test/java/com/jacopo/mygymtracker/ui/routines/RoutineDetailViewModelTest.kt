@@ -15,6 +15,7 @@ import com.jacopo.mygymtracker.data.repository.SettingsRepository
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.Routine
+import com.jacopo.mygymtracker.domain.model.SetType
 import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.ui.MainDispatcherRule
 import kotlinx.coroutines.Job
@@ -123,6 +124,18 @@ class RoutineDetailViewModelTest {
 
         viewModel.setRest(squat.key, null)
         awaitRoutines { it.single().exercises.single().restSeconds == null }
+    }
+
+    @Test
+    fun setType_isSaved() = runTest {
+        val viewModel = loadedViewModel()
+        viewModel.addNewExercise("Squat", Category.LEGS, TrackingType.WEIGHT_REPS, isBarbell = true)
+        val squat = viewModel.uiState.value.exercises.single()
+
+        viewModel.updateSetType(squat.key, squat.sets.first().key, SetType.WARM_UP)
+
+        val saved = awaitRoutines { routines -> routines.any { routine -> routine.exercises.any { it.sets.first().type == SetType.WARM_UP } } }
+        assertEquals(listOf(SetType.WARM_UP, SetType.NORMAL, SetType.NORMAL), saved.single().exercises.single().sets.map { it.type })
     }
 
     @Test

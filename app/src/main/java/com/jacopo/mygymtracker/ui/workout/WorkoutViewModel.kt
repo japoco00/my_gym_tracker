@@ -12,6 +12,7 @@ import com.jacopo.mygymtracker.data.repository.WorkoutRepository
 import com.jacopo.mygymtracker.di.appContainer
 import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.Routine
+import com.jacopo.mygymtracker.domain.model.SetType
 import com.jacopo.mygymtracker.domain.model.toRoutineExercises
 import com.jacopo.mygymtracker.resttimer.RestTimerController
 import com.jacopo.mygymtracker.ui.components.EditingSet
@@ -214,6 +215,10 @@ class WorkoutViewModel(
 
     fun updateSetDuration(exerciseKey: String, setKey: String, seconds: Int) {
         updateSet(exerciseKey, setKey) { it.copy(durationSeconds = seconds.coerceAtLeast(0)) }
+    }
+
+    fun updateSetType(exerciseKey: String, setKey: String, type: SetType) {
+        updateSet(exerciseKey, setKey) { it.copy(type = type) }
     }
 
     /** Ticking a set off starts the rest before the next one, unless auto-start is off in the settings. */

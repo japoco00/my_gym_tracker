@@ -7,6 +7,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.Category
+import com.jacopo.mygymtracker.domain.model.SetType
 import com.jacopo.mygymtracker.domain.model.ThemeMode
 import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.domain.model.WeightUnit
@@ -77,6 +78,30 @@ fun formatSet(
     trackingType == TrackingType.REPS -> pluralStringResource(R.plurals.reps_count, reps, reps)
     else -> stringResource(R.string.set_summary, weightUnit.format(weightKg), weightUnit.label(), reps)
 }
+
+/** A set's leading marker: its [number] if it's a normal set, else its type's letter, e.g. `W`. */
+@Composable
+fun setMarker(number: Int?, type: SetType): String = when (type) {
+    SetType.NORMAL -> number?.toString().orEmpty()
+    SetType.WARM_UP -> stringResource(R.string.set_type_warm_up_short)
+    SetType.DROP -> stringResource(R.string.set_type_drop_short)
+    SetType.FAILURE -> stringResource(R.string.set_type_failure_short)
+}
+
+/** A set's name: `Set 2` if it's a normal set, else its type, e.g. `Warm-up`. */
+@Composable
+fun setName(number: Int?, type: SetType): String =
+    if (type == SetType.NORMAL && number != null) stringResource(R.string.set_editor_title, number) else type.label()
+
+@Composable
+fun SetType.label(): String = stringResource(
+    when (this) {
+        SetType.NORMAL -> R.string.set_type_normal
+        SetType.WARM_UP -> R.string.set_type_warm_up
+        SetType.DROP -> R.string.set_type_drop
+        SetType.FAILURE -> R.string.set_type_failure
+    },
+)
 
 @Composable
 fun WeightUnit.label(): String = stringResource(

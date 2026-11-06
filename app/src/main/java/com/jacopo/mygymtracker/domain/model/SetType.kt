@@ -13,3 +13,9 @@ enum class SetType {
     /** A set taken to failure. */
     FAILURE,
 }
+
+/** Numbers the normal sets 1, 2, 3… in order; the other types get null, as their type marks them instead. */
+fun List<SetType>.normalSetNumbers(): List<Int?> {
+    var number = 0
+    return map { type -> if (type == SetType.NORMAL) ++number else null }
+}

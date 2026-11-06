@@ -32,11 +32,13 @@ import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.LoggedSet
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.domain.model.WorkoutExercise
+import com.jacopo.mygymtracker.domain.model.normalSetNumbers
 import com.jacopo.mygymtracker.ui.components.PrTag
-import com.jacopo.mygymtracker.ui.components.SetNumber
+import com.jacopo.mygymtracker.ui.components.SetMarker
 import com.jacopo.mygymtracker.ui.components.SetRow
 import com.jacopo.mygymtracker.ui.components.SwipeToDeleteContainer
 import com.jacopo.mygymtracker.ui.format.formatSet
+import com.jacopo.mygymtracker.ui.format.setMarker
 import com.jacopo.mygymtracker.ui.theme.AppTheme
 
 /**
@@ -53,10 +55,11 @@ fun LoggedExerciseSection(
 ) {
     Column(modifier = modifier.padding(top = 20.dp, bottom = 4.dp)) {
         ExerciseTitle(name = exercise.exercise.name, setCount = exercise.sets.size, onClick = onClick)
+        val numbers = exercise.sets.map { it.type }.normalSetNumbers()
         exercise.sets.forEachIndexed { index, set ->
             SetRow(
                 value = formatSet(exercise.exercise.trackingType, weightUnit, set.reps, set.weightKg, set.durationSeconds),
-                leading = { SetNumber(number = index + 1) },
+                leading = { SetMarker(label = setMarker(numbers[index], set.type)) },
             ) {
                 if (index == prSetIndex) PrTag()
             }
@@ -80,12 +83,13 @@ fun EditableExerciseSection(
             .animateContentSize(),
     ) {
         ExerciseTitle(name = exercise.exercise.name, setCount = exercise.sets.size, onClick = null)
+        val numbers = exercise.sets.map { it.type }.normalSetNumbers()
         exercise.sets.forEachIndexed { index, set ->
             key(set.key) {
                 SwipeToDeleteContainer(onDelete = { onDeleteSet(set.key) }) {
                     SetRow(
                         value = formatSet(exercise.exercise.trackingType, weightUnit, set.reps, set.weightKg, set.durationSeconds),
-                        leading = { SetNumber(number = index + 1) },
+                        leading = { SetMarker(label = setMarker(numbers[index], set.type)) },
                         onClick = { onOpenSet(set.key) },
                     )
                 }

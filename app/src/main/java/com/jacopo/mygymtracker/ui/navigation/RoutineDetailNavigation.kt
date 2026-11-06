@@ -65,6 +65,7 @@ fun NavGraphBuilder.routineDetailDestination(
                 onRepsChange = viewModel::updateSetReps,
                 onWeightChange = viewModel::updateSetWeight,
                 onDurationChange = viewModel::updateSetDuration,
+                onTypeChange = viewModel::updateSetType,
                 modifier = route.routineId?.let { Modifier.sharedContainer(routineContainerKey(it)) } ?: Modifier,
             )
         }

@@ -60,16 +60,18 @@ import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.LoggedSet
+import com.jacopo.mygymtracker.domain.model.SetType
 import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.domain.model.UserSettings
+import com.jacopo.mygymtracker.domain.model.normalSetNumbers
 import com.jacopo.mygymtracker.resttimer.RestTimer
 import com.jacopo.mygymtracker.ui.components.AddExercisesSheet
 import com.jacopo.mygymtracker.ui.components.RestEditorSheet
 import com.jacopo.mygymtracker.ui.components.SetEditorSheet
 import com.jacopo.mygymtracker.ui.format.formatDuration
 import com.jacopo.mygymtracker.ui.theme.AppTheme
-import kotlinx.coroutines.delay
 import java.time.Instant
+import kotlinx.coroutines.delay
 
 /** Keeps the last row scrollable above the floating Finish button / rest toolbar. */
 private val FloatingControlsClearance = 96.dp
@@ -99,6 +101,7 @@ fun WorkoutScreen(
     onRepsChange: (exerciseKey: String, setKey: String, Int) -> Unit,
     onWeightChange: (exerciseKey: String, setKey: String, Double) -> Unit,
     onDurationChange: (exerciseKey: String, setKey: String, seconds: Int) -> Unit,
+    onTypeChange: (exerciseKey: String, setKey: String, type: SetType) -> Unit,
     onSetCompletedChange: (exerciseKey: String, setKey: String, completed: Boolean) -> Unit,
     onAdjustRest: (deltaSeconds: Int) -> Unit,
     onSkipRest: () -> Unit,
@@ -209,15 +212,17 @@ fun WorkoutScreen(
         val set = exercise.sets[index]
         SetEditorSheet(
             exerciseName = exercise.exercise.name,
-            number = index + 1,
+            number = exercise.sets.map { it.type }.normalSetNumbers()[index],
             trackingType = exercise.exercise.trackingType,
             weightUnit = uiState.weightUnit,
             reps = set.reps,
             weightKg = set.weightKg,
             durationSeconds = set.durationSeconds,
+            type = set.type,
             onRepsChange = { onRepsChange(exerciseKey, setKey, it) },
             onWeightChange = { onWeightChange(exerciseKey, setKey, it) },
             onDurationChange = { onDurationChange(exerciseKey, setKey, it) },
+            onTypeChange = { onTypeChange(exerciseKey, setKey, it) },
             onDelete = { onDeleteSet(exerciseKey, setKey) },
             onDismiss = onCloseSetEditor,
             previous = exercise.exercise.id?.let { uiState.previousSets[it]?.getOrNull(index) },
@@ -537,6 +542,7 @@ private fun WorkoutScreenSample(restTimer: RestTimer?) {
             onRepsChange = { _, _, _ -> },
             onWeightChange = { _, _, _ -> },
             onDurationChange = { _, _, _ -> },
+            onTypeChange = { _, _, _ -> },
             onSetCompletedChange = { _, _, _ -> },
             onAdjustRest = {},
             onSkipRest = {},

@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.ui.theme.AppTheme
 
 /**
- * One set as a line: a [leading] marker (a tick box or the set number), the set's [value] and
+ * One set as a line: a [leading] marker (a tick box, or the set's number or type letter), the set's [value] and
  * optional [trailing] info. The workout, a finished workout and the routine editor all use it,
  * so a set looks the same everywhere.
  *
@@ -77,10 +77,10 @@ fun SetRow(
     }
 }
 
-/** The set's number in a small circle, as [SetRow]'s leading marker when there's nothing to tick. */
+/** The set's marker in a small circle, its number or type letter, as [SetRow]'s leading slot when there's nothing to tick. */
 @Composable
-fun SetNumber(number: Int, modifier: Modifier = Modifier) {
-    // 48dp wide like a tick box's touch target, so numbered and tickable rows line up.
+fun SetMarker(label: String, modifier: Modifier = Modifier) {
+    // 48dp wide like a tick box's touch target, so marked and tickable rows line up.
     Box(contentAlignment = Alignment.Center, modifier = modifier.size(48.dp)) {
         Box(
             contentAlignment = Alignment.Center,
@@ -88,7 +88,7 @@ fun SetNumber(number: Int, modifier: Modifier = Modifier) {
                 .size(32.dp)
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh, CircleShape),
         ) {
-            Text(text = number.toString(), style = MaterialTheme.typography.labelLarge)
+            Text(text = label, style = MaterialTheme.typography.labelLarge)
         }
     }
 }
@@ -97,6 +97,6 @@ fun SetNumber(number: Int, modifier: Modifier = Modifier) {
 @Composable
 private fun SetRowPreview() {
     AppTheme {
-        SetRow(value = "80 kg × 8", leading = { SetNumber(number = 2) }, onClick = {}, isHighlighted = true)
+        SetRow(value = "80 kg × 8", leading = { SetMarker(label = "2") }, onClick = {}, isHighlighted = true)
     }
 }

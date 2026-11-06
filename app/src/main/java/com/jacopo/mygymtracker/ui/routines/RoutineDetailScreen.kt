@@ -48,7 +48,9 @@ import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.Category
 import com.jacopo.mygymtracker.domain.model.Exercise
+import com.jacopo.mygymtracker.domain.model.SetType
 import com.jacopo.mygymtracker.domain.model.TrackingType
+import com.jacopo.mygymtracker.domain.model.normalSetNumbers
 import com.jacopo.mygymtracker.ui.components.AddExercisesSheet
 import com.jacopo.mygymtracker.ui.components.AppHeader
 import com.jacopo.mygymtracker.ui.components.ExerciseEditorSheet
@@ -83,6 +85,7 @@ fun RoutineDetailScreen(
     onRepsChange: (exerciseKey: String, setKey: String, Int) -> Unit,
     onWeightChange: (exerciseKey: String, setKey: String, Double) -> Unit,
     onDurationChange: (exerciseKey: String, setKey: String, seconds: Int) -> Unit,
+    onTypeChange: (exerciseKey: String, setKey: String, type: SetType) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -174,16 +177,18 @@ fun RoutineDetailScreen(
         // No isCompleted: a planned set has nothing to tick, so the main button just closes.
         SetEditorSheet(
             exerciseName = exercise.name,
-            number = index + 1,
+            number = exercise.sets.map { it.type }.normalSetNumbers()[index],
             trackingType = exercise.trackingType,
             weightUnit = uiState.weightUnit,
             reps = set.reps,
             weightKg = set.weightKg,
             durationSeconds = set.durationSeconds,
+            type = set.type,
             plates = uiState.plates.takeIf { exercise.isBarbell },
             onRepsChange = { onRepsChange(exerciseKey, setKey, it) },
             onWeightChange = { onWeightChange(exerciseKey, setKey, it) },
             onDurationChange = { onDurationChange(exerciseKey, setKey, it) },
+            onTypeChange = { onTypeChange(exerciseKey, setKey, it) },
             onDelete = { onDeleteSet(exerciseKey, setKey) },
             onDismiss = onCloseSetEditor,
         )
@@ -358,6 +363,7 @@ private fun RoutineDetailScreenPreview() {
             onRepsChange = { _, _, _ -> },
             onWeightChange = { _, _, _ -> },
             onDurationChange = { _, _, _ -> },
+            onTypeChange = { _, _, _ -> },
         )
     }
 }

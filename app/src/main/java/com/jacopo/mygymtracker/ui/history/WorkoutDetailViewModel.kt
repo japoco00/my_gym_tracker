@@ -11,6 +11,7 @@ import com.jacopo.mygymtracker.data.repository.WorkoutRepository
 import com.jacopo.mygymtracker.di.appContainer
 import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.LoggedSet
+import com.jacopo.mygymtracker.domain.model.SetType
 import com.jacopo.mygymtracker.domain.model.WorkoutExercise
 import com.jacopo.mygymtracker.domain.model.WorkoutSession
 import com.jacopo.mygymtracker.domain.progress.prSetIndex
@@ -148,6 +149,10 @@ class WorkoutDetailViewModel(
 
     fun updateSetDuration(exerciseKey: String, setKey: String, seconds: Int) {
         updateSet(exerciseKey, setKey) { it.copy(durationSeconds = seconds.coerceAtLeast(0)) }
+    }
+
+    fun updateSetType(exerciseKey: String, setKey: String, type: SetType) {
+        updateSet(exerciseKey, setKey) { it.copy(type = type) }
     }
 
     /** Stores the edits; exercises left without sets are dropped. */

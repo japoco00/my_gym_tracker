@@ -5,6 +5,7 @@ import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.PlannedSet
 import com.jacopo.mygymtracker.domain.model.Routine
 import com.jacopo.mygymtracker.domain.model.RoutineExercise
+import com.jacopo.mygymtracker.domain.model.SetType
 import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.domain.model.UserSettings
 import com.jacopo.mygymtracker.domain.model.WeightUnit
@@ -73,6 +74,7 @@ data class PlannedSetUiState @OptIn(ExperimentalUuidApi::class) constructor(
     val reps: Int = 0,
     val weightKg: Double = 0.0,
     val durationSeconds: Int = 0,
+    val type: SetType = SetType.NORMAL,
 )
 
 // region Mappers
@@ -94,7 +96,7 @@ fun RoutineExercise.toUiState(): RoutineExerciseUiState = RoutineExerciseUiState
     trackingType = exercise.trackingType,
     isBarbell = exercise.isBarbell,
     sets = sets.map {
-        PlannedSetUiState(reps = it.reps, weightKg = it.weightKg, durationSeconds = it.durationSeconds)
+        PlannedSetUiState(reps = it.reps, weightKg = it.weightKg, durationSeconds = it.durationSeconds, type = it.type)
     },
     restSeconds = restSeconds,
 )
@@ -127,7 +129,9 @@ private fun RoutineExerciseUiState.toDomain(): RoutineExercise = RoutineExercise
         note = note,
         isBarbell = isBarbell,
     ),
-    sets = sets.map { PlannedSet(reps = it.reps, weightKg = it.weightKg, durationSeconds = it.durationSeconds) },
+    sets = sets.map {
+        PlannedSet(reps = it.reps, weightKg = it.weightKg, durationSeconds = it.durationSeconds, type = it.type)
+    },
     restSeconds = restSeconds,
 )
 
