@@ -11,12 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.ui.components.AppHeader
+import com.jacopo.mygymtracker.ui.components.BackButton
 import com.jacopo.mygymtracker.ui.components.DestructiveOverflowMenu
 import com.jacopo.mygymtracker.ui.components.Pill
 import com.jacopo.mygymtracker.ui.components.ShapeBadge
@@ -69,12 +68,7 @@ fun WorkoutHeader(
         scrollBehavior = scrollBehavior,
         modifier = modifier,
         navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.action_back),
-                )
-            }
+            BackButton(onClick = onBack)
         },
         actions = {
             SetsBadge(completed = completedSets, total = totalSets)

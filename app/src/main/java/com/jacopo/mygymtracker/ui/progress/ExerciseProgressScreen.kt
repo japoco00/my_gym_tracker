@@ -13,13 +13,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.ListItemShapes
 import androidx.compose.material3.MaterialShapes
@@ -52,6 +50,7 @@ import com.jacopo.mygymtracker.domain.progress.MetricQuantity
 import com.jacopo.mygymtracker.domain.progress.ProgressMetric
 import com.jacopo.mygymtracker.domain.progress.SessionProgress
 import com.jacopo.mygymtracker.ui.components.AppHeader
+import com.jacopo.mygymtracker.ui.components.BackButton
 import com.jacopo.mygymtracker.ui.components.Pill
 import com.jacopo.mygymtracker.ui.components.SectionLabel
 import com.jacopo.mygymtracker.ui.components.ShapeBadge
@@ -110,12 +109,7 @@ private fun ProgressHeader(
         title = uiState.exerciseName,
         scrollBehavior = scrollBehavior,
         navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.action_back),
-                )
-            }
+            BackButton(onClick = onBack)
         },
         actions = {
             uiState.record?.valueOf(uiState.metric)?.let { best ->

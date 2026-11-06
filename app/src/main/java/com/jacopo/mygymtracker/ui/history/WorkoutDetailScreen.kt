@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -65,6 +64,7 @@ import com.jacopo.mygymtracker.domain.model.WorkoutSession
 import com.jacopo.mygymtracker.domain.model.normalSetNumbers
 import com.jacopo.mygymtracker.ui.components.AddExercisesSheet
 import com.jacopo.mygymtracker.ui.components.AppHeader
+import com.jacopo.mygymtracker.ui.components.BackButton
 import com.jacopo.mygymtracker.ui.components.DestructiveOverflowMenu
 import com.jacopo.mygymtracker.ui.components.Pill
 import com.jacopo.mygymtracker.ui.components.SetEditorSheet
@@ -278,12 +278,7 @@ private fun WorkoutDetailHeader(
                     Icon(imageVector = Icons.Default.Close, contentDescription = stringResource(R.string.action_cancel))
                 }
             } else {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.action_back),
-                    )
-                }
+                BackButton(onClick = onBack)
             }
         },
         actions = {

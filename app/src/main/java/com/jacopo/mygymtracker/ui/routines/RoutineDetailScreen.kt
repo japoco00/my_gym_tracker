@@ -16,14 +16,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -53,6 +51,7 @@ import com.jacopo.mygymtracker.domain.model.TrackingType
 import com.jacopo.mygymtracker.domain.model.normalSetNumbers
 import com.jacopo.mygymtracker.ui.components.AddExercisesSheet
 import com.jacopo.mygymtracker.ui.components.AppHeader
+import com.jacopo.mygymtracker.ui.components.BackButton
 import com.jacopo.mygymtracker.ui.components.ExerciseEditorSheet
 import com.jacopo.mygymtracker.ui.components.Pill
 import com.jacopo.mygymtracker.ui.components.RestEditorSheet
@@ -272,12 +271,7 @@ private fun RoutineHeader(
         },
         scrollBehavior = scrollBehavior,
         navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.action_back),
-                )
-            }
+            BackButton(onClick = onBack)
         },
         pills = {
             Pill { Text(text = exercises) }

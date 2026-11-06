@@ -11,12 +11,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
@@ -41,6 +39,7 @@ import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.BodyWeight
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.ui.components.AppHeader
+import com.jacopo.mygymtracker.ui.components.BackButton
 import com.jacopo.mygymtracker.ui.components.DateLineChart
 import com.jacopo.mygymtracker.ui.components.Pill
 import com.jacopo.mygymtracker.ui.components.SectionLabel
@@ -120,12 +119,7 @@ private fun BodyWeightHeader(
         title = stringResource(R.string.body_weight_title),
         scrollBehavior = scrollBehavior,
         navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.action_back),
-                )
-            }
+            BackButton(onClick = onBack)
         },
         actions = {
             uiState.latest?.let { latest ->
