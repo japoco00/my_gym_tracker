@@ -24,6 +24,7 @@ com.jacopo.mygymtracker
 ├── di/                   # AppContainer + CreationExtras.appContainer()
 ├── domain/
 │   ├── history/          # Pure history math: workouts grouped by week, week streaks
+│   ├── home/             # Pure Home logic: greeting, up-next routine, stats for the tiles
 │   ├── model/            # Pure Kotlin business models
 │   ├── plates/           # Pure plate math: which plates to load on each side
 │   ├── progress/         # Pure progress math: e1RM, volume, personal records
@@ -39,7 +40,7 @@ com.jacopo.mygymtracker
     ├── components/       # Shared, feature-agnostic composables
     ├── format/           # Display formatting: dates, durations, weights, enum labels
     ├── navigation/       # AppNavHost, TopLevelDestination, one *Navigation.kt per feature
-    ├── <feature>/        # routines, workout, history, progress, bodyweight, exercises, settings (list + detail screens together)
+    ├── <feature>/        # home, routines, workout, history, progress, bodyweight, exercises, settings (list + detail screens together)
     └── theme/            # Material 3 Theme, Color, Typography
 ```
 
@@ -110,7 +111,7 @@ com.jacopo.mygymtracker
 - **Feature Co-location**: Group each screen's `*Screen.kt`, `*ViewModel.kt`, `*UiState` and feature-specific components inside `ui/<feature>/`. Place reusable widgets shared by multiple features in `ui/components/`.
 - **Stateless Screens**: `*Screen` composables accept `uiState`, event callbacks, and `modifier: Modifier = Modifier`, never a ViewModel instance.
 - **Strings**: All user-visible text lives in `res/values/strings.xml`, read with `stringResource` / `pluralStringResource`. Formatting of dates, durations and weights goes through `ui/format/`.
-- **Scaffolds**: Each screen owns its `Scaffold` and top bar, built with the shared `ui/components/AppHeader` (big collapsing title, `Pill` facts, rounded `surfaceContainer` block). `MyGymTrackerApp` shows the bottom `ShortNavigationBar` only on tab roots (`TopLevelDestination`), so detail screens are full screen.
+- **Scaffolds**: Each screen owns its `Scaffold` and top bar, built with the shared `ui/components/AppHeader` (big collapsing title, `Pill` facts, rounded `surfaceContainer` block). The one exception is Home, whose poster greeting is the header. `MyGymTrackerApp` shows the bottom `ShortNavigationBar` only on tab roots (`TopLevelDestination`), so detail screens are full screen.
 - **Shared building blocks** (`ui/components/`): every screen follows the workout screen's Material 3 Expressive style. Reuse these instead of writing a feature-local variant:
   - `AppHeader`: a `String` title, or a composable `(expanded) -> Unit` title for custom content such as the routine editor's editable name. Expanded titles use `Typography.headerTitle`.
   - `Pill` for header facts (`Pill(icon, text)` for the usual icon + text), `SectionLabel` for list section titles, `ShapeBadge` for a short value + label inside a `MaterialShapes` shape in `AppHeader`'s actions (stays visible when collapsed). Animate only the shape through its `shapeModifier`.
@@ -124,8 +125,9 @@ com.jacopo.mygymtracker
   - `ExerciseEditorSheet` creates or edits a catalog exercise. Pass `isNameTaken` so duplicate names can't be saved.
   - `AddExercisesSheet` picks catalog exercises; `DestructiveOverflowMenu` ends with one destructive action, other `items` above it; `SwipeToDeleteContainer` wraps swipe-to-delete rows.
   - `DateLineChart`: the one line chart over dates (exercise progress, body weight).
+  - `ActiveWorkoutCard` (resume the workout in progress) and `StartConflictDialog` (starting while one is in progress), on Home and Routines. Their ViewModels share the start logic through `ui/workout/WorkoutStarter`.
 - **Editors save as you go**: the routine editor has no Save button. Its ViewModel debounces each edit into a save and flushes pending edits in `onCleared` on the app scope, so Back (and predictive back) never loses work.
-- **Motion**: Take specs from `MaterialTheme.motionScheme` (`*SpatialSpec` for position/size, `*EffectsSpec` for alpha/color) instead of hand-written tweens; a hand-timed sequence like the finish celebration is the exception. Pair state changes with `LocalHapticFeedback` using the M3 types (`ToggleOn`/`ToggleOff`, `Confirm`, `GestureThresholdActivate`), and fire them from the user's action, not from restored state.
+- **Motion**: Take specs from `MaterialTheme.motionScheme` (`*SpatialSpec` for position/size, `*EffectsSpec` for alpha/color) instead of hand-written tweens; a hand-timed sequence like the finish celebration is the exception, and so are endless decorative loops (Home's morphing shapes), since springs can't repeat. Pair state changes with `LocalHapticFeedback` using the M3 types (`ToggleOn`/`ToggleOff`, `Confirm`, `GestureThresholdActivate`), and fire them from the user's action, not from restored state.
 - **Previews**: Include private `@Preview` composables wrapped in `AppTheme` with realistic sample data.
 
 ---
@@ -136,7 +138,7 @@ com.jacopo.mygymtracker
   - Route declaration (`@Serializable`).
   - `NavGraphBuilder.<feature>Destination(...)`: creates the ViewModel, collects state, holds Activity Result launchers (e.g. the backup file pickers, so the screen stays previewable) and exposes navigation as lambdas wired in `AppNavHost`.
   - `NavController.navigateTo<Feature>(...)`.
-- **Tabs**: Switch tabs only through `navigateToTopLevelDestination`, which keeps one copy per tab and saves/restores each tab's back stack.
+- **Tabs**: Home (the start destination), Routines, History, Exercises. Settings is a pushed screen opened from Home's avatar. Switch tabs only through `navigateToTopLevelDestination`, which keeps one copy per tab and saves/restores each tab's back stack.
 - **Closing screens**: Close a screen with `popBackStack<Route>(inclusive = true)`, so a double Back or a close racing with Back can't pop the screen below. This relies on **acyclic routes**: at most one entry per route type on the back stack. Keep links pointing forward (e.g. Workout detail → Progress); a link back to an earlier route type needs a different close strategy first.
 - **Transitions**: `AppNavHost` owns the defaults: pushes slide horizontally with a fade, tab switches only fade. A destination overrides them through `composable<Route>(enterTransition = …)`; return `null` to fall back to the defaults.
 - **Shared bounds**: `AppNavHost` wraps the `NavHost` in `SharedTransitionLayout` and provides `LocalSharedTransitionScope`. A destination taking part provides `LocalNavAnimatedVisibilityScope` and only fades, while both ends apply `Modifier.sharedContainer(key)` with the same key (a saved routine's row grows into its editor). Both locals live in `ui/components/`, so screens never import `ui/navigation`; without them the modifier does nothing, which keeps previews working.
