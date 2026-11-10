@@ -84,8 +84,9 @@ private const val PR_HAPTIC_DELAY_MS = 150L
 /**
  * One exercise of the workout as a checklist: a line per set with last time's values.
  * Tick a set when it's done, tap it to edit it, swipe it to delete it.
- * The next set to do is highlighted.
+ * The set to do next is highlighted, when it's one of this exercise's.
  *
+ * @param nextSetKey the key of the workout's next set to do, or null when every set is ticked.
  * @param onStartRest starts this exercise's rest by hand; null hides the button, as the rest starts on its own.
  * @param onWarmUp opens the warm-up sets for this exercise; null hides the menu item, as there's no weight to warm up for.
  */
@@ -94,6 +95,7 @@ fun WorkoutExerciseSection(
     exercise: WorkoutExerciseUiState,
     previousSets: List<LoggedSet>,
     prSetKeys: Set<String>,
+    nextSetKey: String?,
     weightUnit: WeightUnit,
     defaultRestSeconds: Int,
     onRemove: () -> Unit,
@@ -108,7 +110,6 @@ fun WorkoutExerciseSection(
 ) {
     val sets = exercise.sets
     val doneCount = sets.count { it.isCompleted }
-    val nextIndex = sets.indexOfFirst { !it.isCompleted }
     val numbers = sets.map { it.type }.normalSetNumbers()
     Column(
         modifier = modifier
@@ -150,7 +151,7 @@ fun WorkoutExerciseSection(
                             )
                         },
                         onClick = { onOpenSet(set.key) },
-                        isHighlighted = index == nextIndex,
+                        isHighlighted = set.key == nextSetKey,
                         isDimmed = set.isCompleted,
                     ) {
                         LivePrTag(visible = set.key in prSetKeys)
@@ -293,6 +294,7 @@ private fun SetCheck(name: String, letter: String?, checked: Boolean, onCheckedC
 @Composable
 private fun WorkoutExerciseSectionPreview() {
     val record = WorkoutSetUiState(reps = 8, weightKg = 80.0, isCompleted = true)
+    val next = WorkoutSetUiState(reps = 8, weightKg = 80.0)
     AppTheme {
         WorkoutExerciseSection(
             exercise = WorkoutExerciseUiState(
@@ -300,12 +302,13 @@ private fun WorkoutExerciseSectionPreview() {
                 sets = listOf(
                     WorkoutSetUiState(reps = 10, weightKg = 40.0, isCompleted = true, type = SetType.WARM_UP),
                     record,
-                    WorkoutSetUiState(reps = 8, weightKg = 80.0),
+                    next,
                     WorkoutSetUiState(reps = 8, weightKg = 80.0),
                 ),
             ),
             previousSets = listOf(LoggedSet(reps = 8, weightKg = 77.5, isCompleted = true)),
             prSetKeys = setOf(record.key),
+            nextSetKey = next.key,
             weightUnit = WeightUnit.KG,
             defaultRestSeconds = 90,
             onRemove = {},

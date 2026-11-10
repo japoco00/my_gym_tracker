@@ -283,6 +283,24 @@ class WorkoutViewModelTest {
     }
 
     @Test
+    fun nextSet_followsLastToggledSet_thenWrapsToSkippedOnes() = runTest {
+        val viewModel = loadedViewModel(startWorkout())
+        val squatKey = viewModel.uiState.value.exercises.single().key
+        viewModel.addSet(squatKey)
+        val (first, second, third) = viewModel.uiState.value.exercises.single().sets.map { it.key }
+        assertEquals(first, viewModel.uiState.value.nextSetKey)
+
+        viewModel.setCompleted(squatKey, second, completed = true) // skips the first
+        assertEquals(third, viewModel.uiState.value.nextSetKey)
+
+        viewModel.setCompleted(squatKey, third, completed = true)
+        assertEquals(first, viewModel.uiState.value.nextSetKey)
+
+        viewModel.setCompleted(squatKey, second, completed = false)
+        assertEquals(second, viewModel.uiState.value.nextSetKey)
+    }
+
+    @Test
     fun completingSet_startsExerciseRestOrDefault() = runTest {
         val viewModel = loadedViewModel(startWorkout())
         val squat = viewModel.uiState.value.exercises.single()

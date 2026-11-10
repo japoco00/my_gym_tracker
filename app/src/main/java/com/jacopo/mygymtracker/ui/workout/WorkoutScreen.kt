@@ -171,6 +171,7 @@ fun WorkoutScreen(
                     exercise = exercise,
                     previousSets = exercise.exercise.id?.let { uiState.previousSets[it] }.orEmpty(),
                     prSetKeys = uiState.prSetKeys,
+                    nextSetKey = uiState.nextSetKey,
                     weightUnit = uiState.weightUnit,
                     defaultRestSeconds = uiState.defaultRestSeconds,
                     onRemove = { onRemoveExercise(exerciseKey) },

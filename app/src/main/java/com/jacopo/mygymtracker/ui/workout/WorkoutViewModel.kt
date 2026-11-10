@@ -249,6 +249,7 @@ class WorkoutViewModel(
     /** Ticking a set off starts the rest before the next one, unless auto-start is off in the settings. */
     fun setCompleted(exerciseKey: String, setKey: String, completed: Boolean) {
         updateSet(exerciseKey, setKey) { it.copy(isCompleted = completed) }
+        _uiState.update { it.copy(lastToggledSetKey = setKey) }
         if (completed && _uiState.value.autoStartRest) startRest(exerciseKey)
     }
 

@@ -26,6 +26,7 @@ import kotlin.uuid.Uuid
  * @property plates the plates owned in [weightUnit], for the set editor of barbell exercises.
  * @property autoStartRest whether ticking a set starts the rest; if not, each exercise offers a start button.
  * @property keepScreenOn whether the screen stays awake while the workout is open.
+ * @property lastToggledSetKey the key of the set last ticked or unticked, where the search for [nextSetKey] starts.
  * @property exit set once the screen should close, saying why.
  */
 data class WorkoutUiState(
@@ -47,6 +48,7 @@ data class WorkoutUiState(
     val editingSet: EditingSet? = null,
     val editingRestKey: String? = null,
     val warmUpPreviewKey: String? = null,
+    val lastToggledSetKey: String? = null,
     val isLoading: Boolean = true,
     val exit: WorkoutExit? = null,
 ) {
@@ -63,6 +65,16 @@ data class WorkoutUiState(
         val ticked = exercise.sets.filter { it.isCompleted }
         val earlier = earlierSets[exercise.exercise.id].orEmpty()
         prSetIndex(ticked.map { it.toLoggedSet() }, earlier, exercise.exercise.trackingType)?.let { ticked[it].key }
+    }
+
+    /**
+     * Key of the one set to do next across the whole workout: the first unticked set from the last one toggled,
+     * wrapping round to the skipped ones. Without that set (a resumed workout), from the last ticked one in order.
+     */
+    val nextSetKey: String? = exercises.flatMap { it.sets }.let { sets ->
+        val start = sets.indexOfFirst { it.key == lastToggledSetKey }.takeIf { it >= 0 }
+            ?: sets.indexOfLast { it.isCompleted }.coerceAtLeast(0)
+        (sets.drop(start) + sets.take(start)).firstOrNull { !it.isCompleted }?.key
     }
 }
 
