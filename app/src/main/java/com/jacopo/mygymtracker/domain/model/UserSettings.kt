@@ -7,6 +7,7 @@ package com.jacopo.mygymtracker.domain.model
  * @property dynamicColor colours from the wallpaper, on Android 12+.
  * @property autoStartRest ticking a set starts the rest; otherwise it is started by hand.
  * @property keepScreenOn the screen stays on during a workout.
+ * @property name what the home screen calls the user; blank means no name.
  */
 data class UserSettings(
     val weightUnit: WeightUnit = WeightUnit.KG,
@@ -16,6 +17,7 @@ data class UserSettings(
     val dynamicColor: Boolean = true,
     val autoStartRest: Boolean = true,
     val keepScreenOn: Boolean = true,
+    val name: String = "",
 ) {
     /** The plates owned in the current [weightUnit]. */
     val currentPlates: List<Double> get() = plates[weightUnit].orEmpty()

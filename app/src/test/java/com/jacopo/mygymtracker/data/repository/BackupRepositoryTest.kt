@@ -77,6 +77,7 @@ class BackupRepositoryTest {
             dynamicColor = defaults.dynamicColor,
             autoStartRest = defaults.autoStartRest,
             keepScreenOn = defaults.keepScreenOn,
+            name = defaults.name,
         )
         assertEquals(expected, restored.settings.observeSettings().first())
     }
@@ -145,6 +146,7 @@ class BackupRepositoryTest {
             settings.setDynamicColor(false)
             settings.setAutoStartRest(false)
             settings.setKeepScreenOn(false)
+            settings.setName("Jacopo")
             val squat = Exercise(name = "Squat", category = Category.LEGS, note = "High bar", isBarbell = true)
             val plank = newExercise("Plank", Category.CORE).copy(trackingType = TrackingType.DURATION)
             val routine = routineOf(

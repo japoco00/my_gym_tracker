@@ -26,6 +26,7 @@ class SettingsRepositoryTest {
         repository.setDynamicColor(false)
         repository.setAutoStartRest(false)
         repository.setKeepScreenOn(false)
+        repository.setName("  Jacopo ")
 
         val expected = UserSettings(
             weightUnit = WeightUnit.LB,
@@ -34,6 +35,7 @@ class SettingsRepositoryTest {
             dynamicColor = false,
             autoStartRest = false,
             keepScreenOn = false,
+            name = "Jacopo",
         )
         assertEquals(expected, repository.observeSettings().first())
     }

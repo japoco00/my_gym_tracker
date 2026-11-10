@@ -74,6 +74,10 @@ class SettingsViewModel(
         _backupMessage.value = null
     }
 
+    fun setName(name: String) {
+        viewModelScope.launch { settingsRepository.setName(name) }
+    }
+
     fun setWeightUnit(unit: WeightUnit) {
         viewModelScope.launch { settingsRepository.setWeightUnit(unit) }
     }

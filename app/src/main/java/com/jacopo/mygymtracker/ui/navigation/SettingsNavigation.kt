@@ -53,6 +53,7 @@ fun NavGraphBuilder.settingsDestination() {
             // Some providers report .json files as a generic binary.
             onImportBackup = { importLauncher.launch(arrayOf(BACKUP_MIME_TYPE, "application/octet-stream")) },
             onBackupMessageShown = viewModel::onBackupMessageShown,
+            onNameChange = viewModel::setName,
         )
     }
 }

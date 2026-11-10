@@ -27,6 +27,7 @@ fun UserSettings.toBackup() = BackupSettings(
     dynamicColor = dynamicColor,
     autoStartRest = autoStartRest,
     keepScreenOn = keepScreenOn,
+    name = name,
 )
 
 fun BackupSettings.toDomain() = UserSettings(
@@ -37,6 +38,7 @@ fun BackupSettings.toDomain() = UserSettings(
     dynamicColor = dynamicColor,
     autoStartRest = autoStartRest,
     keepScreenOn = keepScreenOn,
+    name = name,
 )
 
 fun Exercise.toBackup() = BackupExercise(

@@ -273,6 +273,9 @@
 
     <!-- Settings -->
     <string name="settings_title">Settings</string>
+    <string name="settings_profile">Profile</string>
+    <string name="settings_name">Your name</string>
+    <string name="settings_name_unset">Used to greet you on Home</string>
     <string name="settings_units">Units</string>
     <string name="settings_workout">Workout</string>
     <string name="settings_weight_unit">Weight unit</string>

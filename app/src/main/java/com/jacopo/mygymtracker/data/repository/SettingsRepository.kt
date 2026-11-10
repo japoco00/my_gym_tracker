@@ -41,6 +41,7 @@ class SettingsRepository(
                 dynamicColor = preferences[DYNAMIC_COLOR] ?: true,
                 autoStartRest = preferences[AUTO_START_REST] ?: true,
                 keepScreenOn = preferences[KEEP_SCREEN_ON] ?: true,
+                name = preferences[NAME] ?: "",
             )
         }
 
@@ -79,6 +80,11 @@ class SettingsRepository(
         dataStore.edit { it[KEEP_SCREEN_ON] = enabled }
     }
 
+    /** Stores [name] without surrounding blanks. */
+    suspend fun setName(name: String) {
+        dataStore.edit { it[NAME] = name.trim() }
+    }
+
     /**
      * Replaces every setting at once, as when restoring a backup.
      * Plates outside a unit's [WeightUnit.plateOptions] are dropped; a unit without plates gets the defaults.
@@ -97,6 +103,7 @@ class SettingsRepository(
             preferences[DYNAMIC_COLOR] = settings.dynamicColor
             preferences[AUTO_START_REST] = settings.autoStartRest
             preferences[KEEP_SCREEN_ON] = settings.keepScreenOn
+            preferences[NAME] = settings.name.trim()
         }
     }
 
@@ -107,6 +114,7 @@ class SettingsRepository(
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
         val AUTO_START_REST = booleanPreferencesKey("auto_start_rest")
         val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
+        val NAME = stringPreferencesKey("name")
 
         /** Plates as `Double.toString()` texts; a missing key means the [WeightUnit.defaultPlates]. */
         fun platesKey(unit: WeightUnit) = stringSetPreferencesKey("plates_${unit.name.lowercase()}")

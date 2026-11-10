@@ -28,8 +28,9 @@ data class BackupFile(
         /**
          * 2 added the theme, dynamic colour, rest auto-start and keep-screen-on settings.
          * 3 added set types, RPE and body weights.
+         * 4 added the user's name.
          */
-        const val CURRENT_FORMAT_VERSION = 3
+        const val CURRENT_FORMAT_VERSION = 4
     }
 }
 
@@ -43,6 +44,7 @@ data class BackupSettings(
     val dynamicColor: Boolean = true,
     val autoStartRest: Boolean = true,
     val keepScreenOn: Boolean = true,
+    val name: String = "",
 )
 
 @Serializable

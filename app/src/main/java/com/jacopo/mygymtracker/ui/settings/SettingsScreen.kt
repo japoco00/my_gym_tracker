@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -25,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.ListItemShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.SnackbarHost
@@ -50,6 +53,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -70,6 +75,7 @@ import com.jacopo.mygymtracker.ui.theme.AppTheme
 fun SettingsScreen(
     settings: UserSettings?,
     @StringRes backupMessage: Int?,
+    onNameChange: (String) -> Unit,
     onWeightUnitChange: (WeightUnit) -> Unit,
     onRestSecondsChange: (deltaSeconds: Int) -> Unit,
     onAutoStartRestChange: (Boolean) -> Unit,
@@ -87,6 +93,7 @@ fun SettingsScreen(
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val snackbarHostState = remember { SnackbarHostState() }
     var confirmImport by rememberSaveable { mutableStateOf(false) }
+    var editName by rememberSaveable { mutableStateOf(false) }
     BackupMessageSnackbar(message = backupMessage, snackbarHostState = snackbarHostState, onShown = onBackupMessageShown)
     if (confirmImport) {
         ConfirmImportDialog(
@@ -95,6 +102,16 @@ fun SettingsScreen(
                 onImportBackup()
             },
             onDismiss = { confirmImport = false },
+        )
+    }
+    if (editName && settings != null) {
+        NameDialog(
+            initialName = settings.name,
+            onSave = {
+                editName = false
+                onNameChange(it)
+            },
+            onDismiss = { editName = false },
         )
     }
 
@@ -119,7 +136,17 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
         ) {
-            SectionLabel(text = stringResource(R.string.settings_units))
+            SectionLabel(text = stringResource(R.string.settings_profile))
+            SegmentedListItem(
+                onClick = { editName = true },
+                shapes = ListItemDefaults.segmentedShapes(index = 0, count = 1),
+                supportingContent = { Text(text = settings.name.ifBlank { stringResource(R.string.settings_name_unset) }) },
+                trailingContent = { Icon(imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+            ) {
+                Text(text = stringResource(R.string.settings_name))
+            }
+
+            SectionLabel(text = stringResource(R.string.settings_units), modifier = Modifier.padding(top = 16.dp))
             SegmentedListItem(
                 shapes = ListItemDefaults.segmentedShapes(index = 0, count = 1),
                 supportingContent = { Text(text = stringResource(R.string.settings_weight_unit_description)) },
@@ -235,6 +262,35 @@ fun SettingsScreen(
             }
         }
     }
+}
+
+/** Edits the name from [initialName]; a blank name clears it. */
+@Composable
+private fun NameDialog(initialName: String, onSave: (String) -> Unit, onDismiss: () -> Unit) {
+    var name by rememberSaveable { mutableStateOf(initialName) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = stringResource(R.string.settings_name)) },
+        text = {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Words,
+                    imeAction = ImeAction.Done,
+                ),
+                keyboardActions = KeyboardActions(onDone = { onSave(name) }),
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = { onSave(name) }) { Text(text = stringResource(R.string.action_save)) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(text = stringResource(R.string.action_cancel)) }
+        },
+    )
 }
 
 /** Import wipes everything, so it asks before the file picker opens. */
@@ -384,6 +440,7 @@ private fun SettingsScreenPreview() {
         SettingsScreen(
             settings = UserSettings(),
             backupMessage = null,
+            onNameChange = {},
             onWeightUnitChange = {},
             onRestSecondsChange = {},
             onPlateToggle = {},
