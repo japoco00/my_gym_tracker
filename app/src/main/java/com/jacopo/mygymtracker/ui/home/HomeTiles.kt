@@ -52,6 +52,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -86,7 +87,6 @@ import com.jacopo.mygymtracker.ui.format.shortDateFormatter
 import java.time.Duration
 import java.time.LocalDate
 import java.time.format.TextStyle
-import java.util.Locale
 import kotlin.math.abs
 
 /** Home's stats as a grid of tiles, or a single tile promising them until the first workout. */
@@ -183,7 +183,7 @@ private fun MonthTile(
     modifier: Modifier = Modifier,
 ) {
     Tile(onClick = onClick, color = MaterialTheme.colorScheme.secondaryContainer, modifier = modifier) {
-        TileLabel(R.drawable.ic_event, today.month.getDisplayName(TextStyle.FULL_STANDALONE, Locale.getDefault()))
+        TileLabel(R.drawable.ic_event, today.month.getDisplayName(TextStyle.FULL_STANDALONE, LocalConfiguration.current.locales[0]))
         Spacer(modifier = Modifier.weight(1f))
         BigNumber(
             value = stats.monthWorkouts.toString(),
@@ -200,7 +200,7 @@ private fun MonthTile(
 /** One cell per day of the last [HEATMAP_WEEKS] weeks, a column per week; trained days open their workout. */
 @Composable
 private fun HeatmapTile(stats: HomeStats, today: LocalDate, onOpenWorkoutDetail: (sessionId: Int) -> Unit) {
-    val locale = Locale.getDefault()
+    val locale = LocalConfiguration.current.locales[0]
     val colors = MaterialTheme.colorScheme
     Tile {
         TileLabel(R.drawable.ic_event, stringResource(R.string.home_consistency))
@@ -423,7 +423,7 @@ private fun RecordsTile(
 
 @Composable
 private fun FunFactsTile(stats: HomeStats, weightUnit: WeightUnit) {
-    val locale = Locale.getDefault()
+    val locale = LocalConfiguration.current.locales[0]
     val longest = stats.longestWorkout
     val minutes = Duration.between(longest.startedAt, longest.finishedAt).toMinutes()
     Tile {
