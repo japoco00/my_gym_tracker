@@ -11,8 +11,8 @@ import com.jacopo.mygymtracker.di.appContainer
 import com.jacopo.mygymtracker.domain.model.Routine
 import com.jacopo.mygymtracker.domain.model.WorkoutSession
 import com.jacopo.mygymtracker.domain.model.WorkoutSummary
+import com.jacopo.mygymtracker.ui.workout.WorkoutStarter
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -45,9 +45,7 @@ class RoutinesViewModel(
 ) : ViewModel() {
 
     private val pendingDelete = MutableStateFlow<Routine?>(null)
-    private val startConflict = MutableStateFlow<Routine?>(null)
-    private val startedWorkoutId = MutableStateFlow<Int?>(null)
-    private var startJob: Job? = null
+    private val starter = WorkoutStarter(workoutRepository, viewModelScope) { uiState.value.activeWorkout }
 
     val uiState: StateFlow<RoutinesUiState> = combine(
         combine(
@@ -57,8 +55,8 @@ class RoutinesViewModel(
             ::Triple,
         ),
         pendingDelete,
-        startConflict,
-        startedWorkoutId,
+        starter.conflict,
+        starter.startedWorkoutId,
     ) { (routines, activeWorkout, history), pending, conflict, startedId ->
         RoutinesUiState(
             routines = routines.filterNot { it.id == pending?.id },
@@ -76,49 +74,18 @@ class RoutinesViewModel(
     )
 
     /** Starts a workout from [routine], or asks what to do if another one is still running. */
-    fun startWorkout(routine: Routine) {
-        if (startJob?.isActive == true) return
-        if (uiState.value.activeWorkout != null) {
-            startConflict.value = routine
-            return
-        }
-        startJob = viewModelScope.launch { start(routine) }
-    }
+    fun startWorkout(routine: Routine) = starter.start(routine)
 
     /** Starts a workout with no exercises and no routine behind it, called [name]. */
-    fun startEmptyWorkout(name: String) {
-        startWorkout(Routine(name = name))
-    }
+    fun startEmptyWorkout(name: String) = starter.startEmpty(name)
 
     /** Throws away the running workout and starts the one that caused the conflict. */
-    fun discardActiveAndStart() {
-        val routine = startConflict.value ?: return
-        if (startJob?.isActive == true) return
-        startConflict.value = null
-        startJob = viewModelScope.launch {
-            uiState.value.activeWorkout?.id?.let { workoutRepository.deleteWorkout(it) }
-            start(routine)
-        }
-    }
+    fun discardActiveAndStart() = starter.discardActiveAndStart()
 
-    fun dismissStartConflict() {
-        startConflict.value = null
-    }
+    fun dismissStartConflict() = starter.dismissConflict()
 
     /** Called once the screen has navigated to [RoutinesUiState.startedWorkoutId]. */
-    fun onWorkoutOpened() {
-        startedWorkoutId.value = null
-    }
-
-    /** Asks again instead of starting if another workout became active meanwhile. */
-    private suspend fun start(routine: Routine) {
-        val sessionId = workoutRepository.startWorkout(routine)
-        if (sessionId == null) {
-            startConflict.value = routine
-        } else {
-            startedWorkoutId.value = sessionId
-        }
-    }
+    fun onWorkoutOpened() = starter.onWorkoutOpened()
 
     /** Hides [routine] at once; it is deleted for real when the undo window closes. */
     fun deleteRoutine(routine: Routine) {

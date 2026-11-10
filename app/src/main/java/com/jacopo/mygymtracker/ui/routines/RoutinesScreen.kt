@@ -1,12 +1,8 @@
 package com.jacopo.mygymtracker.ui.routines
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,16 +10,11 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumExtendedFloatingActionButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedListItem
@@ -31,16 +22,13 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -61,12 +49,13 @@ import com.jacopo.mygymtracker.domain.model.RoutineExercise
 import com.jacopo.mygymtracker.domain.model.WorkoutExercise
 import com.jacopo.mygymtracker.domain.model.WorkoutSession
 import com.jacopo.mygymtracker.domain.model.WorkoutSummary
+import com.jacopo.mygymtracker.ui.components.ActiveWorkoutCard
 import com.jacopo.mygymtracker.ui.components.AppHeader
 import com.jacopo.mygymtracker.ui.components.EmptyStateText
 import com.jacopo.mygymtracker.ui.components.Pill
 import com.jacopo.mygymtracker.ui.components.SectionLabel
+import com.jacopo.mygymtracker.ui.components.StartConflictDialog
 import com.jacopo.mygymtracker.ui.components.SwipeToDeleteContainer
-import com.jacopo.mygymtracker.ui.components.rememberElapsedTime
 import com.jacopo.mygymtracker.ui.components.sharedContainer
 import com.jacopo.mygymtracker.ui.format.formatRelativeDay
 import com.jacopo.mygymtracker.ui.theme.AppTheme
@@ -250,96 +239,6 @@ private fun EmptyWorkoutItem(onStart: () -> Unit, modifier: Modifier = Modifier)
     ) {
         Text(text = stringResource(R.string.routines_empty_workout), fontWeight = FontWeight.SemiBold)
     }
-}
-
-/** The running workout: progress, elapsed time and the next exercise with sets left. */
-@Composable
-private fun ActiveWorkoutCard(
-    workout: WorkoutSession,
-    onResume: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val sets = workout.exercises.flatMap { it.sets }
-    val completedSets = sets.count { it.isCompleted }
-    val nextExercise = workout.exercises.firstOrNull { exercise -> exercise.sets.any { !it.isCompleted } }
-    Surface(
-        color = MaterialTheme.colorScheme.primaryContainer,
-        shape = MaterialTheme.shapes.extraLarge,
-        modifier = modifier.fillMaxWidth(),
-    ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Text(
-                text = stringResource(R.string.workout_in_progress),
-                style = MaterialTheme.typography.labelMedium,
-            )
-            Text(
-                text = workout.routineName,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Text(
-                text = stringResource(
-                    R.string.routines_active_progress,
-                    pluralStringResource(R.plurals.workout_sets_progress, sets.size, completedSets, sets.size),
-                    rememberElapsedTime(workout.startedAt),
-                ),
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            LinearWavyProgressIndicator(
-                progress = { if (sets.isEmpty()) 0f else completedSets / sets.size.toFloat() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp),
-            )
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = nextExercise?.let { stringResource(R.string.routines_next_exercise, it.exercise.name) }
-                        .orEmpty(),
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f),
-                )
-                Button(onClick = onResume, shapes = ButtonDefaults.shapes()) {
-                    Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = null,
-                        modifier = Modifier.size(ButtonDefaults.IconSize),
-                    )
-                    Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
-                    Text(text = stringResource(R.string.workout_resume))
-                }
-            }
-        }
-    }
-}
-
-/** Only one workout can run at a time: resume it, or throw it away and start [routine]. */
-@Composable
-private fun StartConflictDialog(
-    activeWorkout: WorkoutSession,
-    routine: Routine,
-    onResume: () -> Unit,
-    onDiscardAndStart: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.workout_in_progress)) },
-        text = {
-            Text(stringResource(R.string.workout_conflict_message, activeWorkout.routineName, routine.name))
-        },
-        confirmButton = {
-            TextButton(onClick = onResume) { Text(stringResource(R.string.workout_resume)) }
-        },
-        dismissButton = {
-            TextButton(onClick = onDiscardAndStart) {
-                Text(stringResource(R.string.workout_discard_and_start))
-            }
-        },
-    )
 }
 
 /** Shows the undo snackbar for [pendingDelete]; a newer delete replaces the current snackbar. */
