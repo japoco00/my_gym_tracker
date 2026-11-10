@@ -104,6 +104,10 @@ class WorkoutRepository(
     fun observeHistory(): Flow<List<WorkoutSummary>> =
         workoutDao.observeSummaries().map { rows -> rows.map { it.toDomain() } }
 
+    /** Emits finished workouts with all their sets, oldest first. */
+    fun observeFinishedWorkouts(): Flow<List<WorkoutSession>> =
+        workoutDao.observeFinishedWithExercises().map { rows -> rows.map { it.toDomain() } }
+
     /** The sets performed last time for each exercise. Exercises never performed are absent. */
     suspend fun getLastPerformance(exerciseIds: Collection<Int>): Map<Int, List<LoggedSet>> =
         exerciseIds.distinct()

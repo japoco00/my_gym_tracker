@@ -142,6 +142,7 @@ fun WorkoutSummaryRow.toDomain(): WorkoutSummary = WorkoutSummary(
     finishedAt = Instant.ofEpochMilli(finishedAtEpochMs),
     setCount = setCount,
     volumeKg = volumeKg,
+    routineId = routineId,
 )
 
 /** Groups rows, already ordered by session, into one entry per session. */

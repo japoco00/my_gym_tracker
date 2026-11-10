@@ -136,8 +136,22 @@ class WorkoutRepositoryTest {
 
         assertEquals(2, history.size)
         assertEquals(secondId, history.first().id)
+        assertEquals(routine.id, history.first().routineId)
         assertEquals(1, history.first().setCount)
         assertEquals(500.0, history.first().volumeKg, 1e-9)
+    }
+
+    @Test
+    fun observeFinishedWorkouts_skipsActiveOneOldestFirst() = runTest {
+        val routine = savedRoutine()
+        val laterId = finishWorkout(routine, at = 10)
+        val earlierId = finishWorkout(routine, at = 1)
+        workouts.startWorkout(routine, now = time(20))
+
+        val finished = workouts.observeFinishedWorkouts().first()
+
+        assertEquals(listOf(earlierId, laterId), finished.map { it.id })
+        assertEquals(listOf(LoggedSet(5, 100.0, isCompleted = true)), finished.first().exercises.first().sets)
     }
 
     @Test

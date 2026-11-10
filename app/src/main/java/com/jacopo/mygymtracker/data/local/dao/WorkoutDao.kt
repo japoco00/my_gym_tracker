@@ -55,13 +55,17 @@ interface WorkoutDao {
     @Query("SELECT * FROM workout_sessions WHERE finishedAtEpochMs IS NOT NULL ORDER BY startedAtEpochMs")
     suspend fun getFinishedWithExercises(): List<WorkoutSessionWithExercises>
 
+    @Transaction
+    @Query("SELECT * FROM workout_sessions WHERE finishedAtEpochMs IS NOT NULL ORDER BY startedAtEpochMs")
+    fun observeFinishedWithExercises(): Flow<List<WorkoutSessionWithExercises>>
+
     /** Removes every workout, in progress or finished. Exercises and sets cascade. */
     @Query("DELETE FROM workout_sessions")
     suspend fun deleteAll()
 
     @Query(
         """
-        SELECT s.sessionId, s.routineName, s.startedAtEpochMs, s.finishedAtEpochMs,
+        SELECT s.sessionId, s.routineId, s.routineName, s.startedAtEpochMs, s.finishedAtEpochMs,
                COUNT(ls.loggedSetId) AS setCount,
                COALESCE(SUM(CASE WHEN ls.type = 'WARM_UP' THEN 0 ELSE ls.reps * ls.weightKg END), 0) AS volumeKg
         FROM workout_sessions s
