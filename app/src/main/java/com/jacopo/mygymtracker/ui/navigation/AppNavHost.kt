@@ -33,7 +33,7 @@ fun AppNavHost(
         CompositionLocalProvider(LocalSharedTransitionScope provides this) {
             NavHost(
                 navController = navController,
-                startDestination = RoutinesRoute,
+                startDestination = HomeRoute,
                 enterTransition = {
                     if (isTabSwitch()) fadeIn(fade) else slideInHorizontally(slide) { it / 4 } + fadeIn(fade)
                 },
@@ -47,6 +47,17 @@ fun AppNavHost(
                     if (isTabSwitch()) fadeOut(fade) else slideOutHorizontally(slide) { it / 4 } + fadeOut(fade)
                 },
             ) {
+                homeDestination(
+                    onOpenSettings = { navController.navigateToSettings() },
+                    onCreateRoutine = { navController.navigateToRoutineDetail() },
+                    onOpenRoutines = { navController.navigateToTopLevelDestination(TopLevelDestination.ROUTINES) },
+                    onOpenWorkout = { sessionId -> navController.navigateToWorkout(sessionId) },
+                    onOpenHistory = { navController.navigateToTopLevelDestination(TopLevelDestination.HISTORY) },
+                    onOpenWorkoutDetail = { sessionId -> navController.navigateToWorkoutDetail(sessionId) },
+                    onOpenBodyWeight = { navController.navigateToBodyWeight() },
+                    onOpenExerciseProgress = { exerciseId -> navController.navigateToExerciseProgress(exerciseId) },
+                )
+
                 routinesDestination(
                     onCreateRoutine = { navController.navigateToRoutineDetail() },
                     onOpenRoutine = { routineId -> navController.navigateToRoutineDetail(routineId) },
@@ -84,7 +95,9 @@ fun AppNavHost(
                     onNavigateBack = { navController.closeExerciseProgress() },
                 )
 
-                settingsDestination()
+                settingsDestination(
+                    onNavigateBack = { navController.closeSettings() },
+                )
             }
         }
     }

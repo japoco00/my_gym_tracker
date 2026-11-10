@@ -42,7 +42,7 @@ fun MyGymTrackerApp(
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentTab = backStackEntry?.destination.toTopLevelDestination()
     // Keeps the tab highlighted while the bar slides away.
-    var shownTab by remember { mutableStateOf(TopLevelDestination.ROUTINES) }
+    var shownTab by remember { mutableStateOf(TopLevelDestination.HOME) }
     if (currentTab != null) shownTab = currentTab
     val barSpec = MaterialTheme.motionScheme.defaultSpatialSpec<IntSize>()
 

@@ -24,10 +24,10 @@
     <string name="pr_description">Personal record</string>
 
     <!-- Navigation -->
+    <string name="nav_home">Home</string>
     <string name="nav_routines">Routines</string>
     <string name="nav_history">History</string>
     <string name="nav_exercises">Exercises</string>
-    <string name="nav_settings">Settings</string>
 
     <!-- Home. The greeting and fun facts mark key words with <b>, escaped so it survives getString. -->
     <string name="home_hello_morning">Good &lt;b>morning&lt;/b></string>

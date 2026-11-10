@@ -65,6 +65,7 @@ import com.jacopo.mygymtracker.domain.model.UserSettings.Companion.REST_STEP_SEC
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.domain.model.formatWeight
 import com.jacopo.mygymtracker.ui.components.AppHeader
+import com.jacopo.mygymtracker.ui.components.BackButton
 import com.jacopo.mygymtracker.ui.components.SectionLabel
 import com.jacopo.mygymtracker.ui.format.formatDuration
 import com.jacopo.mygymtracker.ui.format.label
@@ -75,6 +76,7 @@ import com.jacopo.mygymtracker.ui.theme.AppTheme
 fun SettingsScreen(
     settings: UserSettings?,
     @StringRes backupMessage: Int?,
+    onBack: () -> Unit,
     onNameChange: (String) -> Unit,
     onWeightUnitChange: (WeightUnit) -> Unit,
     onRestSecondsChange: (deltaSeconds: Int) -> Unit,
@@ -122,6 +124,9 @@ fun SettingsScreen(
                 title = stringResource(R.string.settings_title),
                 scrollBehavior = scrollBehavior,
                 expandedHeight = 136.dp,
+                navigationIcon = {
+                    BackButton(onClick = onBack)
+                },
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -440,6 +445,7 @@ private fun SettingsScreenPreview() {
         SettingsScreen(
             settings = UserSettings(),
             backupMessage = null,
+            onBack = {},
             onNameChange = {},
             onWeightUnitChange = {},
             onRestSecondsChange = {},

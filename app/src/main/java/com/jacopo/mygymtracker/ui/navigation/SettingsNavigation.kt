@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.jacopo.mygymtracker.resttimer.RestTimerNotifications
@@ -20,7 +21,9 @@ data object SettingsRoute
 private const val BACKUP_MIME_TYPE = "application/json"
 private const val CSV_MIME_TYPE = "text/csv"
 
-fun NavGraphBuilder.settingsDestination() {
+fun NavGraphBuilder.settingsDestination(
+    onNavigateBack: () -> Unit,
+) {
     composable<SettingsRoute> {
         val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.Factory)
         val settings by viewModel.settings.collectAsStateWithLifecycle()
@@ -40,6 +43,7 @@ fun NavGraphBuilder.settingsDestination() {
         SettingsScreen(
             settings = settings,
             backupMessage = backupMessage,
+            onBack = onNavigateBack,
             onWeightUnitChange = viewModel::setWeightUnit,
             onRestSecondsChange = viewModel::changeRestSeconds,
             onPlateToggle = viewModel::togglePlate,
@@ -56,4 +60,13 @@ fun NavGraphBuilder.settingsDestination() {
             onNameChange = viewModel::setName,
         )
     }
+}
+
+fun NavController.navigateToSettings() {
+    navigate(route = SettingsRoute)
+}
+
+/** Pops the settings screen only, so a double tap on Back can't also pop the screen below. */
+fun NavController.closeSettings() {
+    popBackStack<SettingsRoute>(inclusive = true)
 }

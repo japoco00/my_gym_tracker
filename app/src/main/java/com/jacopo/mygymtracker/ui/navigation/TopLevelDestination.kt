@@ -15,10 +15,10 @@ enum class TopLevelDestination(
     @param:DrawableRes val iconRes: Int,
     @param:StringRes val labelRes: Int,
 ) {
+    HOME(HomeRoute, R.drawable.ic_home, R.string.nav_home),
     ROUTINES(RoutinesRoute, R.drawable.ic_fitness_center, R.string.nav_routines),
     HISTORY(HistoryRoute, R.drawable.ic_history, R.string.nav_history),
     EXERCISES(ExercisesRoute, R.drawable.ic_list, R.string.nav_exercises),
-    SETTINGS(SettingsRoute, R.drawable.ic_settings, R.string.nav_settings),
 }
 
 /** The tab whose root screen is [this] destination, or `null` for full-screen destinations. */
