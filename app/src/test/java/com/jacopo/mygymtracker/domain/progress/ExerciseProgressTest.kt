@@ -1,9 +1,13 @@
 package com.jacopo.mygymtracker.domain.progress
 
+import com.jacopo.mygymtracker.domain.model.Category
+import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.ExerciseHistoryEntry
 import com.jacopo.mygymtracker.domain.model.LoggedSet
 import com.jacopo.mygymtracker.domain.model.SetType
 import com.jacopo.mygymtracker.domain.model.TrackingType
+import com.jacopo.mygymtracker.domain.model.WorkoutExercise
+import com.jacopo.mygymtracker.domain.model.WorkoutSession
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -135,7 +139,33 @@ class ExerciseProgressTest {
         assertNull(entry(1, day = 1, warmUp).toSessionProgress(TrackingType.WEIGHT_REPS))
     }
 
+    @Test
+    fun latestRecords_keepsTheNewestRecordPerExercise() {
+        val bench = Exercise(id = 1, name = "Bench Press", category = Category.CHEST)
+        val squat = Exercise(id = 2, name = "Squat", category = Category.LEGS)
+        val dips = Exercise(id = 3, name = "Dips", category = Category.CHEST, trackingType = TrackingType.REPS)
+        val workouts = listOf(
+            workout(day = 1, bench to LoggedSet(5, 80.0), squat to LoggedSet(5, 100.0), dips to LoggedSet(10)),
+            workout(day = 2, bench to LoggedSet(5, 85.0), squat to LoggedSet(5, 100.0)),
+            workout(day = 3, bench to LoggedSet(5, 90.0), dips to LoggedSet(12)),
+            workout(day = 4, squat to LoggedSet(5, 90.0)),
+        )
+
+        val records = latestRecords(workouts, limit = 3)
+
+        assertEquals(listOf("Dips" to day(3), "Bench Press" to day(3)), records.map { it.exercise.name to it.achievedAt })
+        assertEquals(LoggedSet(5, 90.0), records[1].set)
+        assertEquals(listOf("Dips"), latestRecords(workouts, limit = 1).map { it.exercise.name })
+    }
+
     private fun day(day: Long): Instant = Instant.EPOCH.plusSeconds(day * 86_400)
+
+    private fun workout(day: Long, vararg sets: Pair<Exercise, LoggedSet>) = WorkoutSession(
+        routineId = null,
+        routineName = "Workout",
+        startedAt = day(day),
+        exercises = sets.map { (exercise, set) -> WorkoutExercise(exercise, listOf(set)) },
+    )
 
     private fun entry(sessionId: Int, day: Long, vararg sets: LoggedSet) =
         ExerciseHistoryEntry(sessionId = sessionId, performedAt = day(day), sets = sets.toList())

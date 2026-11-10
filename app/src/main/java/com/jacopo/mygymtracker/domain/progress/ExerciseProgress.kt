@@ -1,9 +1,11 @@
 package com.jacopo.mygymtracker.domain.progress
 
+import com.jacopo.mygymtracker.domain.model.Exercise
 import com.jacopo.mygymtracker.domain.model.ExerciseHistoryEntry
 import com.jacopo.mygymtracker.domain.model.LoggedSet
 import com.jacopo.mygymtracker.domain.model.SetType
 import com.jacopo.mygymtracker.domain.model.TrackingType
+import com.jacopo.mygymtracker.domain.model.WorkoutSession
 import java.time.Instant
 
 /** Above this many reps, one-rep-max estimates become unreliable. */
@@ -72,6 +74,25 @@ fun prSetIndex(sets: List<LoggedSet>, earlier: List<LoggedSet>, trackingType: Tr
         .maxByOrNull { (_, value) -> value }
         ?: return null
     return best.first.takeIf { best.second > toBeat }
+}
+
+/** A [set] of [exercise] that beat every earlier one, see [prSetIndex]. */
+data class PersonalRecord(val exercise: Exercise, val set: LoggedSet, val achievedAt: Instant)
+
+/** The newest records in [workouts], given oldest first: at most one per exercise and [limit] in all, newest first. */
+fun latestRecords(workouts: List<WorkoutSession>, limit: Int): List<PersonalRecord> {
+    val earlierSets = HashMap<Int?, MutableList<LoggedSet>>()
+    val records = mutableListOf<PersonalRecord>()
+    for (workout in workouts) {
+        for (performed in workout.exercises) {
+            val earlier = earlierSets.getOrPut(performed.exercise.id) { mutableListOf() }
+            prSetIndex(performed.sets, earlier, performed.exercise.trackingType)?.let {
+                records += PersonalRecord(performed.exercise, performed.sets[it], workout.startedAt)
+            }
+            earlier += performed.sets
+        }
+    }
+    return records.asReversed().distinctBy { it.exercise.id }.take(limit)
 }
 
 /**
