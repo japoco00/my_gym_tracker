@@ -29,6 +29,76 @@
     <string name="nav_exercises">Exercises</string>
     <string name="nav_settings">Settings</string>
 
+    <!-- Home. The greeting and fun facts mark key words with <b>, escaped so it survives getString. -->
+    <string name="home_hello_morning">Good &lt;b>morning&lt;/b></string>
+    <string name="home_hello_morning_named">Good morning, &lt;b>%1$s&lt;/b></string>
+    <string name="home_hello_afternoon">Good &lt;b>afternoon&lt;/b></string>
+    <string name="home_hello_afternoon_named">Good afternoon, &lt;b>%1$s&lt;/b></string>
+    <string name="home_hello_evening">Good &lt;b>evening&lt;/b></string>
+    <string name="home_hello_evening_named">Good evening, &lt;b>%1$s&lt;/b></string>
+    <string name="home_hello_night">Still &lt;b>up&lt;/b>?</string>
+    <string name="home_hello_night_named">Still up, &lt;b>%1$s&lt;/b>?</string>
+    <string name="home_welcome">&lt;b>Welcome&lt;/b></string>
+    <string name="home_welcome_named">Welcome, &lt;b>%1$s&lt;/b></string>
+    <string name="home_first_routine">Let’s build your &lt;b>first routine&lt;/b></string>
+    <string name="home_still_running">&lt;b>%1$s&lt;/b> is still running</string>
+    <string name="home_sets_miss_you">Your sets &lt;b>miss you&lt;/b></string>
+    <string name="home_sets_done">&lt;b>%1$d of %2$d&lt;/b> down</string>
+    <string name="home_nice_work">Done for today. &lt;b>Nice work&lt;/b></string>
+    <string name="home_rest_is_training">Rest is &lt;b>training&lt;/b> too</string>
+    <string name="home_go_eat">Now go &lt;b>eat&lt;/b> something</string>
+    <plurals name="home_days_off">
+        <item quantity="one">&lt;b>%d day&lt;/b> off. Ready to come back?</item>
+        <item quantity="other">&lt;b>%d days&lt;/b> off. Ready to come back?</item>
+    </plurals>
+    <string name="home_bar_missed_you">The bar &lt;b>missed you&lt;/b></string>
+    <string name="home_easy_restart">Easy restart: &lt;b>%1$s&lt;/b>?</string>
+    <string name="home_next_session">Ready for the &lt;b>next session&lt;/b>?</string>
+    <string name="home_calling">&lt;b>%1$s&lt;/b> is calling</string>
+    <plurals name="home_weeks_in_a_row">
+        <item quantity="one">&lt;b>%d week&lt;/b> in a row</item>
+        <item quantity="other">&lt;b>%d weeks&lt;/b> in a row</item>
+    </plurals>
+    <string name="home_no_workouts">No workouts yet. That’s the fun part.</string>
+    <!-- E.g. "Push done · 52 min · 4320 kg". -->
+    <string name="home_trained_today">%1$s done · %2$s · %3$s</string>
+    <string name="home_minutes">%d min</string>
+    <string name="home_next_routine">Next: %1$s</string>
+    <string name="home_other_routine">Other routine</string>
+    <string name="home_no_stats">Streak, calendar, records and body weight show up here after your first workout.</string>
+    <string name="home_streak">Streak</string>
+    <plurals name="home_streak_weeks">
+        <item quantity="one">week in a row</item>
+        <item quantity="other">weeks in a row</item>
+    </plurals>
+    <plurals name="home_month_workouts">
+        <item quantity="one">workout</item>
+        <item quantity="other">workouts</item>
+    </plurals>
+    <!-- %1$s is the weight unit, e.g. "kg lifted". -->
+    <string name="home_lifted">%1$s lifted</string>
+    <string name="home_consistency">Consistency</string>
+    <plurals name="home_heatmap_caption">
+        <item quantity="one">%1$d workout in the last %2$d weeks</item>
+        <item quantity="other">%1$d workouts in the last %2$d weeks</item>
+    </plurals>
+    <string name="home_weekly_volume">Weekly volume</string>
+    <string name="home_volume_caption">%1$s lifted per week</string>
+    <string name="home_volume_now">Now</string>
+    <!-- E.g. "−1.8 kg since Jul 22". -->
+    <string name="home_body_weight_since">%1$s since %2$s</string>
+    <string name="home_records">Records</string>
+    <string name="home_records_empty">Beat a best and it shows up here.</string>
+    <string name="home_record_summary">%1$s · %2$s</string>
+    <string name="home_fun_facts">Fun facts</string>
+    <string name="home_fact_favourite_day">Favourite day: &lt;b>%1$s&lt;/b></string>
+    <string name="home_fact_longest">Longest workout: &lt;b>%1$s&lt;/b>, %2$s</string>
+    <string name="home_fact_whales">&lt;b>%1$s&lt;/b> lifted ≈ &lt;b>%2$s&lt;/b> blue whales</string>
+    <plurals name="home_fact_workouts_since">
+        <item quantity="one">&lt;b>%1$d&lt;/b> workout since %2$s</item>
+        <item quantity="other">&lt;b>%1$d&lt;/b> workouts since %2$s</item>
+    </plurals>
+
     <!-- Routines -->
     <string name="routines_title">Routines</string>
     <string name="routines_empty">No routines yet. Create your first one!</string>

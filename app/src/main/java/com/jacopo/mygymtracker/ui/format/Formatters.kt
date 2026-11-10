@@ -1,5 +1,6 @@
 package com.jacopo.mygymtracker.ui.format
 
+import android.icu.text.CompactDecimalFormat
 import android.text.format.DateFormat
 import android.text.format.DateUtils
 import androidx.compose.runtime.Composable
@@ -62,6 +63,16 @@ fun shortDateFormatter(): DateTimeFormatter {
     return DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(locale, "MMMd"), locale)
         .withZone(ZoneId.systemDefault())
 }
+
+/** Numeric day and month in the device's locale, e.g. `14/7` or `7/14`. */
+fun dayMonthFormatter(): DateTimeFormatter {
+    val locale = Locale.getDefault()
+    return DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(locale, "dM"), locale)
+}
+
+/** A short number in the device's locale, e.g. `4.3K`. */
+fun formatCompact(value: Double): String =
+    CompactDecimalFormat.getInstance(Locale.getDefault(), CompactDecimalFormat.CompactStyle.SHORT).format(value)
 
 /** A weight with its unit, e.g. `78.4 kg`. */
 @Composable
