@@ -13,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ShortNavigationBarItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -32,18 +33,29 @@ import com.jacopo.mygymtracker.ui.components.FloatingDock
 import com.jacopo.mygymtracker.ui.navigation.AppNavHost
 import com.jacopo.mygymtracker.ui.navigation.LocalTabActions
 import com.jacopo.mygymtracker.ui.navigation.TopLevelDestination
+import com.jacopo.mygymtracker.ui.navigation.navigateFromWidget
 import com.jacopo.mygymtracker.ui.navigation.navigateToTopLevelDestination
 import com.jacopo.mygymtracker.ui.navigation.toTopLevelDestination
+import com.jacopo.mygymtracker.widget.WidgetDestination
 
 /**
  * App shell: floats the tab dock over tab roots only, sliding it away when a full-screen
  * destination opens. Each screen owns its own Scaffold, insets and top bar; tab screens leave
  * [com.jacopo.mygymtracker.ui.components.FloatingDockClearance] under their content.
+ *
+ * Opens [widgetDestination] when a widget asks for it, then reports it with [onWidgetDestinationOpened].
  */
 @Composable
 fun MyGymTrackerApp(
+    widgetDestination: WidgetDestination?,
+    onWidgetDestinationOpened: () -> Unit,
     navController: NavHostController = rememberNavController(),
 ) {
+    LaunchedEffect(widgetDestination) {
+        widgetDestination ?: return@LaunchedEffect
+        navController.navigateFromWidget(widgetDestination)
+        onWidgetDestinationOpened()
+    }
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentTab = backStackEntry?.destination.toTopLevelDestination()
     // Keeps the tab highlighted while the dock slides away.

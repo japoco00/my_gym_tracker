@@ -1,5 +1,6 @@
 package com.jacopo.mygymtracker
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
@@ -15,6 +16,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jacopo.mygymtracker.domain.model.ThemeMode
 import com.jacopo.mygymtracker.ui.MyGymTrackerApp
 import com.jacopo.mygymtracker.ui.theme.AppTheme
+import com.jacopo.mygymtracker.widget.widgetRequest
 
 class MainActivity : ComponentActivity() {
 
@@ -23,6 +25,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         holdFirstFrameUntil { viewModel.settings.value != null }
+        // A recreated activity still holds the intent it was launched with: handle it once.
+        if (savedInstanceState == null) intent.widgetRequest()?.let(viewModel::onWidgetRequest)
 
         setContent {
             val settings = viewModel.settings.collectAsStateWithLifecycle().value ?: return@setContent
@@ -40,9 +44,17 @@ class MainActivity : ComponentActivity() {
                 onDispose {}
             }
             AppTheme(darkTheme = darkTheme, dynamicColor = settings.dynamicColor) {
-                MyGymTrackerApp()
+                MyGymTrackerApp(
+                    widgetDestination = viewModel.widgetDestination.collectAsStateWithLifecycle().value,
+                    onWidgetDestinationOpened = viewModel::onWidgetDestinationOpened,
+                )
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        intent.widgetRequest()?.let(viewModel::onWidgetRequest)
     }
 
     /** Keeps the splash screen up until [isReady], so the app never draws a frame in the wrong theme. */
