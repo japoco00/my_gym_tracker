@@ -30,6 +30,30 @@
             </intent-filter>
         </activity>
 
+        <receiver
+            android:name=".widget.UpNextWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_up_next">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_up_next_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.WeekWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_this_week">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_week_info" />
+        </receiver>
+
         <service
             android:name=".resttimer.RestTimerService"
             android:exported="false"

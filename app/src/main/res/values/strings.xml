@@ -388,4 +388,19 @@
     <string name="settings_csv_export_description">Save your finished workouts as a spreadsheet, one row per set. It can\'t be imported back.</string>
     <string name="csv_exported">Workouts exported</string>
     <string name="csv_export_failed">Couldn\'t export the workouts</string>
+
+    <!-- Home screen widgets -->
+    <string name="widget_up_next">Up next</string>
+    <string name="widget_up_next_description">Start your next routine, or resume the one in progress</string>
+    <string name="widget_this_week">This week</string>
+    <string name="widget_week_description">The days you trained this week and your streak</string>
+    <string name="widget_first_week">Your first week</string>
+    <string name="widget_done_today">Done today · next up</string>
+    <plurals name="widget_days_off">
+        <item quantity="one">%d day off · up next</item>
+        <item quantity="other">%d days off · up next</item>
+    </plurals>
+    <string name="widget_no_routine">Nothing to train yet</string>
+    <string name="widget_build_routine">Build a routine</string>
+    <string name="widget_build_routine_hint">Takes a minute</string>
 </resources>

@@ -27,6 +27,7 @@ class MainActivity : ComponentActivity() {
         holdFirstFrameUntil { viewModel.settings.value != null }
         // A recreated activity still holds the intent it was launched with: handle it once.
         if (savedInstanceState == null) intent.widgetRequest()?.let(viewModel::onWidgetRequest)
+        (application as MyApplication).keepWidgetsUpdated()
 
         setContent {
             val settings = viewModel.settings.collectAsStateWithLifecycle().value ?: return@setContent
