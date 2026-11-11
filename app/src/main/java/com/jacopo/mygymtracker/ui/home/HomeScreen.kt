@@ -2,46 +2,54 @@ package com.jacopo.mygymtracker.ui.home
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MediumExtendedFloatingActionButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SplitButtonDefaults
+import androidx.compose.material3.SplitButtonLayout
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -103,28 +111,13 @@ fun HomeScreen(
         )
     }
 
-    val listState = rememberLazyListState()
     // Here rather than in the header, so scrolling the header away and back doesn't replay it.
     val greetingShown = remember { MutableTransitionState(false).apply { targetState = true } }
-    Scaffold(
-        floatingActionButton = {
-            if (!uiState.isLoading && activeWorkout == null) {
-                StartButton(
-                    upNext = uiState.upNext,
-                    trainedToday = uiState.situation == HomeSituation.TrainedToday,
-                    expanded = !listState.canScrollBackward,
-                    onStartWorkout = onStartWorkout,
-                    onCreateRoutine = onCreateRoutine,
-                )
-            }
-        },
-        modifier = modifier,
-    ) { innerPadding ->
+    Scaffold(modifier = modifier) { innerPadding ->
         if (uiState.isLoading) return@Scaffold
         LazyColumn(
-            state = listState,
-            // Edge to edge, so the header's shape runs under the status bar; the bottom inset clears the FAB.
-            contentPadding = PaddingValues(bottom = innerPadding.calculateBottomPadding() + 112.dp),
+            // Edge to edge, so the header's shape runs under the status bar.
+            contentPadding = PaddingValues(bottom = innerPadding.calculateBottomPadding() + 16.dp),
             modifier = Modifier.fillMaxSize(),
         ) {
             item(key = "header") {
@@ -143,16 +136,15 @@ fun HomeScreen(
                         modifier = Modifier.padding(start = 16.dp, top = 24.dp, end = 16.dp),
                     )
                 } else {
-                    Row(modifier = Modifier.padding(start = 12.dp, top = 12.dp)) {
-                        if (uiState.upNext != null) {
-                            TextButton(onClick = onOpenRoutines, shapes = ButtonDefaults.shapes()) {
-                                Text(stringResource(R.string.home_other_routine))
-                            }
-                        }
-                        TextButton(onClick = onStartEmptyWorkout, shapes = ButtonDefaults.shapes()) {
-                            Text(stringResource(R.string.routines_empty_workout))
-                        }
-                    }
+                    StartSplitButton(
+                        upNext = uiState.upNext,
+                        trainedToday = uiState.situation == HomeSituation.TrainedToday,
+                        onStartWorkout = onStartWorkout,
+                        onCreateRoutine = onCreateRoutine,
+                        onOpenRoutines = onOpenRoutines,
+                        onStartEmptyWorkout = onStartEmptyWorkout,
+                        modifier = Modifier.padding(start = 24.dp, top = 24.dp, end = 24.dp),
+                    )
                 }
             }
             item(key = "tiles") {
@@ -268,40 +260,94 @@ private fun subline(uiState: HomeUiState): String? {
     }
 }
 
-/** Starts [upNext], or creates the first routine without one; shrinks to its icon once the list scrolls. */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+/**
+ * Starts [upNext], or creates the first routine without one; the arrow lists the other ways to start.
+ * Tonal once trained today: the next routine is an option, not the call to action.
+ */
 @Composable
-private fun StartButton(
+private fun StartSplitButton(
     upNext: Routine?,
     trainedToday: Boolean,
-    expanded: Boolean,
     onStartWorkout: (Routine) -> Unit,
     onCreateRoutine: () -> Unit,
+    onOpenRoutines: () -> Unit,
+    onStartEmptyWorkout: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
+    val size = SplitButtonDefaults.MediumContainerHeight
+    val colors = if (trainedToday) ButtonDefaults.filledTonalButtonColors() else ButtonDefaults.buttonColors()
     val label = when {
         upNext == null -> stringResource(R.string.routines_create)
         trainedToday -> stringResource(R.string.home_next_routine, upNext.name)
         else -> stringResource(R.string.routine_start, upNext.name)
     }
-    MediumExtendedFloatingActionButton(
-        onClick = { if (upNext == null) onCreateRoutine() else onStartWorkout(upNext) },
-        expanded = expanded,
-        icon = {
-            Icon(
-                imageVector = if (upNext == null) Icons.Default.Add else Icons.Default.PlayArrow,
-                contentDescription = if (expanded) null else label,
-            )
-        },
-        text = {
-            Text(text = label, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.widthIn(max = 240.dp))
-        },
-        // Already trained today: the next routine is an option, not the call to action.
-        containerColor = if (trainedToday) {
-            MaterialTheme.colorScheme.secondaryContainer
-        } else {
-            FloatingActionButtonDefaults.containerColor
-        },
+    var menuOpen by remember { mutableStateOf(false) }
+    val arrowRotation by animateFloatAsState(
+        targetValue = if (menuOpen) 180f else 0f,
+        animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
     )
+    Box(modifier = modifier) {
+        SplitButtonLayout(
+            leadingButton = {
+                SplitButtonDefaults.LeadingButton(
+                    onClick = { if (upNext == null) onCreateRoutine() else onStartWorkout(upNext) },
+                    shapes = SplitButtonDefaults.leadingButtonShapesFor(size),
+                    colors = colors,
+                    contentPadding = SplitButtonDefaults.leadingButtonContentPaddingFor(size),
+                    modifier = Modifier.heightIn(size),
+                ) {
+                    Icon(
+                        imageVector = if (upNext == null) Icons.Default.Add else Icons.Default.PlayArrow,
+                        contentDescription = null,
+                        modifier = Modifier.size(SplitButtonDefaults.leadingButtonIconSizeFor(size)),
+                    )
+                    Spacer(Modifier.size(ButtonDefaults.iconSpacingFor(size)))
+                    Text(text = label, style = ButtonDefaults.textStyleFor(size), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            },
+            trailingButton = {
+                val state = stringResource(if (menuOpen) R.string.state_expanded else R.string.state_collapsed)
+                SplitButtonDefaults.TrailingButton(
+                    checked = menuOpen,
+                    onCheckedChange = { menuOpen = it },
+                    shapes = SplitButtonDefaults.trailingButtonShapesFor(size),
+                    colors = colors,
+                    contentPadding = SplitButtonDefaults.trailingButtonContentPaddingFor(size),
+                    modifier = Modifier
+                        .heightIn(size)
+                        .semantics { stateDescription = state },
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = stringResource(R.string.home_more_ways_to_start),
+                        modifier = Modifier
+                            .size(SplitButtonDefaults.trailingButtonIconSizeFor(size))
+                            .graphicsLayer { rotationZ = arrowRotation },
+                    )
+                }
+            },
+        )
+        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+            if (upNext != null) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.home_other_routine)) },
+                    leadingIcon = { Icon(painterResource(R.drawable.ic_list), contentDescription = null) },
+                    onClick = {
+                        menuOpen = false
+                        onOpenRoutines()
+                    },
+                )
+            }
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.routines_empty_workout)) },
+                leadingIcon = { Icon(Icons.Default.Add, contentDescription = null) },
+                onClick = {
+                    menuOpen = false
+                    onStartEmptyWorkout()
+                },
+            )
+        }
+    }
 }
 
 /** The greeting as HTML, its key words in `<b>`. */

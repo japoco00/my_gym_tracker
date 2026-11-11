@@ -15,6 +15,8 @@
     <string name="action_remove">Remove</string>
     <string name="action_discard">Discard</string>
     <string name="action_more">More options</string>
+    <string name="state_expanded">Expanded</string>
+    <string name="state_collapsed">Collapsed</string>
     <string name="unit_kg">kg</string>
     <string name="unit_lb">lb</string>
     <string name="weight_with_unit">%1$s %2$s</string>
@@ -65,6 +67,7 @@
     <string name="home_minutes">%d min</string>
     <string name="home_next_routine">Next: %1$s</string>
     <string name="home_other_routine">Other routine</string>
+    <string name="home_more_ways_to_start">More ways to start</string>
     <string name="home_no_stats">Streak, calendar, records and body weight show up here after your first workout.</string>
     <string name="home_streak">Streak</string>
     <plurals name="home_streak_weeks">
