@@ -39,11 +39,12 @@ fun NavGraphBuilder.routinesDestination(
             }
         }
 
+        TabActionEffect(TopLevelDestination.ROUTINES, stringResource(R.string.routines_create), onCreateRoutine)
+
         CompositionLocalProvider(LocalNavAnimatedVisibilityScope provides this) {
             val emptyWorkoutName = stringResource(R.string.workout_default_name)
             RoutinesScreen(
                 uiState = uiState,
-                onCreateRoutine = onCreateRoutine,
                 onRoutineClick = onOpenRoutine,
                 onDeleteRoutine = viewModel::deleteRoutine,
                 onUndoDelete = viewModel::undoDelete,

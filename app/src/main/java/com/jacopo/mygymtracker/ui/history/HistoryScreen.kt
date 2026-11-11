@@ -46,6 +46,7 @@ import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.domain.model.WorkoutSummary
 import com.jacopo.mygymtracker.ui.components.AppHeader
 import com.jacopo.mygymtracker.ui.components.EmptyStateText
+import com.jacopo.mygymtracker.ui.components.FloatingDockClearance
 import com.jacopo.mygymtracker.ui.components.Pill
 import com.jacopo.mygymtracker.ui.components.SectionLabel
 import com.jacopo.mygymtracker.ui.format.formatDate
@@ -84,7 +85,7 @@ fun HistoryScreen(
         if (uiState.isLoading) return@Scaffold
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
-            contentPadding = PaddingValues(16.dp),
+            contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = FloatingDockClearance),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),

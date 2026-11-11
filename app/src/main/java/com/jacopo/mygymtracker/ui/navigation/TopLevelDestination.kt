@@ -9,7 +9,7 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.jacopo.mygymtracker.R
 
-/** Tabs of the bottom navigation bar. Every other screen opens full-screen on top of them. */
+/** Tabs of the floating dock. Every other screen opens full-screen on top of them. */
 enum class TopLevelDestination(
     val route: Any,
     @param:DrawableRes val iconRes: Int,

@@ -14,7 +14,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Edit
@@ -29,7 +28,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.ListItemShapes
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MediumExtendedFloatingActionButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Text
@@ -59,6 +57,7 @@ import com.jacopo.mygymtracker.ui.components.AppHeader
 import com.jacopo.mygymtracker.ui.components.DestructiveOverflowMenu
 import com.jacopo.mygymtracker.ui.components.EmptyStateText
 import com.jacopo.mygymtracker.ui.components.ExerciseEditorSheet
+import com.jacopo.mygymtracker.ui.components.FloatingDockClearance
 import com.jacopo.mygymtracker.ui.components.Pill
 import com.jacopo.mygymtracker.ui.components.SectionLabel
 import com.jacopo.mygymtracker.ui.format.label
@@ -72,7 +71,6 @@ fun ExercisesScreen(
     onCategoryFilterChange: (Category?) -> Unit,
     onExerciseClick: (Exercise) -> Unit,
     onEditExercise: (Exercise) -> Unit,
-    onCreateExercise: () -> Unit,
     onDeleteExercise: (Exercise) -> Unit,
     onSaveExercise: (name: String, category: Category, trackingType: TrackingType, isBarbell: Boolean) -> Unit,
     onConfirmDelete: (Exercise) -> Unit,
@@ -102,20 +100,12 @@ fun ExercisesScreen(
                 )
             }
         },
-        floatingActionButton = {
-            MediumExtendedFloatingActionButton(
-                onClick = onCreateExercise,
-                icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                text = { Text(stringResource(R.string.exercises_create)) },
-            )
-        },
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
     ) { innerPadding ->
         if (uiState.isLoading) return@Scaffold
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
-            // The bottom inset keeps the last row clear of the medium FAB.
-            contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 112.dp),
+            contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = FloatingDockClearance),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
@@ -320,7 +310,6 @@ private fun ExercisesScreenPreview() {
             onCategoryFilterChange = {},
             onExerciseClick = {},
             onEditExercise = {},
-            onCreateExercise = {},
             onDeleteExercise = {},
             onSaveExercise = { _, _, _, _ -> },
             onConfirmDelete = {},

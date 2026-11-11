@@ -69,6 +69,7 @@ import com.jacopo.mygymtracker.domain.model.Routine
 import com.jacopo.mygymtracker.domain.model.WorkoutSummary
 import com.jacopo.mygymtracker.domain.progress.PersonalRecord
 import com.jacopo.mygymtracker.ui.components.ActiveWorkoutCard
+import com.jacopo.mygymtracker.ui.components.FloatingDockClearance
 import com.jacopo.mygymtracker.ui.components.StartConflictDialog
 import com.jacopo.mygymtracker.ui.format.formatRelativeDay
 import com.jacopo.mygymtracker.ui.format.formatVolume
@@ -116,8 +117,8 @@ fun HomeScreen(
     Scaffold(modifier = modifier) { innerPadding ->
         if (uiState.isLoading) return@Scaffold
         LazyColumn(
-            // Edge to edge, so the header's shape runs under the status bar.
-            contentPadding = PaddingValues(bottom = innerPadding.calculateBottomPadding() + 16.dp),
+            // Edge to edge, so the header's shape runs under the status bar; the bottom clears the floating dock.
+            contentPadding = PaddingValues(bottom = innerPadding.calculateBottomPadding() + FloatingDockClearance),
             modifier = Modifier.fillMaxSize(),
         ) {
             item(key = "header") {

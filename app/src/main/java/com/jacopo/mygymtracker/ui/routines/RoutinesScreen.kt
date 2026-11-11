@@ -8,14 +8,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.MediumExtendedFloatingActionButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.SnackbarDuration
@@ -52,6 +50,7 @@ import com.jacopo.mygymtracker.domain.model.WorkoutSummary
 import com.jacopo.mygymtracker.ui.components.ActiveWorkoutCard
 import com.jacopo.mygymtracker.ui.components.AppHeader
 import com.jacopo.mygymtracker.ui.components.EmptyStateText
+import com.jacopo.mygymtracker.ui.components.FloatingDockClearance
 import com.jacopo.mygymtracker.ui.components.Pill
 import com.jacopo.mygymtracker.ui.components.SectionLabel
 import com.jacopo.mygymtracker.ui.components.StartConflictDialog
@@ -66,7 +65,6 @@ import java.time.Instant
 @Composable
 fun RoutinesScreen(
     uiState: RoutinesUiState,
-    onCreateRoutine: () -> Unit,
     onRoutineClick: (Int) -> Unit,
     onDeleteRoutine: (Routine) -> Unit,
     onUndoDelete: (routineId: Int) -> Unit,
@@ -109,21 +107,13 @@ fun RoutinesScreen(
                 pills = { if (!uiState.isLoading) HeaderPills(uiState.routines.size, uiState.lastWorkout) },
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        floatingActionButton = {
-            MediumExtendedFloatingActionButton(
-                onClick = onCreateRoutine,
-                icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                text = { Text(stringResource(R.string.routines_create)) },
-            )
-        },
+        snackbarHost = { SnackbarHost(snackbarHostState, Modifier.padding(bottom = FloatingDockClearance)) },
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
     ) { innerPadding ->
         if (uiState.isLoading) return@Scaffold
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
-            // The bottom inset keeps the last row clear of the medium FAB.
-            contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 112.dp),
+            contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = FloatingDockClearance),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
@@ -306,7 +296,6 @@ private fun RoutinesScreenPreview() {
                 ),
                 isLoading = false,
             ),
-            onCreateRoutine = {},
             onRoutineClick = {},
             onDeleteRoutine = {},
             onUndoDelete = {},
