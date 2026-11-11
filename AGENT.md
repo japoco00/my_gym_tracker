@@ -36,7 +36,7 @@ com.jacopo.mygymtracker
 │   └── repository/       # Repositories exposing Domain models & Flows (Room, DataStore)
 ├── resttimer/            # Rest timer: controller, foreground service, notifications
 └── ui/
-    ├── MyGymTrackerApp.kt  # App shell: bottom bar + AppNavHost
+    ├── MyGymTrackerApp.kt  # App shell: floating dock + AppNavHost
     ├── components/       # Shared, feature-agnostic composables
     ├── format/           # Display formatting: dates, durations, weights, enum labels
     ├── navigation/       # AppNavHost, TopLevelDestination, one *Navigation.kt per feature
@@ -111,7 +111,8 @@ com.jacopo.mygymtracker
 - **Feature Co-location**: Group each screen's `*Screen.kt`, `*ViewModel.kt`, `*UiState` and feature-specific components inside `ui/<feature>/`. Place reusable widgets shared by multiple features in `ui/components/`.
 - **Stateless Screens**: `*Screen` composables accept `uiState`, event callbacks, and `modifier: Modifier = Modifier`, never a ViewModel instance.
 - **Strings**: All user-visible text lives in `res/values/strings.xml`, read with `stringResource` / `pluralStringResource`. Formatting of dates, durations and weights goes through `ui/format/`.
-- **Scaffolds**: Each screen owns its `Scaffold` and top bar, built with the shared `ui/components/AppHeader` (big collapsing title, `Pill` facts, rounded `surfaceContainer` block). The one exception is Home, whose poster greeting is the header. `MyGymTrackerApp` shows the bottom `ShortNavigationBar` only on tab roots (`TopLevelDestination`), so detail screens are full screen.
+- **Scaffolds**: Each screen owns its `Scaffold` and top bar, built with the shared `ui/components/AppHeader` (big collapsing title, `Pill` facts, rounded `surfaceContainer` block). The one exception is Home, whose poster greeting is the header. `MyGymTrackerApp` overlays the floating `ui/components/FloatingDock` (a `ShortNavigationBar`) only on tab roots (`TopLevelDestination`), so detail screens are full screen.
+- **Tab actions**: tabs have no FABs. A tab destination hands its primary action to the dock with `TabActionEffect` (`ui/navigation/TabActions`), shown as the dock's "+" segment. Tab screens end their lists with `FloatingDockClearance` so the last item scrolls clear of the dock. Home starts workouts from an in-page `SplitButtonLayout` instead.
 - **Shared building blocks** (`ui/components/`): every screen follows the workout screen's Material 3 Expressive style. Reuse these instead of writing a feature-local variant:
   - `AppHeader`: a `String` title, or a composable `(expanded) -> Unit` title for custom content such as the routine editor's editable name. Expanded titles use `Typography.headerTitle`.
   - `Pill` for header facts (`Pill(icon, text)` for the usual icon + text), `SectionLabel` for list section titles, `ShapeBadge` for a short value + label inside a `MaterialShapes` shape in `AppHeader`'s actions (stays visible when collapsed). Animate only the shape through its `shapeModifier`.
@@ -127,7 +128,7 @@ com.jacopo.mygymtracker
   - `DateLineChart`: the one line chart over dates (exercise progress, body weight).
   - `ActiveWorkoutCard` (resume the workout in progress) and `StartConflictDialog` (starting while one is in progress), on Home and Routines. Their ViewModels share the start logic through `ui/workout/WorkoutStarter`.
 - **Editors save as you go**: the routine editor has no Save button. Its ViewModel debounces each edit into a save and flushes pending edits in `onCleared` on the app scope, so Back (and predictive back) never loses work.
-- **Motion**: Take specs from `MaterialTheme.motionScheme` (`*SpatialSpec` for position/size, `*EffectsSpec` for alpha/color) instead of hand-written tweens; a hand-timed sequence like the finish celebration is the exception, and so are endless decorative loops (Home's morphing shapes), since springs can't repeat. Pair state changes with `LocalHapticFeedback` using the M3 types (`ToggleOn`/`ToggleOff`, `Confirm`, `GestureThresholdActivate`), and fire them from the user's action, not from restored state.
+- **Motion**: Take specs from `MaterialTheme.motionScheme` (`*SpatialSpec` for position/size, `*EffectsSpec` for alpha/color) instead of hand-written tweens; a hand-timed sequence like the finish celebration or the dock's "+" exit (fade, then close) is the exception, and so are endless decorative loops (Home's morphing shapes), since springs can't repeat. Pair state changes with `LocalHapticFeedback` using the M3 types (`ToggleOn`/`ToggleOff`, `Confirm`, `GestureThresholdActivate`), and fire them from the user's action, not from restored state.
 - **Previews**: Include private `@Preview` composables wrapped in `AppTheme` with realistic sample data.
 
 ---
