@@ -1,10 +1,12 @@
 package com.jacopo.mygymtracker.ui.format
 
+import android.content.res.Resources
 import android.icu.text.CompactDecimalFormat
 import android.text.format.DateFormat
 import android.text.format.DateUtils
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import com.jacopo.mygymtracker.R
 import com.jacopo.mygymtracker.domain.model.Category
@@ -93,15 +95,26 @@ fun formatSet(
     weightKg: Double,
     durationSeconds: Int,
     rpe: Double? = null,
+): String = LocalResources.current.formatSet(trackingType, weightUnit, reps, weightKg, durationSeconds, rpe)
+
+/** [formatSet] outside Compose, e.g. in a notification. */
+fun Resources.formatSet(
+    trackingType: TrackingType,
+    weightUnit: WeightUnit,
+    reps: Int,
+    weightKg: Double,
+    durationSeconds: Int,
+    rpe: Double? = null,
 ): String {
+    val unit = getString(weightUnit.labelRes)
     val summary = when {
         trackingType == TrackingType.DURATION -> formatDuration(durationSeconds.toLong())
         trackingType == TrackingType.REPS && weightKg > 0.0 ->
-            stringResource(R.string.set_summary_added, weightUnit.format(weightKg), weightUnit.label(), reps)
-        trackingType == TrackingType.REPS -> pluralStringResource(R.plurals.reps_count, reps, reps)
-        else -> stringResource(R.string.set_summary, weightUnit.format(weightKg), weightUnit.label(), reps)
+            getString(R.string.set_summary_added, weightUnit.format(weightKg), unit, reps)
+        trackingType == TrackingType.REPS -> getQuantityString(R.plurals.reps_count, reps, reps)
+        else -> getString(R.string.set_summary, weightUnit.format(weightKg), unit, reps)
     }
-    return if (rpe == null) summary else stringResource(R.string.set_with_rpe, summary, formatWeight(rpe))
+    return if (rpe == null) summary else getString(R.string.set_with_rpe, summary, formatWeight(rpe))
 }
 
 /** A set's leading marker: its [number] if it's a normal set, else its type's letter, e.g. `W`. */
@@ -119,22 +132,26 @@ fun setName(number: Int?, type: SetType): String =
     if (type == SetType.NORMAL && number != null) stringResource(R.string.set_editor_title, number) else type.label()
 
 @Composable
-fun SetType.label(): String = stringResource(
-    when (this) {
+fun SetType.label(): String = stringResource(labelRes)
+
+@get:StringRes
+val SetType.labelRes: Int
+    get() = when (this) {
         SetType.NORMAL -> R.string.set_type_normal
         SetType.WARM_UP -> R.string.set_type_warm_up
         SetType.DROP -> R.string.set_type_drop
         SetType.FAILURE -> R.string.set_type_failure
-    },
-)
+    }
 
 @Composable
-fun WeightUnit.label(): String = stringResource(
-    when (this) {
+fun WeightUnit.label(): String = stringResource(labelRes)
+
+@get:StringRes
+private val WeightUnit.labelRes: Int
+    get() = when (this) {
         WeightUnit.KG -> R.string.unit_kg
         WeightUnit.LB -> R.string.unit_lb
-    },
-)
+    }
 
 @Composable
 fun ThemeMode.label(): String = stringResource(

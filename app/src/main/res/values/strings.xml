@@ -254,6 +254,13 @@
     <string name="rest_countdown_title">Resting</string>
     <string name="rest_over_title">Rest over</string>
     <string name="rest_over_text">Time for your next set.</string>
+    <!-- Notification titles, with the next set's exercise. -->
+    <string name="rest_up_next">Up next: %1$s</string>
+    <string name="rest_last_set">Last set: %1$s</string>
+    <string name="rest_go">Go: %1$s</string>
+    <!-- The next set in the notification: its name and target, e.g. "Set 3 of 4 · 40 kg × 8". -->
+    <string name="rest_next_set">%1$s · %2$s</string>
+    <string name="rest_set_of">Set %1$d of %2$d</string>
     <string name="rest_skip">Skip</string>
     <string name="rest_skip_description">Skip rest</string>
     <string name="rest_start_description">Start rest</string>

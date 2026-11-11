@@ -1,5 +1,9 @@
 package com.jacopo.mygymtracker.resttimer
 
+import com.jacopo.mygymtracker.domain.model.Category
+import com.jacopo.mygymtracker.domain.model.Exercise
+import com.jacopo.mygymtracker.domain.model.LoggedSet
+import com.jacopo.mygymtracker.domain.model.WeightUnit
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
@@ -14,11 +18,15 @@ class RestTimerControllerTest {
 
     private var started = 0
     private var finished = 0
+    private var lastFinished: RestTimer? = null
 
     private fun TestScope.controller() = RestTimerController(
         scope = backgroundScope,
         onRestStarted = { started++ },
-        onRestFinished = { finished++ },
+        onRestFinished = {
+            finished++
+            lastFinished = it
+        },
         clock = { testScheduler.currentTime },
     )
 
@@ -91,6 +99,27 @@ class RestTimerControllerTest {
 
         assertNull(timer.state.value)
         assertEquals(0, started)
+    }
+
+    @Test
+    fun adjust_keepsTheNextSet_untilTheFinishGetsIt() = runTest {
+        val timer = controller()
+        val next = NextSet(
+            routineName = "Push",
+            exercise = Exercise(name = "Squat", category = Category.CHEST),
+            set = LoggedSet(reps = 5, weightKg = 100.0),
+            number = 2,
+            normalSets = 2,
+            isLast = true,
+            weightUnit = WeightUnit.KG,
+        )
+
+        timer.start(90, next)
+        timer.adjust(-15)
+        assertEquals(next, timer.state.value?.nextSet)
+
+        advanceTimeBy(75_001)
+        assertEquals(next, lastFinished?.nextSet)
     }
 
     @Test

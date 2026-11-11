@@ -77,7 +77,7 @@ class AppContainer(context: Context) {
         RestTimerController(
             scope = applicationScope,
             onRestStarted = { RestTimerService.start(context) },
-            onRestFinished = { RestTimerNotifications.notifyRestOver(context) },
+            onRestFinished = { RestTimerNotifications.notifyRestOver(context, it.nextSet) },
         )
     }
 }

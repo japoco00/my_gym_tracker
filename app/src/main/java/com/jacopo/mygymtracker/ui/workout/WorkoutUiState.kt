@@ -8,8 +8,10 @@ import com.jacopo.mygymtracker.domain.model.UserSettings
 import com.jacopo.mygymtracker.domain.model.WeightUnit
 import com.jacopo.mygymtracker.domain.model.WorkoutExercise
 import com.jacopo.mygymtracker.domain.model.WorkoutSession
+import com.jacopo.mygymtracker.domain.model.normalSetNumbers
 import com.jacopo.mygymtracker.domain.progress.prSetIndex
 import com.jacopo.mygymtracker.domain.progress.volumeKg
+import com.jacopo.mygymtracker.resttimer.NextSet
 import com.jacopo.mygymtracker.resttimer.RestTimer
 import com.jacopo.mygymtracker.ui.components.EditingSet
 import java.time.Instant
@@ -182,5 +184,21 @@ private fun WorkoutSetUiState.toLoggedSet(): LoggedSet = LoggedSet(
     type = type,
     rpe = rpe,
 )
+
+/** The set at [WorkoutUiState.nextSetKey], for the rest timer's notification. */
+fun WorkoutUiState.nextSet(): NextSet? {
+    val exercise = exercises.find { exercise -> exercise.sets.any { it.key == nextSetKey } } ?: return null
+    val index = exercise.sets.indexOfFirst { it.key == nextSetKey }
+    val numbers = exercise.sets.map { it.type }.normalSetNumbers()
+    return NextSet(
+        routineName = routineName,
+        exercise = exercise.exercise,
+        set = exercise.sets[index].toLoggedSet(),
+        number = numbers[index],
+        normalSets = numbers.count { it != null },
+        isLast = completedSets == totalSets - 1,
+        weightUnit = weightUnit,
+    )
+}
 
 // endregion

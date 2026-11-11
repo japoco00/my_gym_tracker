@@ -315,6 +315,21 @@ class WorkoutViewModelTest {
     }
 
     @Test
+    fun completingSet_restLeadsToTheNextSet() = runTest {
+        val viewModel = loadedViewModel(startWorkout())
+
+        viewModel.completeFirstSet()
+
+        val next = checkNotNull(viewModel.uiState.value.restTimer?.nextSet)
+        assertEquals("Push", next.routineName)
+        assertEquals("Squat", next.exercise.name)
+        assertEquals(LoggedSet(reps = 5, weightKg = 100.0), next.set)
+        assertEquals(2, next.number)
+        assertEquals(2, next.normalSets)
+        assertEquals(true, next.isLast)
+    }
+
+    @Test
     fun autoStartOff_restStartsOnlyByHand() = runTest {
         settings.setAutoStartRest(false)
         val viewModel = loadedViewModel(startWorkout())

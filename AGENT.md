@@ -149,7 +149,8 @@ com.jacopo.mygymtracker
 
 ## 7. Rest Timer
 - [`RestTimerController`](class://com.jacopo.mygymtracker.resttimer.RestTimerController) is the single source of truth: an app-scoped `StateFlow` countdown based on wall-clock end time, living in `AppContainer`.
-- `RestTimerService` is a `specialUse` foreground service that only mirrors the controller in a notification (chronometer, +15 s and Skip actions) and holds a partial wake lock until the rest ends. It stops itself when the rest is over.
+- `RestTimerService` is a `specialUse` foreground service that only mirrors the controller in a notification and holds a partial wake lock until the rest ends. It stops itself when the rest is over.
+- The notification names the next set (`RestTimer.nextSet`, a snapshot taken when the rest starts), has −15 s, +15 s and Skip actions, and a `ProgressStyle` bar the service re-posts every second. On Android 16 it's a Live Update (`setRequestPromotedOngoing`, `POST_PROMOTED_NOTIFICATIONS`): keep it ongoing, non-colorized and without custom views, or it loses the promotion.
 - Notification channels are created in `MyApplication`; `POST_NOTIFICATIONS` is requested when a workout opens. Without it the timer still runs in-app.
 - The rest-over sound and vibration belong to its notification channel: Settings > "Rest alert" opens the channel's system page (`RestTimerNotifications.restOverSettingsIntent`). Don't add an in-app sound setting; the channel's would override it.
 

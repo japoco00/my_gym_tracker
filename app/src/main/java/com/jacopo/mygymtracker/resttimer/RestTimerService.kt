@@ -16,6 +16,8 @@ import com.jacopo.mygymtracker.domain.model.UserSettings
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /** Keeps the CPU awake a bit past the rest's end, in case the expiry runs late. */
@@ -45,22 +47,24 @@ class RestTimerService : Service() {
         lastStartId = startId
         when (intent?.action) {
             ACTION_ADD_TIME -> controller.adjust(UserSettings.REST_STEP_SECONDS)
+            ACTION_REMOVE_TIME -> controller.adjust(-UserSettings.REST_STEP_SECONDS)
             ACTION_SKIP -> controller.skip()
             // startForegroundService() requires this on every start, even if the rest is already over.
             else -> ServiceCompat.startForeground(
                 this,
                 RestTimerNotifications.COUNTDOWN_ID,
-                RestTimerNotifications.countdown(this, controller.state.value),
+                RestTimerNotifications.countdown(this, controller.state.value, System.currentTimeMillis()),
                 // ServiceCompat drops this API 34 type on older releases.
                 //noinspection InlinedApi
                 ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
             )
         }
-        if (renderJob == null) renderJob = scope.launch { controller.state.collect(::render) }
+        if (renderJob == null) renderJob = scope.launch { controller.state.collectLatest(::render) }
         return START_NOT_STICKY
     }
 
-    private fun render(timer: RestTimer?) {
+    /** Mirrors [timer], re-posting it every second to move its bar, until the next change cancels it. */
+    private suspend fun render(timer: RestTimer?) {
         if (timer == null) {
             if (wakeLock.isHeld) wakeLock.release()
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
@@ -70,8 +74,12 @@ class RestTimerService : Service() {
         }
         wakeLock.acquire(timer.remainingMillis(System.currentTimeMillis()) + WAKE_LOCK_MARGIN_MS)
         RestTimerNotifications.cancelRestOver(this)
-        getSystemService<NotificationManager>()
-            ?.notify(RestTimerNotifications.COUNTDOWN_ID, RestTimerNotifications.countdown(this, timer))
+        val manager = getSystemService<NotificationManager>() ?: return
+        while (true) {
+            val now = System.currentTimeMillis()
+            manager.notify(RestTimerNotifications.COUNTDOWN_ID, RestTimerNotifications.countdown(this, timer, now))
+            delay(1_000)
+        }
     }
 
     override fun onDestroy() {
@@ -84,6 +92,7 @@ class RestTimerService : Service() {
 
     companion object {
         const val ACTION_ADD_TIME = "com.jacopo.mygymtracker.resttimer.ADD_TIME"
+        const val ACTION_REMOVE_TIME = "com.jacopo.mygymtracker.resttimer.REMOVE_TIME"
         const val ACTION_SKIP = "com.jacopo.mygymtracker.resttimer.SKIP"
 
         fun start(context: Context) {

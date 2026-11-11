@@ -257,7 +257,7 @@ class WorkoutViewModel(
     fun startRest(exerciseKey: String) {
         val state = _uiState.value
         val exercise = state.exercises.find { it.key == exerciseKey } ?: return
-        restTimer.start(exercise.restSeconds ?: state.defaultRestSeconds)
+        restTimer.start(exercise.restSeconds ?: state.defaultRestSeconds, state.nextSet())
     }
 
     fun adjustRest(deltaSeconds: Int) {
