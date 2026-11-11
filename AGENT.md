@@ -3,7 +3,7 @@
 ## 1. Project Overview & Tech Stack
 - **Platform**: Android (Min SDK 26, Compile SDK 37, Target SDK 36, JVM 17)
 - **Language**: Kotlin 2.4 via AGP 9 built-in Kotlin (no `kotlin-android` plugin)
-- **UI Toolkit**: Jetpack Compose with Material 3 (Expressive APIs); charts with Vico (`compose-m3`)
+- **UI Toolkit**: Jetpack Compose with Material 3 (Expressive APIs); charts with Vico (`compose-m3`); home screen widgets with Glance
 - **Architecture**: Clean layered MVVM (`domain`, `data`, `di`, feature-organized `ui`) with Manual Dependency Injection
 - **Persistence**: Room (SQLite) for routines and workouts; Preferences DataStore for user settings
 - **Navigation**: Jetpack Navigation Compose with Kotlin Serialization (`kotlinx.serialization`) type-safe routes
@@ -18,9 +18,9 @@
 
 ```text
 com.jacopo.mygymtracker
-├── MyApplication.kt      # Owns AppContainer; creates notification channels
+├── MyApplication.kt      # Owns AppContainer; creates notification channels; keeps the widgets updated
 ├── MainActivity.kt       # Single-activity Compose host; applies the theme from MainViewModel
-├── MainViewModel.kt      # App-wide settings the activity needs (theme)
+├── MainViewModel.kt      # App-wide state the activity needs: settings (theme), screens asked for by widgets
 ├── di/                   # AppContainer + CreationExtras.appContainer()
 ├── domain/
 │   ├── history/          # Pure history math: workouts grouped by week, week streaks
@@ -35,6 +35,7 @@ com.jacopo.mygymtracker
 │   ├── mapper/           # Entity <-> Domain and Backup <-> Domain extensions
 │   └── repository/       # Repositories exposing Domain models & Flows (Room, DataStore)
 ├── resttimer/            # Rest timer: controller, foreground service, notifications
+├── widget/               # Home screen widgets (Glance): their data, layouts and requests to the app
 └── ui/
     ├── MyGymTrackerApp.kt  # App shell: floating dock + AppNavHost
     ├── components/       # Shared, feature-agnostic composables
@@ -154,7 +155,16 @@ com.jacopo.mygymtracker
 
 ---
 
-## 8. Testing
+## 8. Home Screen Widgets
+- Built with Glance in `widget/`: `UpNextWidget` (start the next routine or resume the running workout) and `WeekWidget` (this week's training days, the streak, the next routine). Both draw one pure `widgetData(...)`, which reuses `domain/home` and `domain/history`.
+- **Updates**: `MyApplication.keepWidgetsUpdated()`, started by `MainActivity`, redraws both widgets whenever `observeWidgetData()` changes, until the process dies. Only the app writes their data, so nothing changes before it runs. Don't start it in `MyApplication.onCreate`: Robolectric creates the application in every test, and it would open the real database. `updatePeriodMillis` (1 h) moves "today" past midnight. Keep `WidgetData` small, so unrelated writes (typing a weight) don't redraw them.
+- **Taps**: widgets never write data. Their buttons open `MainActivity` with a `WidgetRequest` (`Context.widgetIntent`). `MainViewModel.onWidgetRequest` resolves it into a `WidgetDestination`, starting the workout if needed, and the shell opens it once with `navigateFromWidget`. `MainActivity` is `singleTop`, so requests reach `onNewIntent`.
+- Widget screens are pushed on top of whatever is open, so their route can already be lower in the stack. Closing still works: `popBackStack<Route>(inclusive = true)` pops only the topmost copy.
+- **Glance limits**: no animations, at most 10 children per `Row`/`Column`, rounded corners only on API 31+. Shapes are white vector drawables tinted with `GlanceTheme` colours. Widgets follow the system colours, not the in-app theme.
+
+---
+
+## 9. Testing
 - JVM unit tests live in `app/src/test`. CI (`.github/workflows/ci.yml`) runs unit tests, lint and a debug build on every pull request; run its Gradle command locally before pushing.
 - **Domain logic** (`domain/`): plain JUnit, no Android.
 - **Room repositories**: Robolectric (`@RunWith(AndroidJUnit4::class)`) against an in-memory database from `createTestDatabase()` (no catalog seed, so each test owns its data).
@@ -166,6 +176,6 @@ com.jacopo.mygymtracker
 
 ---
 
-## 9. Language & Code Style
+## 10. Language & Code Style
 - **English Only**: All code, identifiers, KDoc, commit messages, and comments MUST be written in English. Translate any Italian comments encountered.
 - Prefer idiomatic Kotlin: immutable data classes, trailing commas, expression bodies where clear, and `Flow` operators (`combine`, `map`, `stateIn`).
