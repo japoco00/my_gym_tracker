@@ -87,6 +87,9 @@ dependencies {
     // Charts
     implementation(libs.vico.compose.m3)
 
+    // Home screen widgets
+    implementation(libs.androidx.glance.appwidget)
+
     // Unit Tests
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
