@@ -1,5 +1,6 @@
 package com.jacopo.mygymtracker.ui.home
 
+import androidx.collection.intListOf
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animateFloatAsState
@@ -23,12 +24,15 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorPosition
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SplitButtonDefaults
 import androidx.compose.material3.SplitButtonLayout
@@ -43,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -53,6 +58,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.core.text.htmlEncode
 import androidx.graphics.shapes.Morph
@@ -328,25 +334,44 @@ private fun StartSplitButton(
                 }
             },
         )
-        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-            if (upNext != null) {
+        val gap = with(LocalDensity.current) { 4.dp.roundToPx() }
+        val menuPosition = remember(gap) {
+            // End-aligned, so the menu opens under the arrow that toggles it; above the button when there's no room below.
+            MenuAnchorPosition.Custom(
+                xCandidates = {
+                    intListOf(if (layoutDirection == LayoutDirection.Ltr) anchorBounds.right - menuSize.width else anchorBounds.left)
+                },
+                yCandidates = { intListOf(anchorBounds.bottom + gap, anchorBounds.top - gap - menuSize.height) },
+            )
+        }
+        DropdownMenuPopup(
+            expanded = menuOpen,
+            onDismissRequest = { menuOpen = false },
+            popupPositionProvider = MenuDefaults.rememberDropdownMenuPopupPositionProvider(menuPosition),
+        ) {
+            DropdownMenuGroup(shapes = MenuDefaults.groupShape(index = 0, count = 1)) {
+                val count = if (upNext != null) 2 else 1
+                if (upNext != null) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.home_other_routine)) },
+                        leadingIcon = { Icon(painterResource(R.drawable.ic_list), contentDescription = null) },
+                        shape = MenuDefaults.itemShape(index = 0, count = count).shape,
+                        onClick = {
+                            menuOpen = false
+                            onOpenRoutines()
+                        },
+                    )
+                }
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.home_other_routine)) },
-                    leadingIcon = { Icon(painterResource(R.drawable.ic_list), contentDescription = null) },
+                    text = { Text(stringResource(R.string.routines_empty_workout)) },
+                    leadingIcon = { Icon(Icons.Default.Add, contentDescription = null) },
+                    shape = MenuDefaults.itemShape(index = count - 1, count = count).shape,
                     onClick = {
                         menuOpen = false
-                        onOpenRoutines()
+                        onStartEmptyWorkout()
                     },
                 )
             }
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.routines_empty_workout)) },
-                leadingIcon = { Icon(Icons.Default.Add, contentDescription = null) },
-                onClick = {
-                    menuOpen = false
-                    onStartEmptyWorkout()
-                },
-            )
         }
     }
 }
